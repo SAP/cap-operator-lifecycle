@@ -1,0 +1,63 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{.Release.Name}}-controller
+  labels:
+    operator.sme.sap.com/app: controller
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  replicas: {{.Values.controller.replicas}}
+  selector:
+    matchLabels:
+      operator.sme.sap.com/app: controller
+      operator.sme.sap.com/category: controller
+      operator.sme.sap.com/release: {{.Release.Name}}
+  template:
+    metadata:
+      labels:
+        operator.sme.sap.com/app: controller
+        operator.sme.sap.com/category: controller
+        operator.sme.sap.com/release: {{.Release.Name}}
+    spec:
+      {{- with .Values.controller.imagePullSecrets | default .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.podSecurityContext | default .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.nodeSelector | default .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.affinity | default .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.tolerations | default .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.priorityClassName | default .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: controller
+          image: {{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag | default .Values.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy | default .Values.image.pullPolicy }}
+          {{- with .Values.controller.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.controller.resources | nindent 12 }}
+          env:
+          - name: CERT_MANAGER
+            value: {{ .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" | ternary "gardener" "cert-manager.io" }}
+          - name: DNS_MANAGER
+            value: {{ .Capabilities.APIVersions.Has "dns.gardener.cloud/v1alpha1" | ternary "gardener" "kubernetes" }}
+          - name: MTX_JOB_IMAGE
+            value: "ghcr.io/sap/cap-operator/mtx-job"
+      serviceAccountName: {{.Release.Name}}-controller

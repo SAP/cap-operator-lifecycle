@@ -1,0 +1,110 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: captenantoperations.sme.sap.com
+  labels:
+    app.kubernetes.io/name: captenantoperations.sme.sap.com
+    busola.io/extension: resource
+    busola.io/extension-version: '0.5'
+data:
+  dataSources: |
+    relatedJobs:
+      resource:
+        kind: Job
+        group: batch
+        version: v1
+      filter: >- 
+        $item.metadata.annotations.`sme.sap.com/owner-identifier` = $join([$root.metadata.namespace,".",$root.metadata.name])
+  details: |
+    header: 
+      - source: metadata.ownerReferences
+        widget: ControlledBy
+        name: Owned By
+        placeholder: '-'
+    body:
+      - name: Summary
+        widget: Panel
+        children:
+          - name: CAP Application Version Instance
+            source: spec.capApplicationVersionInstance
+            widget: ResourceLink
+            resource:
+              name: spec.capApplicationVersionInstance
+              namespace: metadata.namespace
+              kind: "'CAPApplicationVersion'"
+          - name: Operation
+            source: $uppercase(spec.operation)
+          - name: Tenant Identifier
+            source: spec.tenantId
+          - name: State
+            source: status.state
+            widget: Badge
+            highlights:
+              information:
+                - Processing
+                - Deleting
+              positive:
+                - Completed
+              critical:
+                - Failed
+      - name: Steps
+        source: spec.steps
+        widget: Table
+        children:
+        - name: Name
+          search: true
+          source: name
+        - name: Type
+          source: type
+          search: true
+      - name: Related Jobs
+        widget: ResourceList
+        source: $relatedJobs()
+      - widget: EventList
+        filter: '$matchEvents($$, $root.kind, $root.metadata.name)'
+        name: Recent Events
+        defaultType: all
+        hideInvolvedObjects: true
+  form: |
+    []
+  general: |
+    resource:
+      kind: CAPTenantOperation
+      group: sme.sap.com
+      version: v1alpha1
+    name: CAP Tenant Operations
+    category: CAP Operator
+    urlPath: captenantoperations
+    scope: namespace
+    features:
+      actions:
+        disableCreate: true
+        disableEdit: true
+        disableDelete: true
+  list: |
+    - name: Operation
+      source: $uppercase(spec.operation)
+    - name: State
+      source: status.state
+      widget: Badge
+      highlights:
+        information:
+          - Processing
+          - Deleting
+        positive:
+          - Completed
+        critical:
+          - Failed
+      description: status.conditions[-1].message
+    - name: Uses CAP Application Version
+      source: spec.capApplicationVersionInstance
+      widget: ResourceLink
+      resource:
+        name: spec.capApplicationVersionInstance
+        namespace: metadata.namespace
+        kind: "'CAPApplicationVersion'"
+  translations: |
+    en:
+      metadata.annotations: Annotations
+      metadata.labels: Labels
+      metadata.creationTimestamp: Created at

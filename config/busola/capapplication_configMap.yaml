@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: capapplications.sme.sap.com
+  labels:
+    app.kubernetes.io/name: capapplications.sme.sap.com
+    busola.io/extension: resource
+    busola.io/extension-version: '0.5'
+data:
+  dataSources: |
+    relatedCAVs:
+      resource:
+        kind: CAPApplicationVersion
+        group: sme.sap.com
+        version: v1alpha1
+        filter: >-
+          $item.metadata.annotations.`sme.sap.com/owner-identifier` = $join([$root.metadata.namespace,".",$root.metadata.name])
+    relatedTenants:
+      resource:
+        kind: CAPTenant
+        group: sme.sap.com
+        version: v1alpha1
+        filter: >-
+          $item.metadata.annotations.`sme.sap.com/owner-identifier` = $join([$root.metadata.namespace,".",$root.metadata.name])
+  details: |
+    header: []
+    resourceGraph:
+      colorVariant: 3
+      dataSources:
+        - source: relatedCAVs
+        - source: relatedTenants
+    body:
+      - name: Summary
+        widget: Panel
+        children:
+          - name: Application Name
+            source: spec.btpAppName
+          - name: Global Account Id
+            source: spec.globalAccountId
+          - name: Provider Subdomain
+            source: spec.provider.subDomain
+          - name: Provider Tenant Id
+            source: spec.provider.tenantId
+          - name: Primary Domain
+            source: spec.domains.primary
+          - name: Secondary Domain
+            source: $join(spec.domains.secondary, ', ')
+          - name: State
+            source: status.state
+            widget: Badge
+            highlights:
+              information:
+                - Processing
+                - Deleting
+              positive:
+                - Consistent
+              critical:
+                - Error
+      - name: Services / Secrets
+        source: spec.btp.services
+        widget: Table
+        children:
+          - name: Name
+            source: name
+          - name: Class
+            source: class
+          - name: Secret
+            source: secret
+            widget: ResourceLink
+            resource:
+              name: $item.secret
+              namespace: $root.metadata.namespace
+              kind: "'Secret'"
+      - name: Status
+        source: status.conditions
+        widget: Table
+        children:
+          - name: Type
+            source: type
+          - name: Status
+            source: status
+            widget: Badge
+            highlights:
+              positive:
+                - "True"
+              critical:
+                - "False"
+          - name: Reason
+            source: reason
+          - name: Last Transition Time
+            source: $readableTimestamp(lastTransitionTime)
+          - name: Message
+            source: message
+      - name: Recent Events
+        widget: EventList
+        filter: '$matchEvents($$, $root.kind, $root.metadata.name)'
+        defaultType: all
+        hideInvolvedObjects: true         
+  form: |
+    []
+  general: |
+    resource:
+      kind: CAPApplication
+      group: sme.sap.com
+      version: v1alpha1
+    name: CAP Applications
+    category: CAP Operator
+    urlPath: capapplications
+    scope: namespace
+    features:
+      actions:
+        disableCreate: true
+        disableEdit: true
+  list: |
+    - name: Application Name
+      source: spec.btpAppName
+    - name: Global Account Id
+      source: spec.globalAccountId
+    - name: State
+      source: status.state
+      widget: Badge
+      highlights:
+        information:
+          - Processing
+          - Deleting
+        positive:
+          - Consistent
+        critical:
+          - Error
+  translations: |
+    en:
+      metadata.annotations: Annotations
+      metadata.labels: Labels

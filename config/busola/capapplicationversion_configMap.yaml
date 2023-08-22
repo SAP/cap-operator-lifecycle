@@ -1,0 +1,119 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: capapplicationversions.sme.sap.com
+  labels:
+    app.kubernetes.io/name: capapplicationversions.sme.sap.com
+    busola.io/extension: resource
+    busola.io/extension-version: '0.5'
+data:
+  details: |
+    header: 
+      - source: metadata.ownerReferences
+        widget: ControlledBy
+        name: Owned By
+        placeholder: '-'
+    body:
+      - name: Summary
+        widget: Panel
+        children:
+          - name: CAP Application
+            source: spec.capApplicationInstance
+            widget: ResourceLink
+            resource:
+              name: spec.capApplicationInstance
+              namespace: metadata.namespace
+              kind: "'CAPApplication'"
+          - name: Version
+            source: spec.version
+          - name: Image Pull Secrets
+            source: spec.registrySecrets
+            widget: JoinedArray
+            children:
+            - source: $item
+              widget: ResourceLink
+              resource:
+                name: $item
+                namespace: metadata.namespace
+                kind: "'Secret'"
+      - name: Status
+        widget: Panel
+        children:
+          - name: State
+            source: status.state
+            widget: Badge
+          - name: Reason
+            source: status.conditions[-1].reason
+          - name: Message
+            source: status.conditions[-1].message
+          - name: Last Transition Time
+            source: >-
+              $readableTimestamp(status.conditions[-1].lastTransitionTime)
+          - name: Finished Jobs
+            source: status.finishedJobs
+            widget: JoinedArray
+            children:
+            - source: $item
+              widget: ResourceLink
+              resource:
+                name: $item
+                namespace: metadata.namespace
+                kind: "'Job'"
+      - name: Deployment Workloads
+        source: "$filter(spec.workloads, function ($v, $i, $a) {$v.deploymentDefinition ? true : false })"
+        widget: Table
+        children:
+          - name: Name
+            source: name
+            widget: ResourceLink
+            resource:
+              name: $join([$root.metadata.name,"-",$item.name])
+              namespace: $root.metadata.namespace
+              kind: "'Deployment'"
+          - name: Type
+            source: deploymentDefinition.type
+          - name: Consumed BTP Services
+            source: $join(consumedBTPServices, ', ')
+      - name: Job Workloads
+        source: "$filter(spec.workloads, function ($v, $i, $a) {$v.jobDefinition ? true : false })"
+        widget: Table
+        children:
+          - name: Name
+            source: name
+          - name: Type
+            source: jobDefinition.type
+          - name: Consumed BTP Services
+            source: $join(consumedBTPServices, ', ')
+  form: |
+    []
+  general: |
+    resource:
+      kind: CAPApplicationVersion
+      group: sme.sap.com
+      version: v1alpha1
+    name: CAP Application Versions
+    category: CAP Operator
+    urlPath: capapplicationversions
+    scope: namespace
+    features:
+      actions:
+        disableCreate: true
+        disableEdit: true
+        disableDelete: true
+  list: |
+    - name: CAP Application
+      source: spec.capApplicationInstance
+      widget: ResourceLink
+      resource:
+        name: spec.capApplicationInstance
+        namespace: metadata.namespace
+        kind: "'CAPApplication'"
+    - name: Version
+      source: spec.version
+    - name: State
+      source: status.state
+      widget: Badge
+  translations: |
+    en:
+      metadata.annotations: Annotations
+      metadata.labels: Labels

@@ -1,0 +1,147 @@
+image:
+  # -- Default image tag (can be overwritten on component level)
+  tag: ""
+  # -- Default image pull policy (can be overwritten on component level)
+  pullPolicy: ""
+# -- Default image pull secrets (can be overwritten on component level)
+imagePullSecrets:
+- name: regcred
+# -- Default pod security content (can be overwritten on component level)
+podSecurityContext: {}
+# -- Default node selector (can be overwritten on component level)
+nodeSelector: {}
+# -- Default affinity settings (can be overwritten on component level)
+affinity: {}
+# -- Default tolerations (can be overwritten on component level)
+tolerations: []
+# -- Default priority class (can be overwritten on component level)
+priorityClassName: ""
+
+controller:
+  # -- Replicas
+  replicas: 1
+  image:
+    # -- Image repository
+    repository: ghcr.io/sap/cap-operator/cap-controller
+    # -- Image tag
+    tag: ""
+    # -- Image pull policy
+    pullPolicy: ""
+  # -- Image pull secrets
+  imagePullSecrets: []
+  # -- Pod security content
+  podSecurityContext: {}
+  # -- Node selector
+  nodeSelector: {}
+  # -- Affinity settings
+  affinity: {}
+  # -- Tolerations
+  tolerations: []
+  # -- Priority class
+  priorityClassName: ""
+  # -- Security context
+  securityContext: {}
+  resources:
+    limits:
+      # -- Memory limit
+      memory: 500Mi
+      # -- CPU limit
+      cpu: 0.2
+    requests:
+      # -- Memory request
+      memory: 50Mi
+      # -- CPU request
+      cpu: 0.02
+
+subscriptionServer:
+  # -- Replicas
+  replicas: 1
+  image:
+    # -- Image repository
+    repository: ghcr.io/sap/cap-operator/server
+    # -- Image tag
+    tag: ""
+    # -- Image pull policy
+    pullPolicy: ""
+  # -- Image pull secrets
+  imagePullSecrets: []
+  # -- Pod security content
+  podSecurityContext: {}
+  # -- Node selector
+  nodeSelector: {}
+  # -- Affinity settings
+  affinity: {}
+  # -- Tolerations
+  tolerations: []
+  # -- Priority class
+  priorityClassName: ""
+  # -- Security context
+  securityContext: {}
+  resources:
+    limits:
+      # -- Memory limit
+      memory: 200Mi
+      # -- CPU limit
+      cpu: 0.1
+    requests:
+      # -- Memory request
+      memory: 20Mi
+      # -- CPU request
+      cpu: 0.01
+  # -- Service port
+  port: 4000
+  # -- The namespace in the cluster where istio system components are installed
+  istioSystemNamespace: istio-system
+  # -- Labels used to identify the istio ingress-gateway component
+  ingressGatewayLabels:
+    istio: ingressgateway
+    app: istio-ingressgateway
+  # -- The dns target mentioned on the public ingress gateway service used in the cluster
+  dnsTarget: public-ingress.clusters.cs.services.sap # replace with the actual cluster domain
+  # -- The domain under which the cap operator subscription server would be available
+  domain: cap-operator.clusters.cs.services.sap # replace with actual cluster domain
+webhook:
+  # -- Side car to mount admission review
+  sidecar: false
+  # -- Replicas
+  replicas: 1
+  image:
+    # -- Image repository
+    repository: ghcr.io/sap/cap-operator/web-hooks
+    # -- Image tag
+    tag: ""
+    # -- Image pull policy
+    pullPolicy: ""
+  # -- Image pull secrets
+  imagePullSecrets: []
+  # -- Pod security content
+  podSecurityContext: {}
+  # -- Node selector
+  nodeSelector: {}
+  # -- Affinity settings
+  affinity: {}
+  # -- Tolerations
+  tolerations: []
+  # -- Priority class
+  priorityClassName: ""
+  # -- Security context
+  securityContext: {}
+  resources:
+    limits:
+      # -- Memory limit
+      memory: 200Mi
+      # -- CPU limit
+      cpu: 0.1
+    requests:
+      # -- Memory request
+      memory: 20Mi
+      # -- CPU request
+      cpu: 0.01
+  # -- Service port
+  service:
+    # -- Service type
+    type: ClusterIP
+    # -- Service port
+    port: 443
+    # -- Target port
+    targetPort: 1443

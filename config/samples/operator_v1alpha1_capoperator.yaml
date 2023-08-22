@@ -1,0 +1,16 @@
+apiVersion: operator.sme.sap.com/v1alpha1
+kind: CAPOperator
+metadata:
+  labels:
+    app.kubernetes.io/name: cap-operator
+    app.kubernetes.io/instance: cap-operator
+    app.kubernetes.io/part-of: cap-operator-manager
+    app.kuberentes.io/managed-by: kustomize
+  name: cap-operator
+spec:
+  subscriptionServer:
+    subDomain: cop
+  ingressGatewayLabels:
+    istio: ingressgateway
+    app: istio-ingressgateway
+  

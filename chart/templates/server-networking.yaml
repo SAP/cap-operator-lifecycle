@@ -1,0 +1,82 @@
+{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+---
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
+spec:
+  commonName: {{.Values.subscriptionServer.domain}}
+  secretName: {{.Release.Name}}-subscription-server
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
+spec:
+  commonName: {{.Values.subscriptionServer.domain}}
+  secretName: {{.Release.Name}}-subscription-server
+  issuerRef:
+    kind: ClusterIssuer
+    name: cluster-ca
+{{- end }}
+{{- if .Capabilities.APIVersions.Has "dns.gardener.cloud/v1alpha1" }}
+---
+apiVersion: dns.gardener.cloud/v1alpha1
+kind: DNSEntry
+metadata:
+  annotations:
+    dns.gardener.cloud/class: garden
+  name: {{.Release.Name}}-subscription-server
+  namespace: {{.Release.Namespace}}
+spec:
+  dnsName: {{.Values.subscriptionServer.domain}}
+  targets:
+  - {{.Values.subscriptionServer.dnsTarget}}
+{{- end }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  namespace: {{.Release.Namespace}}
+spec:
+  selector:
+  {{- range $key, $val := .Values.subscriptionServer.ingressGatewayLabels }}
+    {{ $key }}: {{ $val }}
+  {{- end}}
+  servers:
+  - hosts:
+    - {{.Values.subscriptionServer.domain}}
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: {{.Release.Name}}-subscription-server
+      mode: SIMPLE
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  namespace: {{.Release.Namespace}}
+spec:
+  gateways:
+  - {{.Release.Name}}-subscription-server
+  hosts:
+  - {{.Values.subscriptionServer.domain}}
+  http:
+  - match:
+    - method:
+        regex: PUT|DELETE
+      uri:
+        prefix: /provision/
+    route:
+    - destination:
+        host: {{.Release.Name}}-subscription-server.{{.Release.Namespace}}.svc.cluster.local
+        port:
+          number: {{.Values.subscriptionServer.port}}
+      weight: 100

@@ -1,0 +1,127 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Release.Name}}-webhook
+  labels:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  replicas: {{ .Values.webhook.replicas }}
+  selector:
+    matchLabels:
+      operator.sme.sap.com/app: webhook
+      operator.sme.sap.com/category: controller
+      operator.sme.sap.com/release: {{.Release.Name}}
+  template:
+    metadata:
+      labels:
+        operator.sme.sap.com/app: webhook
+        operator.sme.sap.com/category: controller
+        operator.sme.sap.com/release: {{.Release.Name}}
+    spec:
+      {{- with .Values.webhook.imagePullSecrets | default .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webhook.podSecurityContext | default .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webhook.nodeSelector | default .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webhook.affinity | default .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webhook.tolerations | default .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webhook.priorityClassName | default .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      serviceAccountName: {{.Release.Name}}-webhook
+      automountServiceAccountToken: true
+      containers:
+      {{- if eq .Values.webhook.sidecar true }}  
+      - name: request-sidecar
+        image: alpine
+        command:
+        - /bin/sh
+        - "-c"
+        - "sleep 60m"
+        imagePullPolicy: {{ .Values.webhook.image.pullPolicy | default .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: request
+          mountPath: /tmp
+      {{- end }}
+      - name: webhook
+        image: {{ .Values.webhook.image.repository }}:{{ .Values.webhook.image.tag | default .Values.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.webhook.image.pullPolicy | default .Values.image.pullPolicy }}
+        {{- with .Values.webhook.securityContext | default .Values.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.webhook.resources | nindent 12 }}
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: WEBHOOK_PORT
+            value: "{{ .Values.webhook.service.targetPort }}"
+          - name: TLS_ENABLED
+            value: "true"
+          - name: TLS_KEY
+            value: "/app/etc/ssl/tls.key"
+          - name: TLS_CERT
+            value: "/app/etc/ssl/tls.crt"
+          - name: WEBHOOK_SIDE_CAR
+            value: {{ if eq .Values.webhook.sidecar true }} "true" {{ else }} "false" {{ end }}
+        args:
+        - "--v={{ .Values.webhook.logLevel | default .Values.logLevel | default 0 }}"
+        volumeMounts:
+        - name: ssl
+          mountPath: /app/etc/ssl
+        - name: request
+          mountPath: /tmp
+        ports:
+          - name: webhook-port
+            containerPort: {{ .Values.webhook.service.targetPort }}
+            protocol: TCP
+      volumes:
+      - name: ssl
+        secret:
+          secretName: {{.Release.Name}}-webhook-tls
+          items:
+          - key: tls.key
+            path: tls.key
+          - key: tls.crt
+            path: tls.crt
+      - name: request
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Release.Name}}-webhook
+  labels:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  type: {{ .Values.webhook.service.type }}
+  ports:
+    - port: {{ .Values.webhook.service.port }}
+      targetPort: webhook-port
+      protocol: TCP
+      name: https
+  selector:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}

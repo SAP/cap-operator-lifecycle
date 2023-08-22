@@ -1,0 +1,65 @@
+{{- if gt (int .Values.webhook.replicas) 0 }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{.Release.Name}}-webhook-tls
+  labels:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+type: Opaque
+data:
+  {{- $data := (lookup "v1" "Secret" .Release.Namespace (printf "%s-webhook-tls" .Release.Name )).data }}
+  {{- $caCert := "" }}
+  {{- if $data }}
+  {{ $data | toYaml | nindent 2 }}
+  {{- $caCert = index $data "ca.crt" }}
+  {{- else }}
+  {{- $cn := printf "%s-webhook.%s.svc" .Release.Name .Release.Namespace }}
+  {{- $ca := genCA (printf "%s-webhook-ca" .Release.Name  ) 36500 }}
+  {{- $cert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 36500 $ca }}
+  ca.crt: {{ $ca.Cert | b64enc }}
+  tls.crt: {{ $cert.Cert | b64enc }}
+  tls.key: {{ $cert.Key | b64enc }}
+  {{- $caCert = $ca.Cert | b64enc }}
+  {{- end }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: cap-operator
+  labels:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+webhooks:
+- name: cap-operator.sme.sap.com
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    caBundle: {{ $caCert }}
+    service:
+      name: {{.Release.Name}}-webhook
+      namespace: {{ .Release.Namespace }}
+      path: /validate
+      port: {{ .Values.webhook.service.port }}
+  rules:
+    - apiGroups:
+      - sme.sap.com
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      - DELETE
+      resources:
+      - pods
+      - capapplications
+      - captenants
+      - capapplicationversions
+  sideEffects: NoneOnDryRun
+  timeoutSeconds: 15 # https://github.com/gardener/gardener/pull/6090
+  failurePolicy: Fail
+---
+{{- end }}

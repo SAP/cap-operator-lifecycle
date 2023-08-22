@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Adds namespace to all resources.
+namespace: cap-operator-system
+
+# Value of this field is prepended to the names of all resources, 
+# e.g. a deployment named "wordpress" becomes "alices-wordpress".
+# Note that it should also match with the prefix (text before '-') of the namespace field above.
+namePrefix: cap-operator-
+
+# Labels to add to all resources and selectors.
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/component: cap-operator.sme.sap.com
+
+resources:
+- ../crd
+- ../rbac
+- ../manager
+- ../busola
+
+images:
+- name: controller
+  newName: ghcr.io/sap/cap-operator-manager
+  newTag: 0.0.1

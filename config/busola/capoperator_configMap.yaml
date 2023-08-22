@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: capoperators.operator.sme.sap.com
+  labels:
+    app.kubernetes.io/name: capoperators.operator.sme.sap.com
+    busola.io/extension: resource
+    busola.io/extension-version: '0.5'
+data:
+  details: |
+    header: []
+    body:
+      - name: Summary
+        widget: Panel
+        children:
+          - name: CAP Operator Name
+            source: spec.name
+          - name: State
+            source: status.state
+            widget: Badge
+      - name: Specifications
+        source: spec
+        widget: CodeViewer
+        language: '"yaml"'
+  form: |+
+    - simple: true
+      path: spec.name
+      required: true
+      name: CAP Operator Name
+    - simple: true
+      path: spec.subscriptionServer.subDomain
+      required: true
+      name: CAP Operator Subscription Server Subdomain
+    - simple: true
+      path: spec.subscriptionServer.dnsTarget
+      required: false
+      name: CAP Operator DNS Target
+    - simple: true
+      path: spec.ingressGatewayLabels.istio
+      required: false
+      name: Istio ingress gateway label - istio
+      placeholder: ingressgateway
+    - simple: true
+      path: spec.ingressGatewayLabels.app
+      required: false
+      name: Istio ingress gateway label - app
+      placeholder: istio-ingressgateway
+
+  general: |
+    resource:
+      kind: CAPOperator
+      group: operator.sme.sap.com
+      version: v1alpha1
+    name: CAP Operators
+    category: CAP Operator Resources
+    urlPath: capoperators
+    scope: namespace
+  list: |
+    - name: CAP Operator Name
+      source: spec.name
+      search: true
+    - name: State
+      source: status.state
+      widget: Badge
+      search: true
+  translations: |
+    en:
+      metadata.annotations: Annotations
+      metadata.labels: Labels
+      metadata.creationTimestamp: Created at

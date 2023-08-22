@@ -1,0 +1,178 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: captenants.sme.sap.com
+  labels:
+    app.kubernetes.io/name: captenants.sme.sap.com
+    busola.io/extension: resource
+    busola.io/extension-version: '0.5'
+data:
+  dataSources: |
+    tenantOps:
+      resource:
+        kind: CAPTenantOperation
+        group: sme.sap.com
+        version: v1alpha1
+      filter: >-
+        $item.metadata.generateName = $join([$root.metadata.name,"-"]) and $item.metadata.namespace = $root.metadata.namespace
+    virtualServices:
+      resource:
+        kind: VirtualService
+        group: networking.istio.io
+        version: v1beta1
+      filter: >-
+        $item.metadata.name = $root.metadata.name and $item.metadata.namespace = $root.metadata.namespace
+  details: |
+    header:
+      - source: metadata.ownerReferences
+        widget: ControlledBy
+        name: Owned By
+        placeholder: '-'
+    body:
+      - name: Tenant Information
+        widget: Panel
+        children:
+          - name: Tenant Identifier
+            source: spec.tenantId
+          - name: Subdomain
+            source: spec.subDomain
+          - name: Desired Version
+            source: spec.version
+          - name: Version Upgrade Strategy
+            source: >-
+              spec.versionUpgradeStrategy = "always" ? "Always" : "Never" 
+          - name: Current CAP Application Version
+            source: status.currentCAPApplicationVersionInstance
+            widget: ResourceLink
+            resource:
+              name: status.currentCAPApplicationVersionInstance
+              namespace: metadata.namespace
+              kind: "'CAPApplicationVersion'"
+      - name: Application Domains
+        widget: Panel
+        children:
+          - name: URL's
+            source: $virtualServices().items[0].spec.hosts
+            widget: JoinedArray
+            children:
+            - source: $item
+              widget: ExternalLink
+              link: "'https://' & $item"
+      - name: Status
+        widget: Panel
+        children:
+          - name: Tenant Ready for Use
+            widget: Badge
+            source: >-
+              (status.conditions[-1].type = "Ready" and status.conditions[-1].status = "True") ? "Yes" : "No"
+            highlights:
+              positive:
+                - Yes
+              negative:
+                - No
+          - name: State
+            source: >-
+              status.state = "UpgradeError" ? "Upgrade Error" : (status.state = "ProvisioningError" ? "Provisioning Error" : status.state)
+            widget: Badge
+            highlights:
+              information:
+                - Provisioning
+                - Upgrading
+                - Deleting
+              positive:
+                - Ready
+              critical:
+                - Provisioning Error
+              negative:
+                - Upgrade Error
+          - name: Reason
+            source: status.conditions[-1].reason
+          - name: Message
+            source: status.conditions[-1].message
+          - name: Last Transition Time
+            source: >-
+              $readableTimestamp(status.conditions[-1].lastTransitionTime)
+      - name: Tenant Operations
+        widget: Table
+        source: $tenantOps().items
+        children:
+          - source: $item.metadata.name
+            name: Name
+            widget: ResourceLink
+            resource:
+              name: $item.metadata.name
+              namespace: $item.metadata.namespace
+              kind: "'CAPTenantOperation'"
+          - source: $uppercase($item.spec.operation)
+            name: Operation
+          - source: $item.status.state
+            name: State
+            widget: Badge
+            highlights:
+              information:
+                - Processing
+                - Deleting
+              positive:
+                - Completed
+              critical:
+                - Failed
+      - widget: EventList
+        filter: '$matchEvents($$, $root.kind, $root.metadata.name)'
+        name: Recent Events
+        defaultType: all
+        hideInvolvedObjects: true
+  form: |
+    []
+  general: |
+    resource:
+      kind: CAPTenant
+      group: sme.sap.com
+      version: v1alpha1
+    name: CAP Tenants
+    description: A tenant represents a consumer who has subscribed to a CAP Application.
+    icon: customer
+    category: CAP Operator
+    urlPath: captenants
+    scope: namespace
+    features:
+      actions:
+        disableCreate: true
+        disableEdit: true
+        disableDelete: true
+  list: |
+    - name: State
+      source: >-
+        status.state = "UpgradeError" ? "Upgrade Error" : (status.state = "ProvisioningError" ? "Provisioning Error" : status.state)
+      widget: Badge
+      highlights:
+        information:
+          - Provisioning
+          - Upgrading
+          - Deleting
+        positive:
+          - Ready
+        critical:
+          - Provisioning Error
+        negative:
+          - Upgrade Error
+    - name: CAP Application
+      source: spec.capApplicationInstance
+      widget: ResourceLink
+      resource:
+        name: spec.capApplicationInstance
+        namespace: metadata.namespace
+        kind: "'CAPApplication'"
+    - name: Current CAP Application Version
+      source: status.currentCAPApplicationVersionInstance
+      widget: ResourceLink
+      resource:
+        name: status.currentCAPApplicationVersionInstance
+        namespace: metadata.namespace
+        kind: "'CAPApplicationVersion'"
+    - name: Tenant Identifier
+      source: spec.tenantId
+  translations: |
+    en:
+      metadata.annotations: Annotations
+      metadata.labels: Labels
+      metadata.creationTimestamp: Created at

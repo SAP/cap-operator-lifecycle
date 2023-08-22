@@ -1,0 +1,80 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  labels:
+    operator.sme.sap.com/app: subscription-server
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  replicas: {{.Values.subscriptionServer.replicas}} 
+  selector:
+    matchLabels:
+      operator.sme.sap.com/app: subscription-server
+      operator.sme.sap.com/category: controller
+      operator.sme.sap.com/release: {{.Release.Name}}
+  template:
+    metadata:
+      labels:
+        operator.sme.sap.com/app: subscription-server
+        operator.sme.sap.com/category: controller
+        operator.sme.sap.com/release: {{.Release.Name}}
+    spec:
+      {{- with .Values.subscriptionServer.imagePullSecrets | default .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.subscriptionServer.podSecurityContext | default .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.subscriptionServer.nodeSelector | default .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.subscriptionServer.affinity | default .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.subscriptionServer.tolerations | default .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.subscriptionServer.priorityClassName | default .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: server
+          image: {{ .Values.subscriptionServer.image.repository }}:{{ .Values.subscriptionServer.image.tag | default .Values.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.subscriptionServer.image.pullPolicy | default .Values.image.pullPolicy }}
+          {{- with .Values.subscriptionServer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.subscriptionServer.resources | nindent 12 }}
+          ports:
+            - name: server-port
+              containerPort: 4000
+              protocol: TCP
+      serviceAccountName: {{.Release.Name}}-subscription-server
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  labels:
+    operator.sme.sap.com/app: subscription-server
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  ports:
+    - name: sub-server-port
+      protocol: TCP
+      port: {{.Values.subscriptionServer.port}}
+      targetPort: server-port
+  selector:
+    operator.sme.sap.com/app: subscription-server
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
