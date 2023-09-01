@@ -3,17 +3,3 @@ kind: Kustomization
 
 resources:
 - manager.yaml
-
-# TO-BE-REMOVED with final solution
-patches:
-- patch: |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: controller-manager
-      namespace: system
-    spec:
-      template:
-        spec:
-          imagePullSecrets:
-          - name: regcred

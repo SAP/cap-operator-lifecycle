@@ -1,0 +1,173 @@
+name: Publish Helm
+
+on: 
+  workflow_dispatch
+
+env:
+  HELM_VERSION: v3.11.3
+  REGISTRY: ghcr.io
+  CHART_DIRECTORY: chart
+  PACKAGES: sap/cap-operator-helm
+  RELEASE_TAG_PREFIX: cap-operator-helm
+
+jobs:
+  create_release_tag:
+    name: Create release tag
+    runs-on: ubuntu-22.04
+    outputs:
+      tag: ${{ steps.get_tag.outputs.tag }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - uses: azure/setup-helm@v3
+      with:
+        version: ${{ env.HELM_VERSION }}
+
+    - name: Determine target commit
+      id: get_target_commit
+      run: |
+        sha=$(git rev-parse HEAD)
+        echo "Target commit: $sha"
+        echo "sha=$sha" >> $GITHUB_OUTPUT
+
+    - name: Get tag
+      id: get_tag
+      run: |
+        chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
+        echo "tag=$RELEASE_TAG_PREFIX/$chart_version" >> $GITHUB_OUTPUT
+
+    - name: Wait for check suites to complete
+      uses: sap-contributions/await-check-suites@master
+      with:
+        ref: ${{ steps.get_target_commit.outputs.sha }}
+        intervalSeconds: 10
+        timeoutSeconds: 1800
+        failStepIfUnsuccessful: true
+        appSlugFilter: github-actions
+
+    - name: Create release
+      id: create_release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ steps.get_tag.outputs.tag }}
+        commit: ${{ steps.get_target_commit.outputs.sha }}
+        makeLatest: true
+        prerelease: false
+        allowUpdates: false
+  
+  publish-to-pages:
+    name: Publish chart to github pages
+    runs-on: ubuntu-22.04
+    needs: create_release_tag
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish-index.outputs.page_url }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Create helm-index branch if missing
+      run: |
+        if ! git rev-parse --verify remotes/origin/helm-index &>/dev/null; then
+          git switch --orphan helm-index
+          git config user.name "${{ vars.WORKFLOW_USER_NAME }}"
+          git config user.email "${{ vars.WORKFLOW_USER_EMAIL }}"
+          git commit --allow-empty -m "Initial commit"
+          git push --set-upstream origin helm-index
+        fi
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        ref: helm-index
+        path: index
+
+    - uses: azure/setup-helm@v3
+      with:
+        version: ${{ env.HELM_VERSION }}
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+
+    - name: Create package
+      run: |
+        chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
+        helm package --version $chart_version $CHART_DIRECTORY
+
+    - name: Create index
+      run: |
+        chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
+        helm repo index --url ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ needs.create_release_tag.outputs.tag }} --merge ./index/index.yaml .
+        mv index.yaml index
+        cd index
+        git config user.name "${{ vars.WORKFLOW_USER_NAME }}"
+        git config user.email "${{ vars.WORKFLOW_USER_EMAIL }}"
+        git add index.yaml
+        git commit -m "Release ${{ needs.create_release_tag.outputs.tag }}"
+        git push
+
+    - name: Upload package
+      run: |
+        upload_url="${{ needs.create_release_tag.outputs.upload_url }}"
+        upload_url=${upload_url%%\{*\}}
+        chart_name=$(yq .name $CHART_DIRECTORY/Chart.yaml)
+        chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
+        file=$chart_name-$chart_version.tgz
+        echo "Uploading $file to $upload_url ..."
+        curl -sSf \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ github.token }}" \
+          -H "Content-Type: $(file -b --mime-type $file)" \
+          --data-binary @$file \
+          "$upload_url?name=$(basename $file)"
+
+    - name: Upload index
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: index
+
+    - name: Publish index
+      id: publish-index
+      uses: actions/deploy-pages@v2
+
+  publish-to-packages:
+    name: Publish chart to github packages
+    needs: create_release_tag
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - uses: azure/setup-helm@v3
+      with:
+        version: ${{ env.HELM_VERSION }}
+
+    - name: Create package
+      run: |
+        chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
+        helm package --version $chart_version $CHART_DIRECTORY
+
+    - name: Login to the OCI registry
+      run: |
+        helm --registry-config $RUNNER_TEMP/helm-config.json registry login $REGISTRY -u ${{ github.actor }} --password-stdin <<< ${{ github.token }}
+
+    - name: Upload package
+      run: |
+        chart_name=$(yq .name $CHART_DIRECTORY/Chart.yaml)
+        chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
+        file=$chart_name-$chart_version.tgz
+        repository=$REGISTRY/$PACKAGES
+        helm --registry-config $RUNNER_TEMP/helm-config.json push $file oci://${repository,,}

@@ -1,0 +1,27 @@
+# This job will generate manifest
+name: Generate Manifests
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  generate-manifest:
+    name: Generate manifest
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download kustomize cli
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+          chmod +x kustomize
+      
+      - name: Generate Manifests
+        run: |
+          ./kustomize build config/default/
