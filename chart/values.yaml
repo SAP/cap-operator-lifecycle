@@ -4,8 +4,7 @@ image:
   # -- Default image pull policy (can be overwritten on component level)
   pullPolicy: ""
 # -- Default image pull secrets (can be overwritten on component level)
-imagePullSecrets:
-- name: regcred
+imagePullSecrets: []
 # -- Default pod security content (can be overwritten on component level)
 podSecurityContext: {}
 # -- Default node selector (can be overwritten on component level)
