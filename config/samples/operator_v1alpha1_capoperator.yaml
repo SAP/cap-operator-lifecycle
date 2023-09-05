@@ -9,7 +9,7 @@ metadata:
   name: cap-operator
 spec:
   subscriptionServer:
-    subDomain: cop
+    subDomain: cap-op
   ingressGatewayLabels:
     istio: ingressgateway
     app: istio-ingressgateway
