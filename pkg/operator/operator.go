@@ -21,6 +21,7 @@ import (
 	"github.com/sap/component-operator-runtime/pkg/operator"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
+	"github.com/sap/cap-operator-lifecycle/internal/transformer"
 )
 
 const Name = "cap-operator.sme.sap.com"
@@ -107,7 +108,14 @@ func (o *Operator) Setup(mgr ctrl.Manager, discoveryClient discovery.DiscoveryIn
 		return errors.Wrap(err, "error checking manifest directory")
 	}
 
-	resourceGenerator, err := manifests.NewHelmGenerator(Name, nil, chartDir, mgr.GetClient(), discoveryClient)
+	resourceGenerator, err := manifests.NewHelmGeneratorWithParameterTransformer(
+		o.options.Name,
+		nil,
+		chartDir,
+		mgr.GetClient(),
+		discoveryClient,
+		transformer.NewParameterTransformer(mgr.GetClient()),
+	)
 	if err != nil {
 		return errors.Wrap(err, "error initializing resource generator")
 	}
