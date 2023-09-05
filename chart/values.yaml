@@ -21,7 +21,7 @@ controller:
   replicas: 1
   image:
     # -- Image repository
-    repository: ghcr.io/sap/cap-operator/cap-controller
+    repository: ghcr.io/sap/cap-operator/controller
     # -- Image tag
     tag: ""
     # -- Image pull policy
