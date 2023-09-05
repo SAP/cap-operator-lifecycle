@@ -1,4 +1,6 @@
 # cap-operator-lifecycle
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/cap-operator-lifecycle)](https://api.reuse.software/info/github.com/SAP/cap-operator-lifecycle)
+
 Helm chart and operator based on Kyma lifecycle manager to install the [CAP Operator](https://sap.github.io/cap-operator/)
 
 # cap-operator-manager
