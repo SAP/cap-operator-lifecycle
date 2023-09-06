@@ -19,29 +19,21 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
-
-	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
-	// to ensure that exec-entrypoint and run can make use of them.
-
-	"k8s.io/client-go/discovery"
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/discovery"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	apiregistrationv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
-	"github.com/sap/cap-operator-lifecycle/pkg/manifests"
-	"github.com/sap/component-operator-runtime/pkg/component"
-	//+kubebuilder:scaffold:imports
+	"github.com/sap/cap-operator-lifecycle/pkg/operator"
 )
 
 var (
@@ -53,15 +45,16 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(apiextensionsv1.AddToScheme(scheme))
 	utilruntime.Must(apiregistrationv1.AddToScheme(scheme))
-	utilruntime.Must(operatorv1alpha1.AddToScheme(scheme))
-	//+kubebuilder:scaffold:scheme
-}
 
-const myself = "cap-operator.sme.sap.com"
+	operator.InitScheme(scheme)
+}
 
 func main() {
 	var metricsAddr string
 	var probeAddr string
+	// Uncomment the following lines to enable webhooks.
+	// var webhookAddr string
+	// var webhookCertDir string
 	var enableLeaderElection bool
 	var chartDir string
 
@@ -69,11 +62,16 @@ func main() {
 		"The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081",
 		"The address the probe endpoint binds to.")
+	// Uncomment the following lines to enable webhooks.
+	// flag.StringVar(&webhookAddr, "webhook-bind-address", ":2443",
+	//	"The address the webhooks endpoint binds to.")
+	// flag.StringVar(&webhookCertDir, "webhook-tls-directory", "",
+	//	"The directory containing tls server key and certificate, as tls.key and tls.crt; defaults to $TMPDIR/k8s-webhook-server/serving-certs")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&chartDir, "manifest-directory", "./chart",
 		"The directory containing the deployment manifests for the managed operator.")
-
+	operator.InitFlags(flag.CommandLine)
 	opts := zap.Options{
 		Development: false,
 	}
@@ -87,24 +85,48 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := checkDirectoryExists(chartDir); err != nil {
-		setupLog.Error(err, "error checking manifest directory")
-		os.Exit(1)
-	}
+	// Uncomment the following lines to enable webhooks.
+	// webhookHost, webhookPort, err := parseAddress(webhookAddr)
+	// if err != nil {
+	//	setupLog.Error(err, "error parsing webhook address")
+	//	os.Exit(1)
+	// }
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                        scheme,
-		MetricsBindAddress:            metricsAddr,
-		HealthProbeBindAddress:        probeAddr,
+		Scheme: scheme,
+		Client: client.Options{
+			Cache: &client.CacheOptions{
+				DisableFor: append(operator.GetUncacheableTypes(), &apiextensionsv1.CustomResourceDefinition{}, &apiregistrationv1.APIService{}),
+			},
+		},
 		LeaderElection:                enableLeaderElection,
-		LeaderElectionID:              myself,
+		LeaderElectionID:              operator.GetName(),
 		LeaderElectionReleaseOnCancel: true,
-		ClientDisableCacheFor:         []client.Object{&operatorv1alpha1.CAPOperator{}, &apiextensionsv1.CustomResourceDefinition{}, &apiregistrationv1.APIService{}},
+		// Uncomment the following lines to enable webhooks.
+		// WebhookServer: webhook.NewServer(webhook.Options{
+		// 	Host:    webhookHost,
+		//	Port:    webhookPort,
+		//	CertDir: webhookCertDir,
+		// }),
+		Metrics: metricsserver.Options{
+			BindAddress: metricsAddr,
+		},
+		HealthProbeBindAddress: probeAddr,
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
+
+	// Uncomment to enable conversion webhook (in case additional api versions are added in ./api).
+	// Note: to make conversion work, additional changes are necessary:
+	// - additional api versions have to be added to InitScheme() in pkg/operator/operator.go
+	// - one of the api versions has to marked as Hub, all other versions need to implement the
+	//   conversion.Convertible interface (see https://book.kubebuilder.io/multiversion-tutorial/conversion.html)
+	// - one of the api versions has to be marked as storage version (+kubebuilder:storageversion)
+	// - the crd resource has to be enhanced with a conversion section, telling the Kubernetes API server how to
+	//   connect to the conversion endpoint.
+	// mgr.GetWebhookServer().Register("/convert", conversion.NewWebhookHandler(mgr.GetScheme()))
 
 	discoveryClient, err := discovery.NewDiscoveryClientForConfig(mgr.GetConfig())
 	if err != nil {
@@ -112,24 +134,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	resourceGenerator, err := manifests.NewHelmGenerator(myself, nil, chartDir, mgr.GetClient(), discoveryClient)
-	if err != nil {
-		setupLog.Error(err, "error initializing manifest generator")
+	if err := operator.Setup(mgr, discoveryClient); err != nil {
+		setupLog.Error(err, "error registering controller with manager")
 		os.Exit(1)
 	}
-
-	if err := component.NewReconciler[*operatorv1alpha1.CAPOperator](
-		myself,
-		mgr.GetClient(),
-		discoveryClient,
-		mgr.GetEventRecorderFor(myself),
-		mgr.GetScheme(),
-		resourceGenerator,
-	).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "CAPOperatorManager")
-		os.Exit(1)
-	}
-	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
@@ -147,13 +155,15 @@ func main() {
 	}
 }
 
-func checkDirectoryExists(path string) error {
-	fsinfo, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if !fsinfo.IsDir() {
-		return fmt.Errorf("not a directory: %s", path)
-	}
-	return nil
-}
+// Uncomment the following lines to enable webhooks.
+// func parseAddress(address string) (string, int, error) {
+//	host, p, err := net.SplitHostPort(address)
+//	if err != nil {
+//		return "", -1, err
+//	}
+//	port, err := strconv.Atoi(p)
+//	if err != nil {
+//		return "", -1, err
+//	}
+//	return host, port, nil
+// }

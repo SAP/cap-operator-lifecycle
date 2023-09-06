@@ -2,28 +2,18 @@
 SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and cap-operator contributors
 SPDX-License-Identifier: Apache-2.0
 */
-package manifests
+package transformer
 
 import (
 	"testing"
 
-	"golang.org/x/exp/slices"
+	componentoperatorruntimetypes "github.com/sap/component-operator-runtime/pkg/types"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	fake "sigs.k8s.io/controller-runtime/pkg/client/fake"
-
-	fakediscovery "k8s.io/client-go/discovery/fake"
-	fakeclientset "k8s.io/client-go/kubernetes/fake"
 )
 
-func ContainsFunc(clientObjects []client.Object, name string, kind string) bool {
-	return slices.ContainsFunc(clientObjects, func(object client.Object) bool {
-		return object.GetName() == name && object.GetObjectKind().GroupVersionKind().Kind == kind
-	})
-}
-
-func TestHelmResourceGenerator(t *testing.T) {
+func TestTransformer(t *testing.T) {
 	tests := []struct {
 		name                       string
 		dnsTargetFilled            bool
@@ -96,48 +86,7 @@ func TestHelmResourceGenerator(t *testing.T) {
 
 			kubeClient := clientBuilder.Build()
 
-			fakeclientset := fakeclientset.NewSimpleClientset()
-			fakeDiscovery, ok := fakeclientset.Discovery().(*fakediscovery.FakeDiscovery)
-			if !ok {
-				t.Error("fake discovery client creation failed")
-			}
-			fakeDiscovery.Resources = []*metav1.APIResourceList{
-				{
-					GroupVersion: "cert.gardener.cloud/v1alpha1",
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "APIResourceList",
-						APIVersion: "v1",
-					},
-					APIResources: []metav1.APIResource{
-						{
-							Name:         "certificates",
-							SingularName: "certificate",
-							Namespaced:   true,
-							Kind:         "Certificate",
-						},
-					},
-				},
-				{
-					GroupVersion: "dns.gardener.cloud/v1alpha1",
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "APIResourceList",
-						APIVersion: "v1",
-					},
-					APIResources: []metav1.APIResource{
-						{
-							Name:         "dnsentries",
-							SingularName: "dnsentry",
-							Namespaced:   true,
-							Kind:         "DNSEntry",
-						},
-					},
-				},
-			}
-
-			helmGenerator, err := NewHelmGenerator("cap-operator.sme.sap.com", nil, "../../chart", kubeClient, fakeDiscovery)
-			if err != nil {
-				t.Error(err)
-			}
+			transformer := NewParameterTransformer(kubeClient)
 
 			parameter := make(map[string]interface{})
 
@@ -157,7 +106,7 @@ func TestHelmResourceGenerator(t *testing.T) {
 				}
 			}
 
-			clientObjects, err := helmGenerator.Generate("cap-operator-system", "cap-operator", &unstructurableMap{parameter})
+			transformedParameters, err := transformer.TransformParameters("cap-operator-system", "cap-operator.sme.sap.com", componentoperatorruntimetypes.UnstructurableMap(parameter))
 			if !tt.expectError && err != nil {
 				t.Error(err)
 			}
@@ -170,33 +119,12 @@ func TestHelmResourceGenerator(t *testing.T) {
 				t.Log(err)
 				return
 			}
-
-			if len(clientObjects) != 24 {
-				t.Error("wrong number of returned client objects")
+			transformedParametersMap := transformedParameters.ToUnstructured()
+			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["dnsTarget"].(string) != "public-ingress.some.cluster.sap" {
+				t.Error("unexpected value returned")
 			}
-
-			if !ContainsFunc(clientObjects, "cap-operator-controller", "Deployment") {
-				t.Error("controller deployment not found")
-			}
-
-			if !ContainsFunc(clientObjects, "cap-operator-subscription-server", "Deployment") {
-				t.Error("subscription-server deployment not found")
-			}
-
-			if !ContainsFunc(clientObjects, "cap-operator-webhook", "Deployment") {
-				t.Error("webhook deployment not found")
-			}
-
-			if !ContainsFunc(clientObjects, "cap-operator-subscription-server", "VirtualService") {
-				t.Error("virutal service not found")
-			}
-
-			if !ContainsFunc(clientObjects, "cap-operator-subscription-server", "Gateway") {
-				t.Error("gateway not found")
-			}
-
-			if !ContainsFunc(clientObjects, "cap-operator-subscription-server", "DNSEntry") {
-				t.Error("DNSEntry not found")
+			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["domain"].(string) != "cop.some.cluster.sap" {
+				t.Error("unexpected value returned")
 			}
 		})
 	}

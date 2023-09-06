@@ -3,27 +3,21 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and cap-operator
 SPDX-License-Identifier: Apache-2.0
 */
 
-package manifests
+package transformer
 
 import (
 	"context"
 	"fmt"
-	"io/fs"
 	"strings"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/sap/component-operator-runtime/pkg/manifests"
-	"github.com/sap/component-operator-runtime/pkg/types"
-
-	"github.com/sap/cap-operator-lifecycle/api/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
 	apitypes "k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/discovery"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/sap/cap-operator-lifecycle/api/v1alpha1"
+	componentoperatorruntimetypes "github.com/sap/component-operator-runtime/pkg/types"
 )
 
 const (
@@ -33,42 +27,26 @@ const (
 	annotationDNSNames      = "dns.gardener.cloud/dnsnames"
 )
 
-type HelmGenerator struct {
-	resourceGenerator *manifests.HelmGenerator
-	client            client.Client
+type transformer struct {
+	client client.Client
 }
 
-type unstructurableMap struct {
-	data map[string]any
+func NewParameterTransformer(client client.Client) *transformer {
+	return &transformer{client: client}
 }
 
-func (m *unstructurableMap) ToUnstructured() map[string]any {
-	return runtime.DeepCopyJSON(m.data)
-}
-
-var _ Generator = &HelmGenerator{}
-
-func NewHelmGenerator(name string, fsys fs.FS, chartPath string, client client.Client, discoveryClient discovery.DiscoveryInterface) (*HelmGenerator, error) {
-	resourceGenerator, err := manifests.NewHelmGenerator(name, fsys, chartPath, client, discoveryClient)
-	if err != nil {
-		return nil, err
-	}
-	g := HelmGenerator{resourceGenerator: resourceGenerator, client: client}
-	return &g, nil
-}
-
-func (g *HelmGenerator) Generate(namespace string, name string, parameters types.Unstructurable) ([]client.Object, error) {
+func (t *transformer) TransformParameters(namespace string, name string, parameters componentoperatorruntimetypes.Unstructurable) (componentoperatorruntimetypes.Unstructurable, error) {
 	parameterMap := parameters.ToUnstructured()
 
-	if err := g.fillDomain(parameterMap); err != nil {
+	if err := t.fillDomain(parameterMap); err != nil {
 		return nil, err
 	}
 
-	if err := g.fillDNSTarget(parameterMap); err != nil {
+	if err := t.fillDNSTarget(parameterMap); err != nil {
 		return nil, err
 	}
 
-	return g.resourceGenerator.Generate(namespace, name, &unstructurableMap{data: parameterMap})
+	return componentoperatorruntimetypes.UnstructurableMap(parameterMap), nil
 }
 
 func trimDNSTarget(dnsTarget string) string {
@@ -80,7 +58,7 @@ func trimDNSTarget(dnsTarget string) string {
 	return strings.ReplaceAll(dnsTarget, "*", "x")
 }
 
-func (g *HelmGenerator) fillDNSTarget(parameters map[string]any) error {
+func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 	// get DNSTarget
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
 	if subscriptionServer["dnsTarget"] != nil { // already filled in CRO
@@ -98,7 +76,7 @@ func (g *HelmGenerator) fillDNSTarget(parameters map[string]any) error {
 		return fmt.Errorf("cannot get dnsTarget; provide ingressGatewayLabels/app and ingressGatewayLabels/istio values in the CRO")
 	}
 
-	dnsTarget, err := g.getDNSTarget(&v1alpha1.IngressGatewayLabels{App: ingressGatewayLabels["app"].(string), Istio: ingressGatewayLabels["istio"].(string)})
+	dnsTarget, err := t.getDNSTarget(&v1alpha1.IngressGatewayLabels{App: ingressGatewayLabels["app"].(string), Istio: ingressGatewayLabels["istio"].(string)})
 	if err != nil {
 		return err
 	}
@@ -108,7 +86,7 @@ func (g *HelmGenerator) fillDNSTarget(parameters map[string]any) error {
 	return nil
 }
 
-func (g *HelmGenerator) getDNSTarget(ingressGatewayLabels *v1alpha1.IngressGatewayLabels) (dnsTarget string, err error) {
+func (t *transformer) getDNSTarget(ingressGatewayLabels *v1alpha1.IngressGatewayLabels) (dnsTarget string, err error) {
 
 	ctx := context.TODO()
 
@@ -120,7 +98,7 @@ func (g *HelmGenerator) getDNSTarget(ingressGatewayLabels *v1alpha1.IngressGatew
 
 	// Get relevant Ingress Gateway pods
 	ingressPods := &corev1.PodList{TypeMeta: metav1.TypeMeta{Kind: "Pod"}}
-	err = g.client.List(ctx, ingressPods, &client.ListOptions{Namespace: metav1.NamespaceAll, LabelSelector: ingressLabelSelector})
+	err = t.client.List(ctx, ingressPods, &client.ListOptions{Namespace: metav1.NamespaceAll, LabelSelector: ingressLabelSelector})
 	if err != nil {
 		return "", err
 	}
@@ -143,7 +121,7 @@ func (g *HelmGenerator) getDNSTarget(ingressGatewayLabels *v1alpha1.IngressGatew
 	}
 
 	// Get dnsTarget
-	ingressGWSvc, err := g.getIngressGatewayService(ctx, relevantsPodsNames)
+	ingressGWSvc, err := t.getIngressGatewayService(ctx, relevantsPodsNames)
 	if err != nil {
 		return "", err
 	}
@@ -169,10 +147,10 @@ func getIngressGatewayLabels(ingressGatewayLabels *v1alpha1.IngressGatewayLabels
 	return ingressLabels
 }
 
-func (g *HelmGenerator) getLoadBalancerSvcs(ctx context.Context) ([]corev1.Service, error) {
+func (t *transformer) getLoadBalancerSvcs(ctx context.Context) ([]corev1.Service, error) {
 	// List all services in the same namespace as the istio-ingressgateway pod namespace
 	svcList := &corev1.ServiceList{TypeMeta: metav1.TypeMeta{Kind: "Service"}}
-	if err := g.client.List(ctx, svcList, &client.ListOptions{Namespace: istioIngressGWNamespace}); err != nil {
+	if err := t.client.List(ctx, svcList, &client.ListOptions{Namespace: istioIngressGWNamespace}); err != nil {
 		return nil, err
 	}
 
@@ -186,8 +164,8 @@ func (g *HelmGenerator) getLoadBalancerSvcs(ctx context.Context) ([]corev1.Servi
 	return loadBalancerSvcs, nil
 }
 
-func (g *HelmGenerator) getIngressGatewayService(ctx context.Context, relevantPodNames map[string]struct{}) (*corev1.Service, error) {
-	loadBalancerSvcs, err := g.getLoadBalancerSvcs(ctx)
+func (t *transformer) getIngressGatewayService(ctx context.Context, relevantPodNames map[string]struct{}) (*corev1.Service, error) {
+	loadBalancerSvcs, err := t.getLoadBalancerSvcs(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +174,7 @@ func (g *HelmGenerator) getIngressGatewayService(ctx context.Context, relevantPo
 	podList := &corev1.PodList{TypeMeta: metav1.TypeMeta{Kind: "Pod"}}
 	for _, svc := range loadBalancerSvcs {
 		// Get all matching ingress GW pods in the ingress gw namespace via ingress gw service selectors
-		err := g.client.List(ctx, podList, &client.ListOptions{LabelSelector: labels.SelectorFromValidatedSet(svc.Spec.Selector)})
+		err := t.client.List(ctx, podList, &client.ListOptions{LabelSelector: labels.SelectorFromValidatedSet(svc.Spec.Selector)})
 		if err != nil {
 			return nil, err
 		}
@@ -219,10 +197,10 @@ func (g *HelmGenerator) getIngressGatewayService(ctx context.Context, relevantPo
 	return &ingressGwSvc, nil
 }
 
-func (g *HelmGenerator) fillDomain(parameters map[string]any) error {
+func (t *transformer) fillDomain(parameters map[string]any) error {
 	// get domain
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
-	domain, err := g.getDomain(subscriptionServer["subDomain"].(string))
+	domain, err := t.getDomain(subscriptionServer["subDomain"].(string))
 	if err != nil {
 		return err
 	}
@@ -233,7 +211,7 @@ func (g *HelmGenerator) fillDomain(parameters map[string]any) error {
 	return nil
 }
 
-func (g *HelmGenerator) getDomain(subDomain string) (string, error) {
+func (t *transformer) getDomain(subDomain string) (string, error) {
 	configMapObj := &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -248,7 +226,7 @@ func (g *HelmGenerator) getDomain(subDomain string) (string, error) {
 	}
 
 	ctx := context.TODO()
-	err := g.client.Get(ctx, apitypes.NamespacedName{Namespace: configMapObj.GetNamespace(), Name: configMapObj.GetName()}, configMapObj)
+	err := t.client.Get(ctx, apitypes.NamespacedName{Namespace: configMapObj.GetNamespace(), Name: configMapObj.GetName()}, configMapObj)
 	if err != nil {
 		return "", err
 	}
