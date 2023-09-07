@@ -1,4 +1,8 @@
 # cap-operator-lifecycle
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/SAP/cap-operator-lifecycle)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sap/cap-operator-lifecycle)](https://goreportcard.com/report/github.com/sap/cap-operator-lifecycle)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=SAP_cap-operator-lifecycle&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=SAP_cap-operator-lifecycle)
+[![CodeQL](https://github.com/SAP/cap-operator-lifecycle/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/SAP/cap-operator-lifecycle/actions/workflows/github-code-scanning/codeql)
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP/cap-operator-lifecycle)](https://api.reuse.software/info/github.com/SAP/cap-operator-lifecycle)
 
 Helm chart and operator based on Kyma lifecycle manager to install the [CAP Operator](https://sap.github.io/cap-operator/)
