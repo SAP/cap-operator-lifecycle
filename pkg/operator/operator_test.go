@@ -49,7 +49,6 @@ func TestCheckDirectoryExists(t *testing.T) {
 }
 
 func TestOperator(t *testing.T) {
-
 	operator := New()
 
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
@@ -85,7 +84,7 @@ func TestOperator(t *testing.T) {
 		return
 	}
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme: scheme,
 		Client: client.Options{
 			Cache: &client.CacheOptions{
@@ -112,4 +111,6 @@ func TestOperator(t *testing.T) {
 		t.Error("error registering controller with manager")
 		return
 	}
+
+	testenv.Stop()
 }
