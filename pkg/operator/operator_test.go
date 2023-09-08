@@ -69,7 +69,8 @@ func TestOperator(t *testing.T) {
 			"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 		flag.StringVar(&chartDir, "manifest-directory", "../../chart",
 			"The directory containing the deployment manifests for the managed operator.")
-		InitFlags(flag.CommandLine)
+
+		operator.InitFlags(flag.CommandLine)
 
 		if err := operator.ValidateFlags(); err != nil {
 			t.Error("Flag validation failed")
@@ -78,6 +79,11 @@ func TestOperator(t *testing.T) {
 
 		if name := operator.GetName(); name != "cap-operator.sme.sap.com" {
 			t.Error("Invalid name")
+			return
+		}
+
+		if uncacheTypes := operator.GetUncacheableTypes(); len(uncacheTypes) != 1 {
+			t.Error("Returned wrong number of types")
 			return
 		}
 
