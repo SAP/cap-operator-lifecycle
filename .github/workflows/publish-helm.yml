@@ -7,7 +7,7 @@ env:
   HELM_VERSION: v3.11.3
   REGISTRY: ghcr.io
   CHART_DIRECTORY: chart
-  PACKAGES: sap/cap-operator-helm
+  PACKAGES: ${{ github.repository_owner }}/cap-operator-helm
   RELEASE_TAG_PREFIX: cap-operator-helm
 
 jobs:
