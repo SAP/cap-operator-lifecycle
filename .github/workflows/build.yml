@@ -44,24 +44,25 @@ jobs:
         name: test-coverage
         path: coverage.out
   
-  # analysis:
-  #   name: Analyze with Sonar Cloud
-  #   needs: build
-  #   runs-on: ubuntu-22.04
-  #   steps:
+  analysis:
+    name: Analyze with Sonar Cloud
+    if: github.repository == 'sap/cap-operator-lifecycle'
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
     
-  #   - name: Check out code for Sonar Analysis
-  #     uses: actions/checkout@v4
-  #     with:
-  #       fetch-depth: 0
+    - name: Check out code for Sonar Analysis
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
-  #   - name: Download Test results
-  #     uses: actions/download-artifact@v3
-  #     with:
-  #       name: test-coverage
+    - name: Download Test results
+      uses: actions/download-artifact@v3
+      with:
+        name: test-coverage
     
-  #   - name: SonarCloud Scan
-  #     uses: SonarSource/sonarcloud-github-action@master
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
