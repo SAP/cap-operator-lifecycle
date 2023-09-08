@@ -7,7 +7,6 @@ package operator
 
 import (
 	"flag"
-	"os"
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -22,6 +21,7 @@ import (
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
 	"github.com/sap/cap-operator-lifecycle/internal/transformer"
+	"github.com/sap/cap-operator-lifecycle/internal/util"
 )
 
 const Name = "cap-operator.sme.sap.com"
@@ -104,7 +104,7 @@ func (o *Operator) GetUncacheableTypes() []client.Object {
 func (o *Operator) Setup(mgr ctrl.Manager, discoveryClient discovery.DiscoveryInterface) error {
 	chartDir := chartFlag.Value.String()
 
-	if err := checkDirectoryExists(chartDir); err != nil {
+	if err := util.CheckDirectoryExists(chartDir); err != nil {
 		return errors.Wrap(err, "error checking manifest directory")
 	}
 
@@ -131,16 +131,5 @@ func (o *Operator) Setup(mgr ctrl.Manager, discoveryClient discovery.DiscoveryIn
 		return errors.Wrapf(err, "unable to create controller")
 	}
 
-	return nil
-}
-
-func checkDirectoryExists(path string) error {
-	fsinfo, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if !fsinfo.IsDir() {
-		return errors.Errorf("not a directory: %s", path)
-	}
 	return nil
 }
