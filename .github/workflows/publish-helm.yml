@@ -36,6 +36,7 @@ jobs:
       id: get_tag
       run: |
         chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
+        echo "chart_version=$chart_version"
         echo "tag=$RELEASE_TAG_PREFIX/$chart_version" >> $GITHUB_OUTPUT
 
     - name: Wait for check suites to complete
