@@ -6,64 +6,49 @@ SPDX-License-Identifier: Apache-2.0
 package operator
 
 import (
-	"fmt"
-	"net/http"
+	"context"
+	"path/filepath"
 	"testing"
+
+	"k8s.io/client-go/rest"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 func TestSource(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Manager Suite")
+
+	RunSpecs(t, "Controller Suite")
 }
 
-var testenv *envtest.Environment
+var testEnv *envtest.Environment
 var cfg *rest.Config
-var clientset *kubernetes.Clientset
-
-// clientTransport is used to force-close keep-alives in tests that check for leaks.
-var clientTransport *http.Transport
+var ctx context.Context
+var cancel context.CancelFunc
 
 var _ = BeforeSuite(func() {
+	ctx, cancel = context.WithCancel(context.Background())
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
-	testenv = &envtest.Environment{}
-
-	var err error
-	cfg, err = testenv.Start()
-	Expect(err).NotTo(HaveOccurred())
-
-	cfg.WrapTransport = func(rt http.RoundTripper) http.RoundTripper {
-		// NB(directxman12): we can't set Transport *and* use TLS options,
-		// so we grab the transport right after it gets created so that we can
-		// type-assert on it (hopefully)?
-		// hopefully this doesn't break 🤞
-		transport, isTransport := rt.(*http.Transport)
-		if !isTransport {
-			panic(fmt.Sprintf("wasn't able to grab underlying transport from REST client's RoundTripper, can't figure out how to close keep-alives: expected an *http.Transport, got %#v", rt))
-		}
-		clientTransport = transport
-		return rt
+	By("bootstrapping test environment")
+	testEnv = &envtest.Environment{
+		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd")},
+		ErrorIfCRDPathMissing: true,
 	}
 
-	clientset, err = kubernetes.NewForConfig(cfg)
+	cfg, err := testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
-
-	// Prevent the metrics listener being created
-	metricsserver.DefaultBindAddress = "0"
+	Expect(cfg).NotTo(BeNil())
 })
 
 var _ = AfterSuite(func() {
-	Expect(testenv.Stop()).To(Succeed())
-
-	// Put the DefaultBindAddress back
-	metricsserver.DefaultBindAddress = ":8080"
+	By("canceling the context for the manager to shutdown")
+	cancel()
+	By("tearing down the test environment")
+	err := testEnv.Stop()
+	Expect(err).NotTo(HaveOccurred())
 })
