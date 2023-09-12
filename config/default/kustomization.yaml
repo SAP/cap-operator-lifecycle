@@ -23,5 +23,5 @@ resources:
 
 images:
 - name: controller
-  newName: ghcr.io/sap/cap-operator-manager
+  newName: ghcr.io/sap/cap-operator-lifecycle/cap-operator-manager
   newTag: 0.0.1

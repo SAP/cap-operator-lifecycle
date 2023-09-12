@@ -46,7 +46,7 @@ jobs:
       id: get_version_from_container_reg
       run: |
         export GHCR_TOKEN=$(echo ${{ github.token }} | base64)
-        echo "version=$(curl -H "Authorization: Bearer $GHCR_TOKEN" https://ghcr.io/v2/${{ github.repository_owner }}/cap-operator-manager/tags/list | jq '.tags[]' | sort -V | tail -n 2 | head -n 1)" >> $GITHUB_OUTPUT
+        echo "version=$(curl -H "Authorization: Bearer $GHCR_TOKEN" https://ghcr.io/v2/${{ github.repository }}/cap-operator-manager/tags/list | jq '.tags[]' | sort -V | tail -n 2 | head -n 1)" >> $GITHUB_OUTPUT
     
     - name: Print docker version from container registry
       run: "echo ${{ steps.get_version_from_container_reg.outputs.version }}"
