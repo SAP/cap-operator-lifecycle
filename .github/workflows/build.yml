@@ -46,7 +46,7 @@ jobs:
   
   analysis:
     name: Analyze with Sonar Cloud
-    if: github.repository == 'sap/cap-operator-lifecycle'
+    if: github.repository_owner == 'sap'
     needs: build
     runs-on: ubuntu-22.04
     steps:

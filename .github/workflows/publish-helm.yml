@@ -7,7 +7,7 @@ env:
   HELM_VERSION: v3.11.3
   REGISTRY: ghcr.io
   CHART_DIRECTORY: chart
-  RELEASE_TAG_PREFIX: cap-operator-helm
+  RELEASE_TAG_PREFIX: helm
 
 jobs:
   create_release_tag:
@@ -168,5 +168,5 @@ jobs:
         chart_name=$(yq .name $CHART_DIRECTORY/Chart.yaml)
         chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
         file=$chart_name-$chart_version.tgz
-        repository=$REGISTRY/${{ github.repository_owner }}/$RELEASE_TAG_PREFIX
+        repository=$REGISTRY/${{ github.repository }}/$RELEASE_TAG_PREFIX
         helm --registry-config $RUNNER_TEMP/helm-config.json push $file oci://${repository,,}
