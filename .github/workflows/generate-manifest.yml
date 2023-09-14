@@ -2,7 +2,26 @@
 name: Generate Manifests
 
 on:
-  workflow_call:
+  workflow_call: 
+    inputs:
+      version:
+        type: string
+        required: true
+      upload_url:
+        type: string
+        required: false
+  workflow_dispatch: 
+    inputs:
+      version:
+        type: string
+        required: true
+      upload_url:
+        type: string
+        required: false
+
+env:
+  MANIFEST_FILENAME: manager_manifest.yaml
+  CR_FILENAME: manager_default_CR.yaml
 
 defaults:
   run:
@@ -17,6 +36,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Update version in kustomization.yaml
+        run: |
+          yq -i '.images[0].newTag="${{ inputs.version }}"' config/default/kustomization.yaml
+          cat config/default/kustomization.yaml > $CR_FILENAME
+
       - name: Download kustomize cli
         run: |
           curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
@@ -24,4 +48,28 @@ jobs:
       
       - name: Generate Manifests
         run: |
-          ./kustomize build config/default/
+          ./kustomize build config/default/ > $MANIFEST_FILENAME
+          cat $MANIFEST_FILENAME
+      
+      - name: Upload manifest & default CR to release
+        if: inputs.upload_url != ''
+        run: |
+          upload_url="${{ inputs.upload_url }}"
+          upload_url=${upload_url%%\{*\}}
+          file=$MANIFEST_FILENAME
+          echo "Uploading manifest $file to $upload_url ..."
+          curl -sSf \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Content-Type: $(file -b --mime-type $file)" \
+            --data-binary @$file \
+            "$upload_url?name=$(basename $file)"
+          
+          file=$CR_FILENAME
+          echo "Uploading default CR $file to $upload_url ..."
+          curl -sSf \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Content-Type: $(file -b --mime-type $file)" \
+            --data-binary @$file \
+            "$upload_url?name=$(basename $file)"

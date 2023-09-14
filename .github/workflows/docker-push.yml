@@ -1,23 +1,25 @@
-name: Docker image build and push; Generate Manifest; Create release tag
+name: Docker push
 
 on:
-  workflow_dispatch
+  release:
+    types: [published]
+    
+concurrency: release-${{ github.event.release.tag_name }}
 
 env:
-    REGISTRY: ghcr.io
+  REGISTRY: ghcr.io
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  compare_image_versions:
-    name: Compare image versions
+  get_component:
+    name: Get component from tag
     runs-on: ubuntu-22.04
     outputs:
-      proceed_with_module_creation: ${{ steps.compare_versions.outputs.proceed }}
-      module_path: ${{ steps.get_current_docker_version.outputs.module_path }}
-      version: ${{ steps.get_current_docker_version.outputs.version }}
+      proceed_with_docker_push: ${{ steps.check_release_tag.outputs.proceed }}
+      component: ${{ steps.extract_component.outputs.component }}
     permissions:
       contents: read
       packages: write
@@ -25,77 +27,35 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    
+    - name: Extract component from tag
+      id: extract_component
+      run: |
+        echo "component=$(echo ${{ github.event.release.tag_name }} | grep -oP '^(.*?)\/' | rev | cut -c2- | rev )" >> $GITHUB_OUTPUT
 
-    - name: Setup Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Log in to the Container registry
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ github.token }}
+    - name: Print component
+      run: |
+        echo ${{ steps.extract_component.outputs.component }}
     
-    - name: Prepare repository name
-      id: prepare-repository-name
+    - name: Check release tag
+      id: check_release_tag
       run: |
-        repository=$REGISTRY/${{ github.repository }}
-        echo "repository=${repository,,}" >> $GITHUB_OUTPUT
-    
-    - name: Get docker version from container registry
-      id: get_version_from_container_reg
-      run: |
-        export GHCR_TOKEN=$(echo ${{ github.token }} | base64)
-        echo "version=$(curl -H "Authorization: Bearer $GHCR_TOKEN" https://ghcr.io/v2/${{ github.repository }}/cap-operator-manager/tags/list | jq '.tags[]' | sort -V | tail -n 2 | head -n 1)" >> $GITHUB_OUTPUT
-    
-    - name: Print docker version from container registry
-      run: "echo ${{ steps.get_version_from_container_reg.outputs.version }}"
-      
-    - name: Get current docker version
-      id: get_current_docker_version
-      run: |
-          echo "version=$(yq eval '.images[0].newTag' config/default/kustomization.yaml)" >> $GITHUB_OUTPUT
-          echo "module_path=$(yq eval '.images[0].newName' config/default/kustomization.yaml)" >> $GITHUB_OUTPUT
-  
-    - name: Print current docker module path and version
-      run: |
-          echo ${{ steps.get_current_docker_version.outputs.module_path }}
-          echo ${{ steps.get_current_docker_version.outputs.version }}
-          
-    - name: Download semver tool
-      run: |
-        wget https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver && \
-        chmod +x semver
-        
-    - name: Compare versions
-      id: compare_versions
-      run: |
-        if [[ '${{ steps.get_version_from_container_reg.outputs.version }}' -eq '' ]]
+        if [[ '${{ steps.extract_component.outputs.component }}' == 'manager' ]]
         then
-          echo "No version available in artifactory, we can proceed."
+          echo "Release tag created for cap-operator-manager, we can proceed with docker push."
           echo "proceed=true" >> $GITHUB_OUTPUT
         else
-          case $(./semver compare ${{ steps.get_version_from_container_reg.outputs.version }} ${{ steps.get_current_docker_version.outputs.version }}) in
-          -1)
-            echo "Current version is higher than artifactory version, we can proceed."
-            echo "proceed=true" >> $GITHUB_OUTPUT
-            ;;
-          0)
-            echo "Current version is same as the artifactory version, we won't proceed."
-            echo "proceed=false" >> $GITHUB_OUTPUT
-            ;;
-          1)
-            echo "Current version is lower than artifactory version, we won't proceed."
-            echo "proceed=false" >> $GITHUB_OUTPUT
-            ;;
-          esac
+          echo "Release tag doesn't correspond to cap-operator-manager, skip!!!"
+          echo "proceed=false" >> $GITHUB_OUTPUT
         fi
-        
+            
   docker_build_and_push:
     name: Docker build and push
     runs-on: ubuntu-22.04
-    needs: [compare_image_versions]
-    if: needs.compare_image_versions.outputs.proceed_with_module_creation == 'true'
+    needs: [get_component]
+    if: needs.get_component.outputs.proceed_with_docker_push == 'true'
+    outputs:
+      version: ${{ steps.extract-metadata.outputs.version }}
     permissions:
       contents: read
       packages: write
@@ -113,17 +73,23 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ github.token }}
-    
+
+    - name: Prepare repository name
+      id: prepare-repository-name
+      run: |
+        repository=$REGISTRY/${{ github.repository }}/cap-operator-manager
+        echo "repository=${repository,,}" >> $GITHUB_OUTPUT
+
     - name: Extract metadata (tags, labels) for Docker
       id: extract-metadata
       uses: docker/metadata-action@v4
       with:
-        images: ${{ needs.compare_image_versions.outputs.module_path }}
+        images: ${{ steps.prepare-repository-name.outputs.repository }}
         tags: |
-          type=pep440,pattern={{version}},value=${{ needs.compare_image_versions.outputs.version }}
+          type=match,pattern=manager/(v\d.\d.\d),group=1,value=${{ github.event.release.tag_name }}
+          type=match,pattern=manager/v(\d.\d.\d),group=1,value=${{ github.event.release.tag_name }}
 
     - name: Build and push docker image
-      id: docker_build
       uses: docker/build-push-action@v4
       with:
         file: Dockerfile
@@ -143,46 +109,13 @@ jobs:
     
     - name: Print Outputs
       run: |
-        echo "Module path: ${{ needs.compare_image_versions.outputs.module_path }}"
         echo "Tags: ${{ steps.extract-metadata.outputs.tags }}"
         echo "Labels: ${{ steps.extract-metadata.outputs.labels }}"
-
+  
   generate_manifests:
     uses: ./.github/workflows/generate-manifest.yml
-    needs: [compare_image_versions, docker_build_and_push]
-    if: needs.compare_image_versions.outputs.proceed_with_module_creation == 'true'
-  
-  create_release_tag:
-    name: Create release tag
-    runs-on: ubuntu-22.04
-    needs: [compare_image_versions, docker_build_and_push]
-    if: needs.compare_image_versions.outputs.proceed_with_module_creation == 'true'
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Determine target commit
-      id: get_target_commit
-      run: |
-        sha=$(git rev-parse HEAD)
-        echo "Target commit: $sha"
-        echo "sha=$sha" >> $GITHUB_OUTPUT
-
-    - name: Wait for check suites to complete
-      uses: sap-contributions/await-check-suites@master
-      with:
-        ref: ${{ steps.get_target_commit.outputs.sha }}
-        intervalSeconds: 10
-        timeoutSeconds: 1800
-        failStepIfUnsuccessful: true
-        appSlugFilter: github-actions
-
-    - name: Create release
-      id: create_release
-      uses: ncipollo/release-action@v1
-      with:
-        tag: cap-operator-manager/v${{ needs.compare_image_versions.outputs.version }}
-        commit: ${{ steps.get_target_commit.outputs.sha }}
-        makeLatest: true
-        prerelease: false
-        allowUpdates: false
+    needs: [get_component, docker_build_and_push]
+    if: needs.get_component.outputs.proceed_with_docker_push == 'true'
+    with:
+      version: ${{ needs.docker_build_and_push.outputs.version }}
+      upload_url: ${{ github.event.release.upload_url }}
