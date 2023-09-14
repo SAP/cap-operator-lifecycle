@@ -86,7 +86,6 @@ jobs:
       with:
         images: ${{ steps.prepare-repository-name.outputs.repository }}
         tags: |
-          type=match,pattern=manager/(v\d.\d.\d),group=1,value=${{ github.event.release.tag_name }}
           type=match,pattern=manager/v(\d.\d.\d),group=1,value=${{ github.event.release.tag_name }}
 
     - name: Build and push docker image
