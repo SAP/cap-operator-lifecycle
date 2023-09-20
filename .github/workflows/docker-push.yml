@@ -1,8 +1,9 @@
 name: Docker push
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: 
+      - manager/v[0-9]+.[0-9]+.[0-9]+
     
 concurrency: release-${{ github.event.release.tag_name }}
 
@@ -13,47 +14,10 @@ defaults:
   run:
     shell: bash
 
-jobs:
-  get_component:
-    name: Get component from tag
-    runs-on: ubuntu-22.04
-    outputs:
-      proceed_with_docker_push: ${{ steps.check_release_tag.outputs.proceed }}
-      component: ${{ steps.extract_component.outputs.component }}
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    
-    - name: Extract component from tag
-      id: extract_component
-      run: |
-        echo "component=$(echo ${{ github.event.release.tag_name }} | grep -oP '^(.*?)\/' | rev | cut -c2- | rev )" >> $GITHUB_OUTPUT
-
-    - name: Print component
-      run: |
-        echo ${{ steps.extract_component.outputs.component }}
-    
-    - name: Check release tag
-      id: check_release_tag
-      run: |
-        if [[ '${{ steps.extract_component.outputs.component }}' == 'manager' ]]
-        then
-          echo "Release tag created for cap-operator-manager, we can proceed with docker push."
-          echo "proceed=true" >> $GITHUB_OUTPUT
-        else
-          echo "Release tag doesn't correspond to cap-operator-manager, skip!!!"
-          echo "proceed=false" >> $GITHUB_OUTPUT
-        fi
-            
+jobs:            
   docker_build_and_push:
     name: Docker build and push
     runs-on: ubuntu-22.04
-    needs: [get_component]
-    if: needs.get_component.outputs.proceed_with_docker_push == 'true'
     outputs:
       version: ${{ steps.extract-metadata.outputs.version }}
     permissions:
@@ -110,11 +74,3 @@ jobs:
       run: |
         echo "Tags: ${{ steps.extract-metadata.outputs.tags }}"
         echo "Labels: ${{ steps.extract-metadata.outputs.labels }}"
-  
-  generate_manifests:
-    uses: ./.github/workflows/generate-manifest.yml
-    needs: [get_component, docker_build_and_push]
-    if: needs.get_component.outputs.proceed_with_docker_push == 'true'
-    with:
-      version: ${{ needs.docker_build_and_push.outputs.version }}
-      upload_url: ${{ github.event.release.upload_url }}
