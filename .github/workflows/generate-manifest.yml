@@ -2,20 +2,63 @@
 name: Generate Manifests
 
 on:
-  workflow_call:
+  release:
+    types: [published]
+
+  workflow_dispatch: 
+    inputs:
+      version:
+        type: string
+        required: true
+      upload_url:
+        type: string
+        required: false
+
+env:
+  MANIFEST_FILENAME: manager_manifest.yaml
+  CR_FILENAME: manager_default_CR.yaml
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  generate-manifest:
+  generate_manifest:
     name: Generate manifest
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
+      - name: Get version and upload URL
+        id: get_version_upload_url
+        run: |
+          if [[ ! -z '${{ inputs.version }}' ]]
+          then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=$(echo ${{ github.event.release.tag_name }} | grep -oP '(?<=\/v)\d+\.\d+\.\d+' )" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ ! -z '${{ inputs.upload_url }}' ]]
+          then
+            echo "upload_url=${{ inputs.upload_url }}" >> $GITHUB_OUTPUT
+          elif [[ ! -z '${{ github.event.release.upload_url }}' ]]
+          then
+            echo "upload_url=${{ github.event.release.upload_url }}" >> $GITHUB_OUTPUT
+          else
+            echo "upload_url=''" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Print version and upload URL
+        run: |
+          echo "Version=${{ steps.get_version_upload_url.outputs.version }}"
+          echo "Upload URL=${{ steps.get_version_upload_url.outputs.upload_url }}"
+
+      - name: Update version in kustomization.yaml
+        run: |
+          yq -i '.images[0].newTag="${{ steps.get_version_upload_url.outputs.version }}"' config/default/kustomization.yaml
 
       - name: Download kustomize cli
         run: |
@@ -24,4 +67,46 @@ jobs:
       
       - name: Generate Manifests
         run: |
-          ./kustomize build config/default/
+          ./kustomize build config/default/ > $MANIFEST_FILENAME
+          cat $MANIFEST_FILENAME
+          cat config/samples/operator_v1alpha1_capoperator.yaml > $CR_FILENAME
+      
+      - name: Determine target commit
+        id: get_target_commit
+        run: |
+          sha=$(git rev-parse HEAD)
+          echo "Target commit: $sha"
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+      
+      - name: Wait for check suites to complete
+        uses: sap-contributions/await-check-suites@master
+        if: inputs.version == ''
+        with:
+          ref: ${{ steps.get_target_commit.outputs.sha }}
+          intervalSeconds: 10
+          timeoutSeconds: 1800
+          failStepIfUnsuccessful: true
+          appSlugFilter: github-actions
+      
+      - name: Upload manifest & default CR to release
+        if: inputs.upload_url != '' || github.event.release.upload_url != ''
+        run: |
+          upload_url="${{ steps.get_version_upload_url.outputs.upload_url }}"
+          upload_url=${upload_url%%\{*\}}
+          file=$MANIFEST_FILENAME
+          echo "Uploading manifest $file to $upload_url ..."
+          curl -sSf \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Content-Type: $(file -b --mime-type $file)" \
+            --data-binary @$file \
+            "$upload_url?name=$(basename $file)"
+          
+          file=$CR_FILENAME
+          echo "Uploading default CR $file to $upload_url ..."
+          curl -sSf \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Content-Type: $(file -b --mime-type $file)" \
+            --data-binary @$file \
+            "$upload_url?name=$(basename $file)"
