@@ -52,7 +52,7 @@ jobs:
       with:
         tag: ${{ steps.get_tag.outputs.tag }}
         commit: ${{ steps.get_target_commit.outputs.sha }}
-        makeLatest: "false"
+        makeLatest: false
         prerelease: false
         allowUpdates: false
   
