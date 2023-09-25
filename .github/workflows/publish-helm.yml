@@ -52,7 +52,7 @@ jobs:
       with:
         tag: ${{ steps.get_tag.outputs.tag }}
         commit: ${{ steps.get_target_commit.outputs.sha }}
-        makeLatest: false
+        makeLatest: "false"
         prerelease: false
         allowUpdates: false
   
@@ -66,7 +66,6 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.publish-index.outputs.page_url }}
 
     steps:
     - name: Checkout repository
@@ -113,7 +112,24 @@ jobs:
         git add index.yaml
         git commit -m "Release ${{ needs.create_release_tag.outputs.tag }}"
         git push
-
+    
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        ref: website
+        path: website
+        token: ${{ secrets.WORKFLOW_USER_TOKEN }}
+    
+    - name: Copy index.yaml to website branch
+      run: |
+        cat index/index.yaml > website/static/index.yaml
+        cd website
+        git config user.name "${{ vars.WORKFLOW_USER_NAME }}"
+        git config user.email "${{ vars.WORKFLOW_USER_EMAIL }}"
+        git add .
+        git commit -m "Add index.yaml to website"
+        git push
+        
     - name: Upload package
       run: |
         upload_url="${{ needs.create_release_tag.outputs.upload_url }}"
@@ -128,15 +144,6 @@ jobs:
           -H "Content-Type: $(file -b --mime-type $file)" \
           --data-binary @$file \
           "$upload_url?name=$(basename $file)"
-
-    - name: Upload index
-      uses: actions/upload-pages-artifact@v2
-      with:
-        path: index
-
-    - name: Publish index
-      id: publish-index
-      uses: actions/deploy-pages@v2
 
   publish-to-packages:
     name: Publish chart to github packages
