@@ -59,8 +59,10 @@ func trimDNSTarget(dnsTarget string) string {
 
 func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 	// get DNSTarget
+	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
 	if parameters["dnsTarget"] != nil { // already filled in CRO
-		parameters["dnsTarget"] = trimDNSTarget(parameters["dnsTarget"].(string))
+		subscriptionServer["dnsTarget"] = trimDNSTarget(parameters["dnsTarget"].(string))
+		delete(parameters, "dnsTarget")
 		return nil
 	}
 
@@ -74,8 +76,8 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 		return err
 	}
 
-	parameters["dnsTarget"] = trimDNSTarget(dnsTarget)
-
+	subscriptionServer["dnsTarget"] = trimDNSTarget(dnsTarget)
+	delete(parameters, "ingressGatewayLabels")
 	return nil
 }
 
@@ -198,6 +200,10 @@ func (t *transformer) fillDomain(parameters map[string]any) error {
 	domain, err := t.getDomain(subscriptionServer["subDomain"].(string))
 	if err != nil {
 		return err
+	}
+
+	if len(domain) > 64 {
+		return fmt.Errorf("subscription server domain '%s' is longer than 64 characters; use a smaller subDomain", domain)
 	}
 
 	subscriptionServer["domain"] = domain

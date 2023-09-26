@@ -19,16 +19,17 @@ func TestTransformer(t *testing.T) {
 		name                       string
 		dnsTargetFilled            bool
 		ingressGatewayLabelsFilled bool
+		longDomain                 bool
 		expectError                bool
 	}{
 		{
-			name:                       "Test with all fields filled",
+			name:                       "Test with dnsTarget and without ingress gateway labels",
 			dnsTargetFilled:            true,
-			ingressGatewayLabelsFilled: true,
+			ingressGatewayLabelsFilled: false,
 			expectError:                false,
 		},
 		{
-			name:                       "Test without dnsTarget",
+			name:                       "Test without dnsTarget and with ingress gateway labels",
 			dnsTargetFilled:            false,
 			ingressGatewayLabelsFilled: true,
 			expectError:                false,
@@ -37,6 +38,12 @@ func TestTransformer(t *testing.T) {
 			name:                       "Test without dnsTarget and ingress gateway labels",
 			dnsTargetFilled:            false,
 			ingressGatewayLabelsFilled: false,
+			expectError:                true,
+		},
+		{
+			name:                       "Test with more than 64 character domain",
+			ingressGatewayLabelsFilled: true,
+			longDomain:                 true,
 			expectError:                true,
 		},
 	}
@@ -95,7 +102,12 @@ func TestTransformer(t *testing.T) {
 
 			parameter["subscriptionServer"] = map[string]interface{}{}
 			subscriptionServer := parameter["subscriptionServer"].(map[string]interface{})
-			subscriptionServer["subDomain"] = "cop"
+
+			if tt.longDomain {
+				subscriptionServer["subDomain"] = "long-subdomain-for-the-test-to-fail-to-check-the-error-case"
+			} else {
+				subscriptionServer["subDomain"] = "cop"
+			}
 			if tt.dnsTargetFilled {
 				parameter["dnsTarget"] = "public-ingress.some.cluster.sap"
 			}
@@ -127,7 +139,7 @@ func TestTransformer(t *testing.T) {
 				return
 			}
 			transformedParametersMap := transformedParameters.ToUnstructured()
-			if transformedParametersMap["dnsTarget"].(string) != "public-ingress.some.cluster.sap" {
+			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["dnsTarget"].(string) != "public-ingress.some.cluster.sap" {
 				t.Error("unexpected value returned")
 			}
 			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["domain"].(string) != "cop.some.cluster.sap" {
