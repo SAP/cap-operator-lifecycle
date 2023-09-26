@@ -26,10 +26,12 @@ kubectl apply -n cap-operator-system -f https://github.com/SAP/cap-operator-life
 ```
 **This would work only if the `ingressGatewayLabels` in your clusters matches the following values:**
 
-```bash
-ingressGatewayLabels:
-  istio: ingressgateway
-  app: istio-ingressgateway
+```yaml
+  ingressGatewayLabels:
+    - name: istio
+      value: ingressgateway
+    - name: app
+      value: istio-ingressgateway
 ```
 
 If not, you will have to manually create the `CAPOperator` resource by applying below yaml to `cap-operator-system` namespace after filling the `ingressGatewayLabels` values from your cluster.
@@ -43,8 +45,10 @@ spec:
   subscriptionServer:
     subDomain: cap-op
   ingressGatewayLabels:
-    istio: <<--istio-->>
-    app: <<--app-->>
+    - name: <<--Label Name-->>
+      value: <<--Label Value-->>
+    - name: <<--Label Name-->>
+      value: <<--Label Value-->>
 ```
 Once the `CAPOperator` resource is created, the CAP Operator Manager will start installing the CAP Operator in the namespace. Once the resource is ready, you will be able to see the CAP Operator Pods running in the namespace.
 

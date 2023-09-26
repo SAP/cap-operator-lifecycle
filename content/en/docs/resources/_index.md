@@ -1,7 +1,7 @@
 ---
 title: "Resources"
 linkTitle: "Resources"
-weight: 10
+weight: 20
 type: "docs"
 description: >
   How to configure the CAP Operator Manager resources
@@ -24,11 +24,15 @@ spec:
   subscriptionServer:
     subDomain: cap-op
   ingressGatewayLabels:
-    istio: ingressgateway
-    app: istio-ingressgateway
+    - name: istio
+      value: ingressgateway
+    - name: app
+      value: istio-ingressgateway
 ```
 
-Here, we will automatically determine the cluster shoot domain and install the CAP Operator by setting the subscription server domain and the DNS Target using the `ingressGatewayLabels`. For the above example, if the determined the cluster shoot domain is `test.stage.kyma.ondemand.com`, then the DNS Target will be set as `public-ingress.test.stage.kyma.ondemand.com` and domain as `cap-op.test.stage.kyma.ondemand.com` by default.
+Here, we will automatically determine the cluster shoot domain and install the CAP Operator by setting the subscription server domain and the DNS Target. The DNS target is derived using the `ingressGatewayLabels`. For the above example, if the determined the cluster shoot domain is `test.stage.kyma.ondemand.com`, then the domain will be set as `cap-op.test.stage.kyma.ondemand.com` by default. 
+
+>Note: The length of the domain should be less than 64 characters. Depending up on your cluster shoot domain, please choose a length appropriate subdomain.
 
 The user can also maintain the DNS Target manually. In such cases, we will take over the value as it is. The user can maintain the DNS Target as shown below:
 
@@ -39,9 +43,6 @@ metadata:
   name: cap-operator
 spec:
   subscriptionServer:
-    dnsTarget: public-ingress-custom.test.stage.kyma.ondemand.com
     subDomain: cap-op
-  ingressGatewayLabels:
-    istio: ingressgateway
-    app: istio-ingressgateway
+  dnsTarget: public-ingress-custom.test.stage.kyma.ondemand.com
 ```

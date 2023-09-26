@@ -31,7 +31,7 @@ description: >
 
 - Now the Kyma lifecycle manager will first install the CAP Operator Manager and then the CAP Operator Manager will install the CAP Operator using the below default resource.
 
-```
+```yaml
 apiVersion: operator.sme.sap.com/v1alpha1
 kind: CAPOperator
 metadata:
@@ -45,8 +45,10 @@ spec:
   subscriptionServer:
     subDomain: cap-op
   ingressGatewayLabels:
-    istio: ingressgateway
-    app: istio-ingressgateway
+    - name: istio
+      value: ingressgateway
+    - name: app
+      value: istio-ingressgateway
 ```
   ![kyma-kyma-cap-op-installing](/cap-operator-lifecycle/img/kyma-cap-op-installing.png)
 

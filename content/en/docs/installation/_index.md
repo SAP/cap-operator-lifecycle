@@ -1,7 +1,7 @@
 ---
 title: "Installation"
 linkTitle: "Installation"
-weight: 20
+weight: 10
 type: "docs"
 description: >
   How to install CAP Operator using CAP Operator Manager
