@@ -38,7 +38,7 @@ jobs:
           then
             echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
           else
-            echo "version=$(echo ${{ github.event.release.tag_name }} | grep -oP '(?<=\/v)\d+\.\d+\.\d+' )" >> $GITHUB_OUTPUT
+            echo "version=$(echo ${{ github.event.release.tag_name }} | grep -oP '(?<=\/v).*' )" >> $GITHUB_OUTPUT
           fi
 
           if [[ ! -z '${{ inputs.upload_url }}' ]]
