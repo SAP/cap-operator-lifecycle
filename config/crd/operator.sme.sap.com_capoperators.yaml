@@ -37,30 +37,41 @@ spec:
             type: object
           spec:
             description: CAPOperatorSpec defines the desired state of CAPOperator
+            oneOf:
+            - required:
+              - ingressGatewayLabels
+            - required:
+              - dnsTarget
             properties:
+              dnsTarget:
+                description: Public ingress URL for the cluster Load Balancer
+                pattern: ^[a-z0-9-.]*$
+                type: string
               ingressGatewayLabels:
-                description: IngressGatewayLabels
-                properties:
-                  app:
-                    type: string
-                  istio:
-                    type: string
-                required:
-                - app
-                - istio
-                type: object
+                description: Labels used to identify the istio ingress-gateway component
+                  and its corresponding namespace. Usually {"app":"istio-ingressgateway","istio":"ingressgateway"}
+                items:
+                  description: Generic Name/Value configuration
+                  properties:
+                    name:
+                      type: string
+                    value:
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                minItems: 1
+                type: array
               subscriptionServer:
                 description: SubscriptionServer info
                 properties:
-                  dnsTarget:
-                    type: string
                   subDomain:
                     type: string
                 required:
                 - subDomain
                 type: object
             required:
-            - ingressGatewayLabels
             - subscriptionServer
             type: object
           status:

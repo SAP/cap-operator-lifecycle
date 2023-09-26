@@ -32,19 +32,9 @@ data:
       required: true
       name: CAP Operator Subscription Server Subdomain
     - simple: true
-      path: spec.subscriptionServer.dnsTarget
+      path: spec.dnsTarget
       required: false
       name: CAP Operator DNS Target
-    - simple: true
-      path: spec.ingressGatewayLabels.istio
-      required: false
-      name: Istio ingress gateway label - istio
-      placeholder: ingressgateway
-    - simple: true
-      path: spec.ingressGatewayLabels.app
-      required: false
-      name: Istio ingress gateway label - app
-      placeholder: istio-ingressgateway
 
   general: |
     resource:

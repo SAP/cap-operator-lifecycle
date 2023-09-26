@@ -16,7 +16,6 @@ import (
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/sap/cap-operator-lifecycle/api/v1alpha1"
 	componentoperatorruntimetypes "github.com/sap/component-operator-runtime/pkg/types"
 )
 
@@ -61,8 +60,9 @@ func trimDNSTarget(dnsTarget string) string {
 func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 	// get DNSTarget
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
-	if subscriptionServer["dnsTarget"] != nil { // already filled in CRO
-		subscriptionServer["dnsTarget"] = trimDNSTarget(subscriptionServer["dnsTarget"].(string))
+	if parameters["dnsTarget"] != nil { // already filled in CRO
+		subscriptionServer["dnsTarget"] = trimDNSTarget(parameters["dnsTarget"].(string))
+		delete(parameters, "dnsTarget")
 		return nil
 	}
 
@@ -71,27 +71,22 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 		return fmt.Errorf("cannot get dnsTarget; provide either dnsTarget or ingressGatewayLabels in the CRO")
 	}
 
-	ingressGatewayLabels := parameters["ingressGatewayLabels"].(map[string]interface{})
-	if ingressGatewayLabels["app"] == nil || ingressGatewayLabels["istio"] == nil {
-		return fmt.Errorf("cannot get dnsTarget; provide ingressGatewayLabels/app and ingressGatewayLabels/istio values in the CRO")
-	}
-
-	dnsTarget, err := t.getDNSTarget(&v1alpha1.IngressGatewayLabels{App: ingressGatewayLabels["app"].(string), Istio: ingressGatewayLabels["istio"].(string)})
+	dnsTarget, err := t.getDNSTarget(parameters["ingressGatewayLabels"].([]interface{}))
 	if err != nil {
 		return err
 	}
 
 	subscriptionServer["dnsTarget"] = trimDNSTarget(dnsTarget)
-
+	delete(parameters, "ingressGatewayLabels")
 	return nil
 }
 
-func (t *transformer) getDNSTarget(ingressGatewayLabels *v1alpha1.IngressGatewayLabels) (dnsTarget string, err error) {
+func (t *transformer) getDNSTarget(ingressGatewayLabels []interface{}) (dnsTarget string, err error) {
 
 	ctx := context.TODO()
 
 	// create ingress gateway selector from labels
-	ingressLabelSelector, err := labels.ValidatedSelectorFromSet(getIngressGatewayLabels(ingressGatewayLabels))
+	ingressLabelSelector, err := labels.ValidatedSelectorFromSet(convertIngressGatewayLabelsToMap(ingressGatewayLabels))
 	if err != nil {
 		return "", err
 	}
@@ -138,11 +133,13 @@ func (t *transformer) getDNSTarget(ingressGatewayLabels *v1alpha1.IngressGateway
 	return dnsTarget, nil
 }
 
-func getIngressGatewayLabels(ingressGatewayLabels *v1alpha1.IngressGatewayLabels) map[string]string {
+func convertIngressGatewayLabelsToMap(ingressGatewayLabels []interface{}) map[string]string {
 	ingressLabels := map[string]string{}
 
-	ingressLabels["app"] = ingressGatewayLabels.App
-	ingressLabels["istio"] = ingressGatewayLabels.Istio
+	for _, label := range ingressGatewayLabels {
+		labelMap := label.(map[string]interface{})
+		ingressLabels[labelMap["name"].(string)] = labelMap["value"].(string)
+	}
 
 	return ingressLabels
 }
@@ -203,6 +200,10 @@ func (t *transformer) fillDomain(parameters map[string]any) error {
 	domain, err := t.getDomain(subscriptionServer["subDomain"].(string))
 	if err != nil {
 		return err
+	}
+
+	if len(domain) > 64 {
+		return fmt.Errorf("subscription server domain '%s' is longer than 64 characters; use a smaller subDomain", domain)
 	}
 
 	subscriptionServer["domain"] = domain

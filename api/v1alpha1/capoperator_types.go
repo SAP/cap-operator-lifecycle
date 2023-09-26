@@ -15,7 +15,6 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
@@ -39,18 +38,22 @@ type CAPOperatorStatus struct {
 type CAPOperatorSpec struct {
 	// SubscriptionServer info
 	SubscriptionServer SubscriptionServer `json:"subscriptionServer"`
-	// IngressGatewayLabels
-	IngressGatewayLabels IngressGatewayLabels `json:"ingressGatewayLabels"`
+	// +kubebuilder:validation:Pattern=^[a-z0-9-.]*$
+	// Public ingress URL for the cluster Load Balancer
+	DNSTarget string `json:"dnsTarget,omitempty"`
+	// +kubebuilder:validation:MinItems=1
+	// Labels used to identify the istio ingress-gateway component and its corresponding namespace. Usually {"app":"istio-ingressgateway","istio":"ingressgateway"}
+	IngressGatewayLabels []NameValue `json:"ingressGatewayLabels,omitempty"`
 }
 
 type SubscriptionServer struct {
-	DNSTarget string `json:"dnsTarget,omitempty"`
 	Subdomain string `json:"subDomain"`
 }
 
-type IngressGatewayLabels struct {
-	Istio string `json:"istio"`
-	App   string `json:"app"`
+// Generic Name/Value configuration
+type NameValue struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 var _ component.Component = &CAPOperator{}

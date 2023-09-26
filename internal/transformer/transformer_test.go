@@ -19,16 +19,17 @@ func TestTransformer(t *testing.T) {
 		name                       string
 		dnsTargetFilled            bool
 		ingressGatewayLabelsFilled bool
+		longDomain                 bool
 		expectError                bool
 	}{
 		{
-			name:                       "Test with all fields filled",
+			name:                       "Test with dnsTarget and without ingress gateway labels",
 			dnsTargetFilled:            true,
-			ingressGatewayLabelsFilled: true,
+			ingressGatewayLabelsFilled: false,
 			expectError:                false,
 		},
 		{
-			name:                       "Test without dnsTarget",
+			name:                       "Test without dnsTarget and with ingress gateway labels",
 			dnsTargetFilled:            false,
 			ingressGatewayLabelsFilled: true,
 			expectError:                false,
@@ -37,6 +38,12 @@ func TestTransformer(t *testing.T) {
 			name:                       "Test without dnsTarget and ingress gateway labels",
 			dnsTargetFilled:            false,
 			ingressGatewayLabelsFilled: false,
+			expectError:                true,
+		},
+		{
+			name:                       "Test with more than 64 character domain",
+			ingressGatewayLabelsFilled: true,
+			longDomain:                 true,
 			expectError:                true,
 		},
 	}
@@ -95,15 +102,26 @@ func TestTransformer(t *testing.T) {
 
 			parameter["subscriptionServer"] = map[string]interface{}{}
 			subscriptionServer := parameter["subscriptionServer"].(map[string]interface{})
-			subscriptionServer["subDomain"] = "cop"
+
+			if tt.longDomain {
+				subscriptionServer["subDomain"] = "long-subdomain-for-the-test-to-fail-to-check-the-error-case"
+			} else {
+				subscriptionServer["subDomain"] = "cop"
+			}
 			if tt.dnsTargetFilled {
-				subscriptionServer["dnsTarget"] = "public-ingress.some.cluster.sap"
+				parameter["dnsTarget"] = "public-ingress.some.cluster.sap"
 			}
 
 			if tt.ingressGatewayLabelsFilled {
-				parameter["ingressGatewayLabels"] = map[string]interface{}{
-					"istio": "ingress",
-					"app":   "istio-ingress",
+				parameter["ingressGatewayLabels"] = []interface{}{
+					map[string]interface{}{
+						"name":  "app",
+						"value": "istio-ingress",
+					},
+					map[string]interface{}{
+						"name":  "istio",
+						"value": "ingress",
+					},
 				}
 			}
 
