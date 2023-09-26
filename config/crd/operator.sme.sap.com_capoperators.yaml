@@ -66,8 +66,13 @@ spec:
                 required:
                 - subDomain
                 type: object
-            required:
-            - subscriptionServer
+            oneOf:
+              - required:
+                - subscriptionServer
+                - ingressGatewayLabels
+              - required:
+                - subscriptionServer
+                - dnsTarget
             type: object
           status:
             properties:
