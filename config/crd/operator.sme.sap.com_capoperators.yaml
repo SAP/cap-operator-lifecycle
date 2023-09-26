@@ -37,6 +37,11 @@ spec:
             type: object
           spec:
             description: CAPOperatorSpec defines the desired state of CAPOperator
+            oneOf:
+            - required:
+              - ingressGatewayLabels
+            - required:
+              - dnsTarget
             properties:
               dnsTarget:
                 description: Public ingress URL for the cluster Load Balancer
@@ -66,13 +71,8 @@ spec:
                 required:
                 - subDomain
                 type: object
-            oneOf:
-              - required:
-                - subscriptionServer
-                - ingressGatewayLabels
-              - required:
-                - subscriptionServer
-                - dnsTarget
+            required:
+            - subscriptionServer
             type: object
           status:
             properties:
