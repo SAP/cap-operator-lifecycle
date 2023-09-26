@@ -11,6 +11,8 @@ spec:
   subscriptionServer:
     subDomain: cap-op
   ingressGatewayLabels:
-    istio: ingressgateway
-    app: istio-ingressgateway
+    - name: istio
+      value: ingressgateway
+    - name: app
+      value: istio-ingressgateway
   

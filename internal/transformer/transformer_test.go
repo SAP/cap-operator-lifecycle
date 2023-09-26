@@ -97,13 +97,19 @@ func TestTransformer(t *testing.T) {
 			subscriptionServer := parameter["subscriptionServer"].(map[string]interface{})
 			subscriptionServer["subDomain"] = "cop"
 			if tt.dnsTargetFilled {
-				subscriptionServer["dnsTarget"] = "public-ingress.some.cluster.sap"
+				parameter["dnsTarget"] = "public-ingress.some.cluster.sap"
 			}
 
 			if tt.ingressGatewayLabelsFilled {
-				parameter["ingressGatewayLabels"] = map[string]interface{}{
-					"istio": "ingress",
-					"app":   "istio-ingress",
+				parameter["ingressGatewayLabels"] = []interface{}{
+					map[string]interface{}{
+						"name":  "app",
+						"value": "istio-ingress",
+					},
+					map[string]interface{}{
+						"name":  "istio",
+						"value": "ingress",
+					},
 				}
 			}
 
@@ -121,7 +127,7 @@ func TestTransformer(t *testing.T) {
 				return
 			}
 			transformedParametersMap := transformedParameters.ToUnstructured()
-			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["dnsTarget"].(string) != "public-ingress.some.cluster.sap" {
+			if transformedParametersMap["dnsTarget"].(string) != "public-ingress.some.cluster.sap" {
 				t.Error("unexpected value returned")
 			}
 			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["domain"].(string) != "cop.some.cluster.sap" {
