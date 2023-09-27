@@ -51,10 +51,9 @@ jobs:
             echo "upload_url=''" >> $GITHUB_OUTPUT
           fi
 
-      - name: Print version and upload URL
+      - name: Print version
         run: |
           echo "Version=${{ steps.get_version_upload_url.outputs.version }}"
-          echo "Upload URL=${{ steps.get_version_upload_url.outputs.upload_url }}"
 
       - name: Update version in kustomization.yaml
         run: |
