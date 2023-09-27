@@ -94,7 +94,6 @@ jobs:
 
     - name: Create index
       run: |
-        chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
         helm repo index --url ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ needs.create_release_tag.outputs.tag }} --merge ./website/static/index.yaml .
         mv index.yaml website/static
         cd website
