@@ -103,13 +103,6 @@ jobs:
         git add .
         git commit -m "Add index.yaml to website"
         git push
-    
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        ref: website
-        path: website
-        token: ${{ secrets.WORKFLOW_USER_TOKEN }}
         
     - name: Upload package
       run: |
