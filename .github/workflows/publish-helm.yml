@@ -73,21 +73,12 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Create helm-index branch if missing
-      run: |
-        if ! git rev-parse --verify remotes/origin/helm-index &>/dev/null; then
-          git switch --orphan helm-index
-          git config user.name "${{ vars.WORKFLOW_USER_NAME }}"
-          git config user.email "${{ vars.WORKFLOW_USER_EMAIL }}"
-          git commit --allow-empty -m "Initial commit"
-          git push --set-upstream origin helm-index
-        fi
-
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        ref: helm-index
-        path: index
+        ref: website
+        path: website
+        token: ${{ secrets.WORKFLOW_USER_TOKEN }}
 
     - uses: azure/setup-helm@v3
       with:
@@ -103,26 +94,8 @@ jobs:
 
     - name: Create index
       run: |
-        chart_version=$(yq .version $CHART_DIRECTORY/Chart.yaml)
-        helm repo index --url ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ needs.create_release_tag.outputs.tag }} --merge ./index/index.yaml .
-        mv index.yaml index
-        cd index
-        git config user.name "${{ vars.WORKFLOW_USER_NAME }}"
-        git config user.email "${{ vars.WORKFLOW_USER_EMAIL }}"
-        git add index.yaml
-        git commit -m "Release ${{ needs.create_release_tag.outputs.tag }}"
-        git push
-    
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        ref: website
-        path: website
-        token: ${{ secrets.WORKFLOW_USER_TOKEN }}
-    
-    - name: Copy index.yaml to website branch
-      run: |
-        cat index/index.yaml > website/static/index.yaml
+        helm repo index --url ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ needs.create_release_tag.outputs.tag }} --merge ./website/static/index.yaml .
+        mv index.yaml website/static
         cd website
         git config user.name "${{ vars.WORKFLOW_USER_NAME }}"
         git config user.email "${{ vars.WORKFLOW_USER_EMAIL }}"
