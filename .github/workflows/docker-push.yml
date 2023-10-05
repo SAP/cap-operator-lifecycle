@@ -3,7 +3,7 @@ name: Docker push
 on:
   push:
     tags: 
-      - manager/v[0-9]+.[0-9]+.[0-9]+-*
+      - manager/v[0-9]+.[0-9]+.[0-9]+*
     
 concurrency: release-${{ github.event.release.tag_name }}
 
