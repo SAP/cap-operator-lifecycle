@@ -8,10 +8,10 @@ description: Includes the Helm chart and the CAP Operator Manager component for 
 <div class="mx-auto">
 	<span class="font-weight-bold">Includes the Helm chart and the CAP Operator Manager component for installing CAP Operator</span><br><br><br>
 	<a class="btn btn-lg btn-outline-info mr-3 mb-4" href="docs/">
-		Documentation <i class="fas fa-arrow-alt-circle-right ml-2"></i>
+		Learn more <i class="fas fa-arrow-alt-circle-right ml-2"></i>
 	</a>
 	<a class="btn btn-lg btn-outline-info mr-3 mb-4" href="https://github.com/sap/cap-operator-lifecycle">
-		Source Repository <i class="fab fa-github ml-2 "></i>
+		Go to the source repository <i class="fab fa-github ml-2 "></i>
 	</a>
  	<br><br><br><p>
 		<img src="https://img.shields.io/github/go-mod/go-version/SAP/cap-operator-lifecycle" alt="go.mod Go Version">
