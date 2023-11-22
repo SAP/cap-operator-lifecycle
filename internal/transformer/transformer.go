@@ -48,11 +48,7 @@ func (t *transformer) TransformParameters(namespace string, name string, paramet
 	return componentoperatorruntimetypes.UnstructurableMap(parameterMap), nil
 }
 
-func trimDNSTarget(dnsTarget string) string {
-	// Trim dnsTarget to under 64 chars
-	for len(dnsTarget) > 64 {
-		dnsTarget = dnsTarget[strings.Index(dnsTarget, ".")+1:]
-	}
+func replaceAsteriskDNSTarget(dnsTarget string) string {
 	// Fix for domain gw/creds secret name (Replace *.domain with x.domain for secret name)
 	return strings.ReplaceAll(dnsTarget, "*", "x")
 }
@@ -61,7 +57,7 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 	// get DNSTarget
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
 	if parameters["dnsTarget"] != nil { // already filled in CRO
-		subscriptionServer["dnsTarget"] = trimDNSTarget(parameters["dnsTarget"].(string))
+		subscriptionServer["dnsTarget"] = replaceAsteriskDNSTarget(parameters["dnsTarget"].(string))
 		delete(parameters, "dnsTarget")
 		return nil
 	}
@@ -76,7 +72,7 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 		return err
 	}
 
-	subscriptionServer["dnsTarget"] = trimDNSTarget(dnsTarget)
+	subscriptionServer["dnsTarget"] = replaceAsteriskDNSTarget(dnsTarget)
 	delete(parameters, "ingressGatewayLabels")
 	return nil
 }
