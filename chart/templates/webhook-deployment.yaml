@@ -44,6 +44,10 @@ spec:
       {{- with .Values.webhook.priorityClassName | default .Values.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
+      {{- with .Values.webhook.topologySpreadConstraints | default .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{.Release.Name}}-webhook
       automountServiceAccountToken: true
       containers:
