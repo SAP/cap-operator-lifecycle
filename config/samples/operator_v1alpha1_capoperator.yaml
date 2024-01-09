@@ -2,6 +2,10 @@ apiVersion: operator.sme.sap.com/v1alpha1
 kind: CAPOperator
 metadata:
   name: cap-operator
+  labels:
+    app.kubernetes.io/name: cap-operator
+    app.kubernetes.io/instance: cap-operator
+    app.kubernetes.io/component: cap-operator-manager
 spec:
   subscriptionServer:
     subDomain: cap-op

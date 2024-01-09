@@ -4,6 +4,10 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
+  labels:
+    app.kubernetes.io/name: capoperators.operator.sme.sap.com
+    app.kubernetes.io/instance: capoperators.operator.sme.sap.com
+    app.kubernetes.io/component: customresourcedefinition
   name: capoperators.operator.sme.sap.com
 spec:
   group: operator.sme.sap.com
