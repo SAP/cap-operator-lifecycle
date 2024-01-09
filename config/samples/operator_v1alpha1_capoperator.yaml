@@ -6,6 +6,9 @@ metadata:
     app.kubernetes.io/name: cap-operator
     app.kubernetes.io/instance: cap-operator
     app.kubernetes.io/component: cap-operator-manager
+    app.kubernetes.io/version: latest
+    kyma-project.io/module: cap-operator
+    app.kubernetes.io/part-of: cap-operator-manager
 spec:
   subscriptionServer:
     subDomain: cap-op
