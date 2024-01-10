@@ -2,17 +2,15 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
-    app.kubernetes.io/name: rolebinding
-    app.kubernetes.io/instance: leader-election-rolebinding
+    app.kubernetes.io/name: cap-operator-leader-election-rolebinding
+    app.kubernetes.io/instance: cap-operator-leader-election-rolebinding
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/part-of: cap-operator-manager
-    app.kubernetes.io/managed-by: kustomize
-  name: leader-election-rolebinding
+  name: cap-operator-leader-election-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: leader-election-role
+  name: cap-operator-leader-election-role
 subjects:
 - kind: ServiceAccount
-  name: controller-manager
+  name: cap-operator-controller-manager
   namespace: system

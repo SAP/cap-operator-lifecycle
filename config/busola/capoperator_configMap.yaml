@@ -4,6 +4,8 @@ metadata:
   name: capoperators.operator.sme.sap.com
   labels:
     app.kubernetes.io/name: capoperators.operator.sme.sap.com
+    app.kubernetes.io/instance: capoperators.operator.sme.sap.com
+    app.kubernetes.io/component: configmap
     busola.io/extension: resource
     busola.io/extension-version: '0.5'
 data:

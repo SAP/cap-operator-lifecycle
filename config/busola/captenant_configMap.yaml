@@ -4,6 +4,8 @@ metadata:
   name: captenants.sme.sap.com
   labels:
     app.kubernetes.io/name: captenants.sme.sap.com
+    app.kubernetes.io/instance: captenants.sme.sap.com
+    app.kubernetes.io/component: configmap
     busola.io/extension: resource
     busola.io/extension-version: '0.5'
 data:
