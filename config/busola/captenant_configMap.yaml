@@ -1,10 +1,10 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: captenants.sme.sap.com
+  name: cap-operator-captenants.sme.sap.com
   labels:
-    app.kubernetes.io/name: captenants.sme.sap.com
-    app.kubernetes.io/instance: captenants.sme.sap.com
+    app.kubernetes.io/name: cap-operator-captenants.sme.sap.com
+    app.kubernetes.io/instance: cap-operator-captenants.sme.sap.com
     app.kubernetes.io/component: configmap
     busola.io/extension: resource
     busola.io/extension-version: '0.5'
@@ -42,7 +42,7 @@ data:
             source: spec.version
           - name: Version Upgrade Strategy
             source: >-
-              spec.versionUpgradeStrategy = "always" ? "Always" : "Never" 
+              spec.versionUpgradeStrategy = "always" ? "Always" : "Never"
           - name: Current CAP Application Version
             source: status.currentCAPApplicationVersionInstance
             widget: ResourceLink
