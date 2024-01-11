@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: capoperators.operator.sme.sap.com
+  name: cap-operator-capoperators.operator.sme.sap.com
   labels:
-    app.kubernetes.io/name: capoperators.operator.sme.sap.com
-    app.kubernetes.io/instance: capoperators.operator.sme.sap.com
+    app.kubernetes.io/name: cap-operator-capoperators.operator.sme.sap.com
+    app.kubernetes.io/instance: cap-operator-capoperators.operator.sme.sap.com
     app.kubernetes.io/component: configmap
     busola.io/extension: resource
     busola.io/extension-version: '0.5'

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: capapplications.sme.sap.com
+  name: cap-operator-capapplications.sme.sap.com
   labels:
-    app.kubernetes.io/name: capapplications.sme.sap.com
-    app.kubernetes.io/instance: capapplications.sme.sap.com
+    app.kubernetes.io/name: cap-operator-capapplications.sme.sap.com
+    app.kubernetes.io/instance: cap-operator-capapplications.sme.sap.com
     app.kubernetes.io/component: configmap
     busola.io/extension: resource
     busola.io/extension-version: '0.5'
@@ -97,7 +97,7 @@ data:
         widget: EventList
         filter: '$matchEvents($$, $root.kind, $root.metadata.name)'
         defaultType: all
-        hideInvolvedObjects: true         
+        hideInvolvedObjects: true
   form: |
     []
   general: |
