@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/client-go/discovery"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -58,8 +57,8 @@ func GetUncacheableTypes() []client.Object {
 	return defaultOperator.GetUncacheableTypes()
 }
 
-func Setup(mgr ctrl.Manager, discoveryClient discovery.DiscoveryInterface) error {
-	return defaultOperator.Setup(mgr, discoveryClient)
+func Setup(mgr ctrl.Manager) error {
+	return defaultOperator.Setup(mgr)
 }
 
 func New() *Operator {
@@ -101,7 +100,7 @@ func (o *Operator) GetUncacheableTypes() []client.Object {
 	return []client.Object{&operatorv1alpha1.CAPOperator{}}
 }
 
-func (o *Operator) Setup(mgr ctrl.Manager, discoveryClient discovery.DiscoveryInterface) error {
+func (o *Operator) Setup(mgr ctrl.Manager) error {
 	chartDir := chartFlag.Value.String()
 
 	if err := util.CheckDirectoryExists(chartDir); err != nil {
@@ -109,11 +108,9 @@ func (o *Operator) Setup(mgr ctrl.Manager, discoveryClient discovery.DiscoveryIn
 	}
 
 	resourceGenerator, err := manifests.NewHelmGeneratorWithParameterTransformer(
-		o.options.Name,
 		nil,
 		chartDir,
 		mgr.GetClient(),
-		discoveryClient,
 		transformer.NewParameterTransformer(mgr.GetClient()),
 	)
 	if err != nil {
@@ -122,11 +119,8 @@ func (o *Operator) Setup(mgr ctrl.Manager, discoveryClient discovery.DiscoveryIn
 
 	if err := component.NewReconciler[*operatorv1alpha1.CAPOperator](
 		o.options.Name,
-		mgr.GetClient(),
-		discoveryClient,
-		mgr.GetEventRecorderFor(o.options.Name),
-		mgr.GetScheme(),
 		resourceGenerator,
+		component.ReconcilerOptions{},
 	).SetupWithManager(mgr); err != nil {
 		return errors.Wrapf(err, "unable to create controller")
 	}
