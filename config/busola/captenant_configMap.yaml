@@ -42,7 +42,7 @@ data:
             source: spec.version
           - name: Version Upgrade Strategy
             source: >-
-              spec.versionUpgradeStrategy = "always" ? "Always" : "Never"
+              spec.versionUpgradeStrategy = "never" ? "Never" : "Always"
           - name: Current CAP Application Version
             source: status.currentCAPApplicationVersionInstance
             widget: ResourceLink
