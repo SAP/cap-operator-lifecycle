@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/sap/component-operator-runtime/pkg/component"
-	"github.com/sap/component-operator-runtime/pkg/manifests"
+	"github.com/sap/component-operator-runtime/pkg/manifests/helm"
 	"github.com/sap/component-operator-runtime/pkg/operator"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
@@ -107,7 +107,7 @@ func (o *Operator) Setup(mgr ctrl.Manager) error {
 		return errors.Wrap(err, "error checking manifest directory")
 	}
 
-	resourceGenerator, err := manifests.NewHelmGeneratorWithParameterTransformer(
+	resourceGenerator, err := helm.NewHelmGeneratorWithParameterTransformer(
 		nil,
 		chartDir,
 		mgr.GetClient(),
