@@ -33,6 +33,7 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | controller.resources.limits.cpu | float | `0.2` | CPU limit |
 | controller.resources.requests.memory | string | `"50Mi"` | Memory request |
 | controller.resources.requests.cpu | float | `0.02` | CPU request |
+| controller.dnsTarget | string | `""` | The dns target mentioned on the public ingress gateway service used in the cluster |
 | subscriptionServer.replicas | int | `1` | Replicas |
 | subscriptionServer.image.repository | string | `"ghcr.io/sap/cap-operator/server"` | Image repository |
 | subscriptionServer.image.tag | string | `""` | Image tag |
