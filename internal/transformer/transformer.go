@@ -14,6 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	apitypes "k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	componentoperatorruntimetypes "github.com/sap/component-operator-runtime/pkg/types"
@@ -29,6 +30,8 @@ const (
 type transformer struct {
 	client client.Client
 }
+
+var setupLog = ctrl.Log.WithName("transformer")
 
 func NewParameterTransformer(client client.Client) *transformer {
 	return &transformer{client: client}
@@ -54,30 +57,52 @@ func replaceAsteriskDNSTarget(dnsTarget string) string {
 }
 
 func (t *transformer) fillDNSTarget(parameters map[string]any) error {
-	// get DNSTarget
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
-	if parameters["dnsTarget"] != nil { // already filled in CRO
-		subscriptionServer["dnsTarget"] = replaceAsteriskDNSTarget(parameters["dnsTarget"].(string))
+	// DNSTarget given - use it
+	if parameters["dnsTarget"] != nil {
+		replacedDnsTarget := replaceAsteriskDNSTarget(parameters["dnsTarget"].(string))
+
+		// set the dnsTarget in the subscriptionServer
+		subscriptionServer["dnsTarget"] = replacedDnsTarget
+		// set the dnsTarget in the controller
+		parameters["controller"] = map[string]interface{}{
+			"dnsTarget": replacedDnsTarget,
+		}
+
 		delete(parameters, "dnsTarget")
 		return nil
 	}
 
 	// DNSTarget not given - read it from the load balancer service in istio namespace
 	if parameters["ingressGatewayLabels"] == nil {
-		return fmt.Errorf("cannot get dnsTarget; provide either dnsTarget or ingressGatewayLabels in the CRO")
+		return fmt.Errorf("unable to retrieve dnsTarget; please specify either dnsTarget or ingressGatewayLabels in the CAP Operator CRO")
 	}
 
-	dnsTarget, err := t.getDNSTarget(parameters["ingressGatewayLabels"].([]interface{}))
+	dnsTarget, err := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]interface{}))
 	if err != nil {
-		return err
+		setupLog.Info("dnsTarget not found using ingressGatewayLabels", "error", err)
+
+		// default the dnsTarget to the x.<cluster-domain>
+		dnsTarget, err = t.getDomain("x")
+		if err != nil {
+			return err
+		}
+
+		setupLog.Info("defaulting dnsTarget to " + dnsTarget)
 	}
 
-	subscriptionServer["dnsTarget"] = replaceAsteriskDNSTarget(dnsTarget)
+	replacedDnsTarget := replaceAsteriskDNSTarget(dnsTarget)
+	// set the dnsTarget in the subscriptionServer
+	subscriptionServer["dnsTarget"] = replacedDnsTarget
+	// set the dnsTarget in the controller
+	parameters["controller"] = map[string]interface{}{
+		"dnsTarget": replacedDnsTarget,
+	}
 	delete(parameters, "ingressGatewayLabels")
 	return nil
 }
 
-func (t *transformer) getDNSTarget(ingressGatewayLabels []interface{}) (dnsTarget string, err error) {
+func (t *transformer) getDNSTargetUsingIngressGatewayLabels(ingressGatewayLabels []interface{}) (dnsTarget string, err error) {
 
 	ctx := context.TODO()
 
@@ -125,7 +150,6 @@ func (t *transformer) getDNSTarget(ingressGatewayLabels []interface{}) (dnsTarge
 		return "", fmt.Errorf("ingress gateway service not annotated with dns target name")
 	}
 
-	// Return ingress Gateway info (Namespace and DNS target)
 	return dnsTarget, nil
 }
 

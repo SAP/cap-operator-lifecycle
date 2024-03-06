@@ -16,41 +16,69 @@ import (
 
 func TestTransformer(t *testing.T) {
 	tests := []struct {
-		name                       string
-		dnsTargetFilled            bool
-		ingressGatewayLabelsFilled bool
-		longDomain                 bool
-		expectError                bool
+		name                               string
+		dnsTargetFilled                    bool
+		ingressGatewayLabelsFilled         bool
+		longDomain                         bool
+		expectError                        bool
+		withoutIngressGatewaySvcAnnotation bool
 	}{
 		{
-			name:                       "Test with dnsTarget and without ingress gateway labels",
+			name:                       "With dnsTarget and without ingress gateway labels",
 			dnsTargetFilled:            true,
 			ingressGatewayLabelsFilled: false,
 			expectError:                false,
 		},
 		{
-			name:                       "Test without dnsTarget and with ingress gateway labels",
+			name:                       "Without dnsTarget and with ingress gateway labels",
 			dnsTargetFilled:            false,
 			ingressGatewayLabelsFilled: true,
 			expectError:                false,
 		},
 		{
-			name:                       "Test without dnsTarget and ingress gateway labels",
+			name:                       "Without dnsTarget and ingress gateway labels",
 			dnsTargetFilled:            false,
 			ingressGatewayLabelsFilled: false,
 			expectError:                true,
 		},
 		{
-			name:                       "Test with more than 64 character domain",
+			name:                       "With more than 64 character domain",
 			ingressGatewayLabelsFilled: true,
 			longDomain:                 true,
 			expectError:                true,
+		},
+		{
+			name:                               "Without annotation in ingress gateway labels",
+			ingressGatewayLabelsFilled:         true,
+			longDomain:                         false,
+			withoutIngressGatewaySvcAnnotation: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
 			clientBuilder := fake.NewClientBuilder()
+
+			istioSvc := &corev1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "istioingress-gateway",
+					Namespace: "istio-system",
+				},
+				Spec: corev1.ServiceSpec{
+					Type: corev1.ServiceTypeLoadBalancer,
+					Selector: map[string]string{
+						"istio": "ingress",
+						"app":   "istio-ingress",
+					},
+				},
+			}
+
+			if !tt.withoutIngressGatewaySvcAnnotation {
+				istioSvc.ObjectMeta.Annotations = map[string]string{
+					"dns.gardener.cloud/dnsnames": "public-ingress.some.cluster.sap",
+				}
+			}
+
 			clientBuilder.WithObjects(
 				&corev1.ConfigMap{
 					TypeMeta: metav1.TypeMeta{
@@ -75,30 +103,13 @@ func TestTransformer(t *testing.T) {
 						},
 					},
 				},
-				&corev1.Service{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "istioingress-gateway",
-						Namespace: "istio-system",
-						Annotations: map[string]string{
-							"dns.gardener.cloud/dnsnames": "public-ingress.some.cluster.sap",
-						},
-					},
-					Spec: corev1.ServiceSpec{
-						Type: corev1.ServiceTypeLoadBalancer,
-						Selector: map[string]string{
-							"istio": "ingress",
-							"app":   "istio-ingress",
-						},
-					},
-				})
+				istioSvc)
 
 			kubeClient := clientBuilder.Build()
 
 			transformer := NewParameterTransformer(kubeClient)
 
 			parameter := make(map[string]interface{})
-
-			parameter["spec"] = map[string]interface{}{}
 
 			parameter["subscriptionServer"] = map[string]interface{}{}
 			subscriptionServer := parameter["subscriptionServer"].(map[string]interface{})
@@ -138,12 +149,23 @@ func TestTransformer(t *testing.T) {
 				t.Log(err)
 				return
 			}
+
+			var expectedDnsTarget string
+			if tt.withoutIngressGatewaySvcAnnotation {
+				expectedDnsTarget = "x.some.cluster.sap"
+			} else {
+				expectedDnsTarget = "public-ingress.some.cluster.sap"
+			}
+
 			transformedParametersMap := transformedParameters.ToUnstructured()
-			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["dnsTarget"].(string) != "public-ingress.some.cluster.sap" {
-				t.Error("unexpected value returned")
+			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["dnsTarget"].(string) != expectedDnsTarget {
+				t.Error("unexpected value returned for subscriptionServer.dnsTarget")
 			}
 			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["domain"].(string) != "cop.some.cluster.sap" {
-				t.Error("unexpected value returned")
+				t.Error("unexpected value returned for subscriptionServer.domain")
+			}
+			if transformedParametersMap["controller"].(map[string]interface{})["dnsTarget"].(string) != expectedDnsTarget {
+				t.Error("unexpected value returned for controller.dnsTarget")
 			}
 		})
 	}
