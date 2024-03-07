@@ -55,6 +55,8 @@ controller:
       memory: 50Mi
       # -- CPU request
       cpu: 0.02
+  # -- The dns target mentioned on the public ingress gateway service used in the cluster
+  dnsTarget: ""
 
 subscriptionServer:
   # -- Replicas

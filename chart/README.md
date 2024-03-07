@@ -1,6 +1,6 @@
 # cap-operator
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![AppVersion: 0.3.0](https://img.shields.io/badge/AppVersion-0.3.0-informational?style=flat-square)
 
 Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 
@@ -33,6 +33,7 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | controller.resources.limits.cpu | float | `0.2` | CPU limit |
 | controller.resources.requests.memory | string | `"50Mi"` | Memory request |
 | controller.resources.requests.cpu | float | `0.02` | CPU request |
+| controller.dnsTarget | string | `""` | The dns target mentioned on the public ingress gateway service used in the cluster |
 | subscriptionServer.replicas | int | `1` | Replicas |
 | subscriptionServer.image.repository | string | `"ghcr.io/sap/cap-operator/server"` | Image repository |
 | subscriptionServer.image.tag | string | `""` | Image tag |
