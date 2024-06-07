@@ -18,9 +18,9 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
-    - uses: azure/setup-helm@v3
+    - uses: azure/setup-helm@v4
       with:
         version: ${{ env.HELM_VERSION }}
 
@@ -69,12 +69,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: website
         path: website
@@ -85,7 +85,7 @@ jobs:
         version: ${{ env.HELM_VERSION }}
 
     - name: Setup Pages
-      uses: actions/configure-pages@v3
+      uses: actions/configure-pages@v5
 
     - name: Create package
       run: |
@@ -128,9 +128,9 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - uses: azure/setup-helm@v3
+    - uses: azure/setup-helm@v4
       with:
         version: ${{ env.HELM_VERSION }}
 
