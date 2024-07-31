@@ -62,8 +62,6 @@ spec:
             value: {{ .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" | ternary "gardener" "cert-manager.io" }}
           - name: DNS_MANAGER
             value: {{ .Capabilities.APIVersions.Has "dns.gardener.cloud/v1alpha1" | ternary "gardener" "kubernetes" }}
-          - name: MTX_JOB_IMAGE
-            value: "ghcr.io/sap/cap-operator/mtx-job"
           {{- if .Values.controller.dnsTarget }}
           - name: DNS_TARGET
             value: {{ .Values.controller.dnsTarget }}
