@@ -18,7 +18,7 @@ metadata:
     operator.sme.sap.com/release: {{.Release.Name}}
 rules:
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications", "capapplications/status"]
+  resources: ["capapplications", "capapplications/status", "captenantoutputs"]
   verbs:  ["get", "list", "watch"]
 - apiGroups: ["sme.sap.com"]
   resources: ["captenants", "captenants/status"]
