@@ -17,7 +17,7 @@ rules:
   resources: ["pods"]
   verbs: ["get", "watch", "list"]
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications","capapplicationversions", "captenants"]
+  resources: ["capapplications","capapplicationversions", "captenants", "captenantoperations", "captenantoutputs"]
   verbs:  ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
