@@ -74,6 +74,10 @@ spec:
         regex: PUT|DELETE
       uri:
         prefix: /provision/
+    - method:
+        regex: GET
+      uri:
+        prefix: /dependencies/
     route:
     - destination:
         host: {{.Release.Name}}-subscription-server.{{.Release.Namespace}}.svc.cluster.local
