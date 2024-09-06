@@ -58,6 +58,7 @@ webhooks:
       - capapplications
       - captenants
       - capapplicationversions
+      - captenantoutputs
   sideEffects: NoneOnDryRun
   timeoutSeconds: 15 # https://github.com/gardener/gardener/pull/6090
   failurePolicy: Fail
