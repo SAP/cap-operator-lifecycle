@@ -34,6 +34,9 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | controller.resources.requests.memory | string | `"50Mi"` | Memory request |
 | controller.resources.requests.cpu | float | `0.02` | CPU request |
 | controller.dnsTarget | string | `""` | The dns target mentioned on the public ingress gateway service used in the cluster |
+| controller.versionMonitoring.prometheusAddress | string | `""` | The URL of the Prometheus server from which metrics related to managed application versions can be queried  |
+| controller.versionMonitoring.metricsEvaluationInterval | string | `"1h"` | The duration (example 2h) after which versions are evaluated for deletion; based on specified workload metrics |
+| controller.versionMonitoring.promClientAcquireRetryDelay | string | `"1h"` | The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt |
 | subscriptionServer.replicas | int | `1` | Replicas |
 | subscriptionServer.image.repository | string | `"ghcr.io/sap/cap-operator/server"` | Image repository |
 | subscriptionServer.image.tag | string | `""` | Image tag |
@@ -76,4 +79,3 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | webhook.service.type | string | `"ClusterIP"` | Service type |
 | webhook.service.port | int | `443` | Service port |
 | webhook.service.targetPort | int | `1443` | Target port |
-

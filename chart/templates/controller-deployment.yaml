@@ -66,4 +66,18 @@ spec:
           - name: DNS_TARGET
             value: {{ .Values.controller.dnsTarget }}
           {{- end }}
+          {{- with .Values.controller.versionMonitoring }}
+          {{- if .prometheusAddress }}
+          - name: PROMETHEUS_ADDRESS
+            value: {{ .prometheusAddress }}
+          {{- end }}
+          {{- if .metricsEvaluationInterval }}
+          - name: METRICS_EVAL_INTERVAL
+            value: {{ .metricsEvaluationInterval }}
+          {{- end }}
+          {{- if .promClientAcquireRetryDelay }}
+          - name: PROM_ACQUIRE_CLIENT_RETRY_DELAY
+            value: {{ .promClientAcquireRetryDelay }}
+          {{- end }}
+          {{- end }}
       serviceAccountName: {{.Release.Name}}-controller
