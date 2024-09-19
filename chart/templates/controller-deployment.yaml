@@ -47,6 +47,10 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.controller.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: controller
           image: {{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag | default .Values.image.tag | default .Chart.AppVersion }}
@@ -58,26 +62,30 @@ spec:
           resources:
             {{- toYaml .Values.controller.resources | nindent 12 }}
           env:
-          - name: CERT_MANAGER
-            value: {{ .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" | ternary "gardener" "cert-manager.io" }}
-          - name: DNS_MANAGER
-            value: {{ .Capabilities.APIVersions.Has "dns.gardener.cloud/v1alpha1" | ternary "gardener" "kubernetes" }}
-          {{- if .Values.controller.dnsTarget }}
-          - name: DNS_TARGET
-            value: {{ .Values.controller.dnsTarget }}
-          {{- end }}
-          {{- with .Values.controller.versionMonitoring }}
-          {{- if .prometheusAddress }}
-          - name: PROMETHEUS_ADDRESS
-            value: {{ .prometheusAddress }}
-          {{- end }}
-          {{- if .metricsEvaluationInterval }}
-          - name: METRICS_EVAL_INTERVAL
-            value: {{ .metricsEvaluationInterval }}
-          {{- end }}
-          {{- if .promClientAcquireRetryDelay }}
-          - name: PROM_ACQUIRE_CLIENT_RETRY_DELAY
-            value: {{ .promClientAcquireRetryDelay }}
-          {{- end }}
+            - name: CERT_MANAGER
+              value: {{ .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" | ternary "gardener" "cert-manager.io" }}
+            - name: DNS_MANAGER
+              value: {{ .Capabilities.APIVersions.Has "dns.gardener.cloud/v1alpha1" | ternary "gardener" "kubernetes" }}
+            {{- if .Values.controller.dnsTarget }}
+            - name: DNS_TARGET
+              value: {{ .Values.controller.dnsTarget }}
+            {{- end }}
+            {{- with .Values.controller.versionMonitoring }}
+            {{- if .prometheusAddress }}
+            - name: PROMETHEUS_ADDRESS
+              value: {{ .prometheusAddress }}
+            {{- end }}
+            {{- if .metricsEvaluationInterval }}
+            - name: METRICS_EVAL_INTERVAL
+              value: {{ .metricsEvaluationInterval }}
+            {{- end }}
+            {{- if .promClientAcquireRetryDelay }}
+            - name: PROM_ACQUIRE_CLIENT_RETRY_DELAY
+              value: {{ .promClientAcquireRetryDelay }}
+            {{- end }}
+            {{- end }}
+          {{- with .Values.controller.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
       serviceAccountName: {{.Release.Name}}-controller
