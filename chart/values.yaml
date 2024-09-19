@@ -55,6 +55,10 @@ controller:
       memory: 50Mi
       # -- CPU request
       cpu: 0.02
+  # -- Optionally specify list of additional volumes for the controller pod(s)
+  volumes: []
+  # -- Optionally specify list of additional volumeMounts for the controller container(s)
+  volumeMounts: []
   # -- The dns target mentioned on the public ingress gateway service used in the cluster
   dnsTarget: ""
   versionMonitoring:
@@ -102,6 +106,10 @@ subscriptionServer:
       memory: 20Mi
       # -- CPU request
       cpu: 0.01
+  # -- Optionally specify list of additional volumes for the server pod(s)
+  volumes: []
+  # -- Optionally specify list of additional volumeMounts for the server container(s)
+  volumeMounts: []
   # -- Service port
   port: 4000
   # -- The namespace in the cluster where istio system components are installed
