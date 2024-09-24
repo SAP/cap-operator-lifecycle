@@ -58,6 +58,12 @@ func replaceAsteriskDNSTarget(dnsTarget string) string {
 
 func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
+
+	if parameters["controller"] == nil {
+		parameters["controller"] = map[string]interface{}{}
+	}
+	controller := parameters["controller"].(map[string]interface{})
+
 	// DNSTarget given - use it
 	if parameters["dnsTarget"] != nil {
 		replacedDnsTarget := replaceAsteriskDNSTarget(parameters["dnsTarget"].(string))
@@ -65,9 +71,7 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 		// set the dnsTarget in the subscriptionServer
 		subscriptionServer["dnsTarget"] = replacedDnsTarget
 		// set the dnsTarget in the controller
-		parameters["controller"] = map[string]interface{}{
-			"dnsTarget": replacedDnsTarget,
-		}
+		controller["dnsTarget"] = replacedDnsTarget
 
 		delete(parameters, "dnsTarget")
 		return nil
@@ -95,9 +99,7 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 	// set the dnsTarget in the subscriptionServer
 	subscriptionServer["dnsTarget"] = replacedDnsTarget
 	// set the dnsTarget in the controller
-	parameters["controller"] = map[string]interface{}{
-		"dnsTarget": replacedDnsTarget,
-	}
+	controller["dnsTarget"] = replacedDnsTarget
 	delete(parameters, "ingressGatewayLabels")
 	return nil
 }
@@ -164,7 +166,7 @@ func convertIngressGatewayLabelsToMap(ingressGatewayLabels []interface{}) map[st
 	return ingressLabels
 }
 
-func (t *transformer) getLoadBalancerSvcs(ctx context.Context) ([]corev1.Service, error) {
+func (t *transformer) getLoadBalancerServices(ctx context.Context) ([]corev1.Service, error) {
 	// List all services in the same namespace as the istio-ingressgateway pod namespace
 	svcList := &corev1.ServiceList{TypeMeta: metav1.TypeMeta{Kind: "Service"}}
 	if err := t.client.List(ctx, svcList, &client.ListOptions{Namespace: istioIngressGWNamespace}); err != nil {
@@ -182,7 +184,7 @@ func (t *transformer) getLoadBalancerSvcs(ctx context.Context) ([]corev1.Service
 }
 
 func (t *transformer) getIngressGatewayService(ctx context.Context, relevantPodNames map[string]struct{}) (*corev1.Service, error) {
-	loadBalancerSvcs, err := t.getLoadBalancerSvcs(ctx)
+	loadBalancerSvcs, err := t.getLoadBalancerServices(ctx)
 	if err != nil {
 		return nil, err
 	}
