@@ -48,6 +48,10 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.subscriptionServer.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: server
           image: {{ .Values.subscriptionServer.image.repository }}:{{ .Values.subscriptionServer.image.tag | default .Values.image.tag | default .Chart.AppVersion }}
@@ -58,6 +62,10 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.subscriptionServer.resources | nindent 12 }}
+          {{- with .Values.subscriptionServer.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: server-port
               containerPort: 4000

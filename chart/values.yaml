@@ -55,9 +55,20 @@ controller:
       memory: 50Mi
       # -- CPU request
       cpu: 0.02
+  # -- Optionally specify list of additional volumes for the controller pod(s)
+  volumes: []
+  # -- Optionally specify list of additional volumeMounts for the controller container(s)
+  volumeMounts: []
   # -- The dns target mentioned on the public ingress gateway service used in the cluster
   dnsTarget: ""
-
+  versionMonitoring:
+    # -- The URL of the Prometheus server from which metrics related to managed application versions can be queried 
+    prometheusAddress: ""
+    # -- The duration (example 2h) after which versions are evaluated for deletion; based on specified workload metrics
+    metricsEvaluationInterval: "1h"
+    # -- The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt
+    promClientAcquireRetryDelay: "1h"
+    
 subscriptionServer:
   # -- Replicas
   replicas: 1
@@ -95,6 +106,10 @@ subscriptionServer:
       memory: 20Mi
       # -- CPU request
       cpu: 0.01
+  # -- Optionally specify list of additional volumes for the server pod(s)
+  volumes: []
+  # -- Optionally specify list of additional volumeMounts for the server container(s)
+  volumeMounts: []
   # -- Service port
   port: 4000
   # -- The namespace in the cluster where istio system components are installed
@@ -107,6 +122,7 @@ subscriptionServer:
   dnsTarget: public-ingress.clusters.cs.services.sap # replace with the actual cluster domain
   # -- The domain under which the cap operator subscription server would be available
   domain: cap-operator.clusters.cs.services.sap # replace with actual cluster domain
+
 webhook:
   # -- Side car to mount admission review
   sidecar: false
