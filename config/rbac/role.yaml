@@ -64,17 +64,6 @@ rules:
   - watch
 - apiGroups:
   - cert-manager.io
-  resources:
-  - certificates
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - cert.gardener.cloud
   resources:
   - certificates
@@ -145,6 +134,7 @@ rules:
   - capapplications
   - capapplicationversions
   - captenantoperations
+  - captenantoutputs
   - captenants
   verbs:
   - get
