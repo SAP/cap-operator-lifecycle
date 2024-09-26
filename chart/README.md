@@ -1,6 +1,6 @@
 # cap-operator
 
-![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![AppVersion: 0.8.0](https://img.shields.io/badge/AppVersion-0.8.0-informational?style=flat-square)
+![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
 
 Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 
@@ -33,7 +33,12 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | controller.resources.limits.cpu | float | `0.2` | CPU limit |
 | controller.resources.requests.memory | string | `"50Mi"` | Memory request |
 | controller.resources.requests.cpu | float | `0.02` | CPU request |
+| controller.volumes | list | `[]` | Optionally specify list of additional volumes for the controller pod(s) |
+| controller.volumeMounts | list | `[]` | Optionally specify list of additional volumeMounts for the controller container(s) |
 | controller.dnsTarget | string | `""` | The dns target mentioned on the public ingress gateway service used in the cluster |
+| controller.versionMonitoring.prometheusAddress | string | `""` | The URL of the Prometheus server from which metrics related to managed application versions can be queried  |
+| controller.versionMonitoring.metricsEvaluationInterval | string | `"1h"` | The duration (example 2h) after which versions are evaluated for deletion; based on specified workload metrics |
+| controller.versionMonitoring.promClientAcquireRetryDelay | string | `"1h"` | The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt |
 | subscriptionServer.replicas | int | `1` | Replicas |
 | subscriptionServer.image.repository | string | `"ghcr.io/sap/cap-operator/server"` | Image repository |
 | subscriptionServer.image.tag | string | `""` | Image tag |
@@ -50,6 +55,8 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | subscriptionServer.resources.limits.cpu | float | `0.1` | CPU limit |
 | subscriptionServer.resources.requests.memory | string | `"20Mi"` | Memory request |
 | subscriptionServer.resources.requests.cpu | float | `0.01` | CPU request |
+| subscriptionServer.volumes | list | `[]` | Optionally specify list of additional volumes for the server pod(s) |
+| subscriptionServer.volumeMounts | list | `[]` | Optionally specify list of additional volumeMounts for the server container(s) |
 | subscriptionServer.port | int | `4000` | Service port |
 | subscriptionServer.istioSystemNamespace | string | `"istio-system"` | The namespace in the cluster where istio system components are installed |
 | subscriptionServer.ingressGatewayLabels | object | `{"app":"istio-ingressgateway","istio":"ingressgateway"}` | Labels used to identify the istio ingress-gateway component |
@@ -76,4 +83,3 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | webhook.service.type | string | `"ClusterIP"` | Service type |
 | webhook.service.port | int | `443` | Service port |
 | webhook.service.targetPort | int | `1443` | Target port |
-
