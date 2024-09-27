@@ -51,10 +51,6 @@ type CAPOperatorSpec struct {
 
 type SubscriptionServer struct {
 	Subdomain string `json:"subDomain"`
-	// Optionally specify list of additional volumes for the server pod(s)
-	Volumes []corev1.Volume `json:"volumes,omitempty"`
-	// Optionally specify list of additional volumeMounts for the server container(s)
-	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
 }
 
 type Controller struct {
