@@ -14,6 +14,10 @@ import (
 	fake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
+const (
+	mockPrometheusAddress = "http://prometheus.server.local:9090"
+)
+
 func TestTransformer(t *testing.T) {
 	tests := []struct {
 		name                               string
@@ -22,6 +26,9 @@ func TestTransformer(t *testing.T) {
 		longDomain                         bool
 		expectError                        bool
 		withoutIngressGatewaySvcAnnotation bool
+		withVersionMonitoring              bool
+		omitVersionMonitoringDurations     bool
+		withControllerVolumes              bool
 	}{
 		{
 			name:                       "With dnsTarget and without ingress gateway labels",
@@ -52,6 +59,21 @@ func TestTransformer(t *testing.T) {
 			ingressGatewayLabelsFilled:         true,
 			longDomain:                         false,
 			withoutIngressGatewaySvcAnnotation: true,
+		},
+		{
+			name:                       "With version monitoring and dnsTarget filled",
+			dnsTargetFilled:            true,
+			ingressGatewayLabelsFilled: false,
+			expectError:                false,
+			withVersionMonitoring:      true,
+		},
+		{
+			name:                           "With version monitoring and ingress labels filled",
+			dnsTargetFilled:                false,
+			ingressGatewayLabelsFilled:     true,
+			expectError:                    false,
+			withVersionMonitoring:          true,
+			omitVersionMonitoringDurations: true,
 		},
 	}
 	for _, tt := range tests {
@@ -136,6 +158,20 @@ func TestTransformer(t *testing.T) {
 				}
 			}
 
+			if tt.withVersionMonitoring {
+				parameter["controller"] = map[string]any{
+					"versionMonitoring": map[string]any{
+						"prometheusAddress": mockPrometheusAddress,
+					},
+				}
+				if !tt.omitVersionMonitoringDurations {
+					controller := parameter["controller"].(map[string]any)
+					vm := controller["versionMonitoring"].(map[string]any)
+					vm["metricsEvaluationInterval"] = "5m"
+					vm["promClientAcquireRetryDelay"] = "5h"
+				}
+			}
+
 			transformedParameters, err := transformer.TransformParameters("cap-operator-system", "cap-operator.sme.sap.com", componentoperatorruntimetypes.UnstructurableMap(parameter))
 			if !tt.expectError && err != nil {
 				t.Error(err)
@@ -164,8 +200,24 @@ func TestTransformer(t *testing.T) {
 			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["domain"].(string) != "cop.some.cluster.sap" {
 				t.Error("unexpected value returned for subscriptionServer.domain")
 			}
-			if transformedParametersMap["controller"].(map[string]interface{})["dnsTarget"].(string) != expectedDnsTarget {
+			transformedController := transformedParametersMap["controller"].(map[string]interface{})
+			if transformedController["dnsTarget"].(string) != expectedDnsTarget {
 				t.Error("unexpected value returned for controller.dnsTarget")
+			}
+			if tt.withVersionMonitoring {
+				if transformedController["versionMonitoring"] == nil {
+					t.Error("expected controller.versionMonitoring to be filled")
+				} else {
+					tvm := transformedController["versionMonitoring"].(map[string]any)
+					if tvm["prometheusAddress"] != mockPrometheusAddress {
+						t.Error("expected controller.versionMonitoring.prometheusAddress to be set")
+					}
+					if tt.omitVersionMonitoringDurations {
+						if tvm["metricsEvaluationInterval"] != nil || tvm["promClientAcquireRetryDelay"] != nil {
+							t.Error("expected version monitoring durations to be unset")
+						}
+					}
+				}
 			}
 		})
 	}

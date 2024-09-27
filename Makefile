@@ -20,7 +20,7 @@ help: ## Display this help.
 
 .PHONY: manifests
 manifests: controller-gen ## Generate ClusterRole & CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd paths="./..." output:crd:artifacts:config=config/crd
+	$(CONTROLLER_GEN) rbac:roleName=cap-operator-manager-role crd paths="./..." output:crd:artifacts:config=config/crd
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -88,8 +88,8 @@ LISTER_GEN ?= $(LOCALBIN)/lister-gen
 SETUP_ENVTEST ?= $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
-CONTROLLER_TOOLS_VERSION ?= v0.13.0
-CODE_GENERATOR_VERSION ?= v0.28.1
+CONTROLLER_TOOLS_VERSION ?= v0.16.3
+CODE_GENERATOR_VERSION ?= v0.31.1
 SETUP_ENVTEST_VERSION ?= latest
 
 .PHONY: controller-gen
