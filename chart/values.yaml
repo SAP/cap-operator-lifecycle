@@ -17,6 +17,10 @@ tolerations: []
 priorityClassName: ""
 # -- Default topology spread constraints (can be overwritten on component level)
 topologySpreadConstraints: []
+# -- Additional pod labels for all components
+podLabels: {}
+# -- Additional pod annotations for all components
+podAnnotations: {}
 
 controller:
   # -- Replicas
@@ -30,6 +34,10 @@ controller:
     pullPolicy: ""
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Additional labels for controller pods
+  podLabels: {}
+  # -- Additional annotations for controller pods
+  podAnnotations: {}
   # -- Pod security content
   podSecurityContext: {}
   # -- Node selector
@@ -81,6 +89,10 @@ subscriptionServer:
     pullPolicy: ""
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Additional labels for subscription server pods
+  podLabels: {}
+  # -- Additional annotations for subscription server pods
+  podAnnotations: {}
   # -- Pod security content
   podSecurityContext: {}
   # -- Node selector
@@ -137,6 +149,10 @@ webhook:
     pullPolicy: ""
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Additional labels for validating webhook pods
+  podLabels: {}
+  # -- Additional annotations for validating webhook pods
+  podAnnotations: {}
   # -- Pod security content
   podSecurityContext: {}
   # -- Node selector
