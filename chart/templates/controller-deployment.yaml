@@ -13,9 +13,6 @@ spec:
       operator.sme.sap.com/app: controller
       operator.sme.sap.com/category: controller
       operator.sme.sap.com/release: {{.Release.Name}}
-      {{- if or (gt (len .Values.podLabels) 0) (gt (len .Values.controller.podLabels) 0) }}
-      {{- include "utils.maps.merge" (list .Values.podLabels .Values.controller.podLabels) | trim | nindent 6 }}
-      {{- end }}
   template:
     metadata:
       labels:
