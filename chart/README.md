@@ -1,6 +1,6 @@
 # cap-operator
 
-![Version: 0.10.1](https://img.shields.io/badge/Version-0.10.1-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
+![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![AppVersion: 0.11.0](https://img.shields.io/badge/AppVersion-0.11.0-informational?style=flat-square)
 
 Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 
@@ -19,6 +19,8 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | topologySpreadConstraints | list | `[]` | Default topology spread constraints (can be overwritten on component level) |
 | podLabels | object | `{}` | Additional pod labels for all components |
 | podAnnotations | object | `{}` | Additional pod annotations for all components |
+| monitoring | object | `{"enabled":false}` | Monitoring configuration for all components |
+| monitoring.enabled | bool | `false` | Optionally enable Prometheus monitoring for all components (disabled by default) |
 | controller.replicas | int | `1` | Replicas |
 | controller.image.repository | string | `"ghcr.io/sap/cap-operator/controller"` | Image repository |
 | controller.image.tag | string | `""` | Image tag |
@@ -40,6 +42,7 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | controller.volumes | list | `[]` | Optionally specify list of additional volumes for the controller pod(s) |
 | controller.volumeMounts | list | `[]` | Optionally specify list of additional volumeMounts for the controller container(s) |
 | controller.dnsTarget | string | `""` | The dns target mentioned on the public ingress gateway service used in the cluster |
+| controller.detailedOperationalMetrics | bool | `false` | Optionally enable detailed opertational metrics for the controller by setting this to true |
 | controller.versionMonitoring.prometheusAddress | string | `""` | The URL of the Prometheus server from which metrics related to managed application versions can be queried  |
 | controller.versionMonitoring.metricsEvaluationInterval | string | `"1h"` | The duration (example 2h) after which versions are evaluated for deletion; based on specified workload metrics |
 | controller.versionMonitoring.promClientAcquireRetryDelay | string | `"1h"` | The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt |

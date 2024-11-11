@@ -21,6 +21,10 @@ topologySpreadConstraints: []
 podLabels: {}
 # -- Additional pod annotations for all components
 podAnnotations: {}
+# -- Monitoring configuration for all components
+monitoring:
+  # -- Optionally enable Prometheus monitoring for all components (disabled by default)
+  enabled: false
 
 controller:
   # -- Replicas
@@ -69,6 +73,8 @@ controller:
   volumeMounts: []
   # -- The dns target mentioned on the public ingress gateway service used in the cluster
   dnsTarget: ""
+  # -- Optionally enable detailed opertational metrics for the controller by setting this to true
+  detailedOperationalMetrics: false
   versionMonitoring:
     # -- The URL of the Prometheus server from which metrics related to managed application versions can be queried 
     prometheusAddress: ""
