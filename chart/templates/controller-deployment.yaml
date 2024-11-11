@@ -69,6 +69,8 @@ spec:
           resources:
             {{- toYaml .Values.controller.resources | nindent 12 }}
           env:
+            - name: DETAILED_OPERATIONAL_METRICS
+              value: "{{ .Values.controller.detailedOperationalMetrics }}"
             - name: CERT_MANAGER
               value: {{ .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" | ternary "gardener" "cert-manager.io" }}
             - name: DNS_MANAGER
@@ -95,4 +97,45 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          ports:
+            - name: metrics-port
+              containerPort: 9090
+              protocol: TCP
       serviceAccountName: {{.Release.Name}}-controller
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{.Release.Name}}-controller
+  labels:
+    operator.sme.sap.com/app: controller
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  ports:
+    - name: metrics-http
+      protocol: TCP
+      port: 9090
+      targetPort: metrics-port
+  selector:
+    operator.sme.sap.com/app: controller
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+---
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{.Release.Name}}-controller
+  labels:
+    operator.sme.sap.com/app: controller
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  selector:
+    matchLabels:
+      operator.sme.sap.com/app: controller
+      operator.sme.sap.com/category: controller
+  endpoints:
+  - port: metrics-http
+{{- end }}
