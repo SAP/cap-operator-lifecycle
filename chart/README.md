@@ -91,4 +91,8 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | webhook.service.type | string | `"ClusterIP"` | Service type |
 | webhook.service.port | int | `443` | Service port |
 | webhook.service.targetPort | int | `1443` | Target port |
+| webhook.certManager.enabled | bool | `false` | Whether to use cert-manager to manage webhook tls |
+| webhook.certManager.issuerGroup | string | `""` | Issuer group (only relevant if enabled is true; if unset, the default cert-manager group is used) |
+| webhook.certManager.issuerKind | string | `""` | Issuer kind (only relevant if enabled is true; if unset, the default cert-manager type 'Issuer' is used) |
+| webhook.certManager.issuerName | string | `""` | Issuer name (only relevant if enabled is true; if unset, a self-signed issuer is used) |
 

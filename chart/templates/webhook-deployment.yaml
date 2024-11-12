@@ -58,7 +58,7 @@ spec:
       serviceAccountName: {{.Release.Name}}-webhook
       automountServiceAccountToken: true
       containers:
-      {{- if eq .Values.webhook.sidecar true }}  
+      {{- if eq .Values.webhook.sidecar true }}
       - name: request-sidecar
         image: alpine
         command:
@@ -108,7 +108,7 @@ spec:
       volumes:
       - name: ssl
         secret:
-          secretName: {{.Release.Name}}-webhook-tls
+          secretName: {{.Release.Name}}-webhook-{{ ternary "tls-managed" "tls" .Values.webhook.certManager.enabled }}
           items:
           - key: tls.key
             path: tls.key

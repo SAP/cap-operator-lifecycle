@@ -1,4 +1,49 @@
 {{- if gt (int .Values.webhook.replicas) 0 }}
+{{- $caCert := "" }}
+---
+{{- if .Values.webhook.certManager.enabled }}
+{{- if not .Values.webhook.certManager.issuerName }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{.Release.Name}}-webhook-issuer
+  labels:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  selfSigned: {}
+{{- end }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{.Release.Name}}-webhook-cert
+  labels:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  dnsNames:
+  - {{.Release.Name}}-webhook
+  - {{.Release.Name}}-webhook.{{ .Release.Namespace }}
+  - {{.Release.Name}}-webhook.{{ .Release.Namespace }}.svc
+  - {{.Release.Name}}-webhook.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    {{- if .Values.webhook.certManager.issuerName }}
+    {{- with .Values.webhook.certManager.issuerGroup }}
+    group: {{ . }}
+    {{- end }}
+    {{- with .Values.webhook.certManager.issuerKind }}
+    kind: {{ . }}
+    {{- end }}
+    name: {{ .Values.webhook.certManager.issuerName }}
+    {{- else }}
+    name: {{.Release.Name}}-webhook-issuer
+    {{- end }}
+  secretName: {{.Release.Name}}-webhook-tls-managed
+{{- else }}
 ---
 apiVersion: v1
 kind: Secret
@@ -11,7 +56,6 @@ metadata:
 type: Opaque
 data:
   {{- $data := (lookup "v1" "Secret" .Release.Namespace (printf "%s-webhook-tls" .Release.Name )).data }}
-  {{- $caCert := "" }}
   {{- if $data }}
   {{ $data | toYaml | nindent 2 }}
   {{- $caCert = index $data "ca.crt" }}
@@ -24,6 +68,7 @@ data:
   tls.key: {{ $cert.Key | b64enc }}
   {{- $caCert = $ca.Cert | b64enc }}
   {{- end }}
+{{- end }}
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -38,7 +83,9 @@ webhooks:
   admissionReviewVersions:
   - v1
   clientConfig:
+    {{- if not .Values.webhook.certManager.enabled }}
     caBundle: {{ $caCert }}
+    {{- end }}
     service:
       name: {{.Release.Name}}-webhook
       namespace: {{ .Release.Namespace }}
