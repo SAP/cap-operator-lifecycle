@@ -68,6 +68,11 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | subscriptionServer.ingressGatewayLabels | object | `{"app":"istio-ingressgateway","istio":"ingressgateway"}` | Labels used to identify the istio ingress-gateway component |
 | subscriptionServer.dnsTarget | string | `"public-ingress.clusters.cs.services.sap"` | The dns target mentioned on the public ingress gateway service used in the cluster |
 | subscriptionServer.domain | string | `"cap-operator.clusters.cs.services.sap"` | The domain under which the cap operator subscription server would be available |
+| subscriptionServer.certManager.enabled | bool | `false` | Whether to use cert-manager to manage subscription server tls |
+| subscriptionServer.certManager.issuerGroup | string | `""` | Issuer group (only relevant if enabled is true; if unset, the default cert-manager group is used) |
+| subscriptionServer.certManager.issuerKind | string | `""` | Issuer kind (only relevant if enabled is true; if unset, the default cert-manager type 'Issuer' is used) |
+| subscriptionServer.certManager.issuerName | string | `""` | Issuer name (only relevant if enabled is true; if unset, a self-signed issuer is used) |
+
 | webhook.sidecar | bool | `false` | Side car to mount admission review |
 | webhook.replicas | int | `1` | Replicas |
 | webhook.image.repository | string | `"ghcr.io/sap/cap-operator/web-hooks"` | Image repository |
