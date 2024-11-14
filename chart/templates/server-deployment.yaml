@@ -104,6 +104,9 @@ spec:
             - name: server-port
               containerPort: 4000
               protocol: TCP
+            - name: metrics-port
+              containerPort: 9090
+              protocol: TCP
       serviceAccountName: {{.Release.Name}}-subscription-server
 ---
 kind: Service
@@ -120,7 +123,29 @@ spec:
       protocol: TCP
       port: {{.Values.subscriptionServer.port}}
       targetPort: server-port
+    - name: metrics-http
+      protocol: TCP
+      port: 9090
+      targetPort: metrics-port
   selector:
     operator.sme.sap.com/app: subscription-server
     operator.sme.sap.com/category: controller
     operator.sme.sap.com/release: {{.Release.Name}}
+---
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  labels:
+    operator.sme.sap.com/app: subscription-server
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  selector:
+    matchLabels:
+      operator.sme.sap.com/app: subscription-server
+      operator.sme.sap.com/category: controller
+  endpoints:
+  - port: metrics-http
+{{- end }}
