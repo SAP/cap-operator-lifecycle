@@ -47,6 +47,13 @@ type CAPOperatorSpec struct {
 	IngressGatewayLabels []NameValue `json:"ingressGatewayLabels,omitempty"`
 	// Controller specification
 	Controller Controller `json:"controller,omitempty"`
+	// Monitoring specification
+	Monitoring Monitoring `json:"monitoring,omitempty"`
+}
+
+type Monitoring struct {
+	// Optionally enable Prometheus monitoring for all components
+	Enabled bool `json:"enabled"`
 }
 
 type SubscriptionServer struct {
