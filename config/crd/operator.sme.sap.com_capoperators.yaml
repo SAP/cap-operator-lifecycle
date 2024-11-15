@@ -1930,6 +1930,15 @@ spec:
                   type: object
                 minItems: 1
                 type: array
+              monitoring:
+                description: Monitoring specification
+                properties:
+                  enabled:
+                    description: Optionally enable Prometheus monitoring for all components
+                    type: boolean
+                required:
+                - enabled
+                type: object
               subscriptionServer:
                 description: SubscriptionServer specification
                 properties:
