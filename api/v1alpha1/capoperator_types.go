@@ -61,6 +61,9 @@ type SubscriptionServer struct {
 }
 
 type Controller struct {
+	// Optionally enable detailed opertational metrics for the controller by setting this to true
+	DetailedOperationalMetrics bool `json:"detailedOperationalMetrics,omitempty"`
+	// Version monitoring configuration
 	VersionMonitoring *VersionMonitoring `json:"versionMonitoring,omitempty"`
 	// Optionally specify list of additional volumes for the controller pod(s)
 	Volumes []corev1.Volume `json:"volumes,omitempty"`
