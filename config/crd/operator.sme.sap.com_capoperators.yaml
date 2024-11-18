@@ -55,7 +55,12 @@ spec:
               controller:
                 description: Controller specification
                 properties:
+                  detailedOperationalMetrics:
+                    description: Optionally enable detailed opertational metrics for
+                      the controller by setting this to true
+                    type: boolean
                   versionMonitoring:
+                    description: Version monitoring configuration
                     properties:
                       metricsEvaluationInterval:
                         description: The duration (example 2h) after which versions
