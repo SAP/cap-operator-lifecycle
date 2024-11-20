@@ -63,7 +63,7 @@ spec:
         {{- if .Values.subscriptionServer.certManager.enabled }}
         - name: ssl
           secret:
-            secretName: {{.Release.Name}}-subscription-server-tls
+            secretName: {{.Release.Name}}-subscription-server-tls-managed
             items:
             - key: tls.key
               path: tls.key

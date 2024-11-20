@@ -1,19 +1,4 @@
-{{- if gt (int .Values.subscriptionServer.replicas) 0 }}
----
-{{- if .Values.subscriptionServer.certManager.enabled }}
-{{- if not .Values.subscriptionServer.certManager.issuerName }}
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: {{.Release.Name}}-subscription-server-issuer
-  labels:
-    operator.sme.sap.com/app: subscription-server
-    operator.sme.sap.com/category: controller
-    operator.sme.sap.com/release: {{.Release.Name}}
-spec:
-  selfSigned: {}
-{{- end }}
+{{- if and (gt (int .Values.subscriptionServer.replicas) 0) .Values.subscriptionServer.certManager.enabled }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -24,23 +9,17 @@ metadata:
     operator.sme.sap.com/category: controller
     operator.sme.sap.com/release: {{.Release.Name}}
 spec:
-  dnsNames:
-  - {{.Release.Name}}-subscription-server
-  - {{.Release.Name}}-subscription-server.{{ .Release.Namespace }}
-  - {{.Release.Name}}-subscription-server.{{ .Release.Namespace }}.svc
-  - {{.Release.Name}}-subscription-server.{{ .Release.Namespace }}.svc.cluster.local
+  commonName: {{.Values.subscriptionServer.domain}}
+  duration: 3650h
   issuerRef:
-    {{- if .Values.subscriptionServer.certManager.issuerName }}
     {{- with .Values.subscriptionServer.certManager.issuerGroup }}
     group: {{ . }}
     {{- end }}
     {{- with .Values.subscriptionServer.certManager.issuerKind }}
     kind: {{ . }}
     {{- end }}
-    name: {{ .Values.subscriptionServer.certManager.issuerName }}
-    {{- else }}
-    name: {{.Release.Name}}-subscription-server-issuer
+    {{- with .Values.subscriptionServer.certManager.issuerName }}
+    name: {{ . }}
     {{- end }}
-  secretName: {{.Release.Name}}-subscription-server-tls
-{{- end }}
+  secretName: {{.Release.Name}}-subscription-server-tls-managed
 {{- end }}
