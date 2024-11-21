@@ -140,13 +140,21 @@ subscriptionServer:
   dnsTarget: public-ingress.clusters.cs.services.sap # replace with the actual cluster domain
   # -- The domain under which the cap operator subscription server would be available
   domain: cap-operator.clusters.cs.services.sap # replace with actual cluster domain
-  # -- Cert Manager
-  certManager:
-    # -- Whether to use cert-manager to manage webhook tls
-    enabled: false
+  # -- Gardener
+  gardener:
+    # -- Whether to use gardener to manage server certificates
+    enabled: true
     # -- Issuer name (only relevant if enabled is true)
     issuerName: ""
-    # -- Issuer kind (only relevant if enabled is true)
+    # -- Issuer namespace (only relevant if enabled is true)
+    issuerNamespace: ""
+  # -- Cert Manager
+  certManager:
+    # -- Whether to use cert-manager to manage server certificates
+    enabled: false
+    # -- Issuer name (only relevant if enabled is true; if unset, 'cluster-ca' is used)
+    issuerName: ""
+    # -- Issuer kind (only relevant if enabled is true; if unset, 'ClusterIssuer' is used)
     issuerKind: ""
     # -- Issuer group (only relevant if enabled is true)
     issuerGroup: ""

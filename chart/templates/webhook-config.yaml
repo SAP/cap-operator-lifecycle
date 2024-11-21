@@ -17,7 +17,6 @@ spec:
   - {{.Release.Name}}-webhook.{{ .Release.Namespace }}
   - {{.Release.Name}}-webhook.{{ .Release.Namespace }}.svc
   - {{.Release.Name}}-webhook.{{ .Release.Namespace }}.svc.cluster.local
-  duration: 3650h
   issuerRef:
     {{- with .Values.webhook.certManager.issuerGroup }}
     group: {{ . }}

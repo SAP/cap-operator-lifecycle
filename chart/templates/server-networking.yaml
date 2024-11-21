@@ -1,4 +1,4 @@
-{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+{{- if and (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") .Values.subscriptionServer.gardener.enabled }}
 ---
 apiVersion: cert.gardener.cloud/v1alpha1
 kind: Certificate
@@ -8,7 +8,14 @@ metadata:
 spec:
   commonName: {{.Values.subscriptionServer.domain}}
   secretName: {{.Release.Name}}-subscription-server
-{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+  {{- if .Values.subscriptionServer.gardener.issuerName }}
+  issuerRef:
+    name: {{.Values.subscriptionServer.gardener.issuerName}}
+    {{- if .Values.subscriptionServer.gardener.issuerNamespace }}
+    namespace: {{.Values.subscriptionServer.gardener.issuerNamespace}}
+    {{- end }}
+  {{- end }}
+{{- else if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") .Values.subscriptionServer.certManager.enabled }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -18,9 +25,20 @@ metadata:
 spec:
   commonName: {{.Values.subscriptionServer.domain}}
   secretName: {{.Release.Name}}-subscription-server
+  {{- if .Values.subscriptionServer.certManager.issuerName }}
+  issuerRef:
+    name: {{.Values.subscriptionServer.certManager.issuerName}}
+    {{- if .Values.subscriptionServer.certManager.issuerKind }}
+    kind: {{.Values.subscriptionServer.certManager.issuerKind}}
+    {{- end }}
+    {{- if .Values.subscriptionServer.certManager.issuerGroup }}
+    group: {{.Values.subscriptionServer.certManager.issuerGroup}}
+    {{- end }}
+  {{- else }}
   issuerRef:
     kind: ClusterIssuer
     name: cluster-ca
+  {{- end }}
 {{- end }}
 {{- if .Capabilities.APIVersions.Has "dns.gardener.cloud/v1alpha1" }}
 ---

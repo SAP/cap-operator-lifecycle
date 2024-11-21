@@ -55,21 +55,9 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or .Values.subscriptionServer.volumes .Values.subscriptionServer.certManager.enabled }}
+      {{- with .Values.subscriptionServer.volumes }}
       volumes:
-        {{- with .Values.subscriptionServer.volumes }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- if .Values.subscriptionServer.certManager.enabled }}
-        - name: ssl
-          secret:
-            secretName: {{.Release.Name}}-subscription-server-tls-managed
-            items:
-            - key: tls.key
-              path: tls.key
-            - key: tls.crt
-              path: tls.crt
-        {{- end }}
       {{- end }}
       containers:
         - name: server
@@ -81,24 +69,9 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.subscriptionServer.resources | nindent 12 }}
-          {{- if .Values.subscriptionServer.certManager.enabled }}
-          env:
-            - name: TLS_ENABLED
-              value: "true"
-            - name: TLS_KEY
-              value: "/app/etc/ssl/tls.key"
-            - name: TLS_CERT
-              value: "/app/etc/ssl/tls.crt"
-          {{- end }}
-          {{- if or .Values.subscriptionServer.volumeMounts .Values.subscriptionServer.certManager.enabled }}
+          {{- with .Values.subscriptionServer.volumeMounts }}
           volumeMounts:
-            {{- with .Values.subscriptionServer.volumeMounts }}
             {{- toYaml . | nindent 12 }}
-            {{- end }}
-            {{- if .Values.subscriptionServer.certManager.enabled }}
-            - name: ssl
-              mountPath: /app/etc/ssl
-            {{- end }}
           {{- end }}
           ports:
             - name: server-port
