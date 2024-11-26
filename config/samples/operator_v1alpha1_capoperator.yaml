@@ -12,9 +12,10 @@ metadata:
 spec:
   subscriptionServer:
     subDomain: cap-op
+    gardener:
+      enabled: true
   ingressGatewayLabels:
     - name: istio
       value: ingressgateway
     - name: app
       value: istio-ingressgateway
-  

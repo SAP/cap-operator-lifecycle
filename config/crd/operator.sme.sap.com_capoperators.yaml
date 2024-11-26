@@ -1933,10 +1933,60 @@ spec:
               subscriptionServer:
                 description: SubscriptionServer specification
                 properties:
+                  certManager:
+                    description: Use cert-manager certificate
+                    properties:
+                      enabled:
+                        description: Whether to use cert-manager to manage certificates
+                        type: boolean
+                      issuerGroup:
+                        description: Issuer group (only relevant if enabled is true)
+                        type: string
+                      issuerKind:
+                        description: Issuer kind (only relevant if enabled is true)
+                        type: string
+                      issuerName:
+                        description: Issuer name (only relevant if enabled is true)
+                        type: string
+                    type: object
+                  gardener:
+                    description: Use gardener certificate
+                    properties:
+                      enabled:
+                        description: Whether to use gardener to manage certificates
+                        type: boolean
+                      issuerName:
+                        description: Issuer name (only relevant if enabled is true)
+                        type: string
+                      issuerNamespace:
+                        description: Issuer namespace (only relevant if enabled is
+                          true)
+                        type: string
+                    type: object
                   subDomain:
                     type: string
                 required:
                 - subDomain
+                type: object
+              webhook:
+                description: Webhook specification
+                properties:
+                  certManager:
+                    description: Use cert-manager certificate
+                    properties:
+                      enabled:
+                        description: Whether to use cert-manager to manage certificates
+                        type: boolean
+                      issuerGroup:
+                        description: Issuer group (only relevant if enabled is true)
+                        type: string
+                      issuerKind:
+                        description: Issuer kind (only relevant if enabled is true)
+                        type: string
+                      issuerName:
+                        description: Issuer name (only relevant if enabled is true)
+                        type: string
+                    type: object
                 type: object
             required:
             - subscriptionServer

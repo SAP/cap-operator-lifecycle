@@ -75,6 +75,11 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | subscriptionServer.gardener.enabled | bool | `true` | Whether to use gardener to manage server certificates |
 | subscriptionServer.gardener.issuerName | string | `""` | Issuer name (only relevant if enabled is true) |
 | subscriptionServer.gardener.issuerNamespace | string | `""` | Issuer namespace (only relevant if enabled is true) |
+| subscriptionServer.certManager | object | `{"enabled":false,"issuerGroup":"","issuerKind":"","issuerName":""}` | Cert Manager |
+| subscriptionServer.certManager.enabled | bool | `false` | Whether to use cert-manager to manage server certificates |
+| subscriptionServer.certManager.issuerGroup | string | `""` | Issuer group (only relevant if enabled is true) |
+| subscriptionServer.certManager.issuerKind | string | `""` | Issuer kind (only relevant if enabled is true) |
+| subscriptionServer.certManager.issuerName | string | `""` | Issuer name (only relevant if enabled is true; if unset, 'cluster-ca' of kind 'ClusterIssuer' is used) |
 | webhook.sidecar | bool | `false` | Side car to mount admission review |
 | webhook.replicas | int | `1` | Replicas |
 | webhook.image.repository | string | `"ghcr.io/sap/cap-operator/web-hooks"` | Image repository |

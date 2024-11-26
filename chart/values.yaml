@@ -152,9 +152,9 @@ subscriptionServer:
   certManager:
     # -- Whether to use cert-manager to manage server certificates
     enabled: false
-    # -- Issuer name (only relevant if enabled is true; if unset, 'cluster-ca' is used)
+    # -- Issuer name (only relevant if enabled is true; if unset, 'cluster-ca' of kind 'ClusterIssuer' is used)
     issuerName: ""
-    # -- Issuer kind (only relevant if enabled is true; if unset, 'ClusterIssuer' is used)
+    # -- Issuer kind (only relevant if enabled is true)
     issuerKind: ""
     # -- Issuer group (only relevant if enabled is true)
     issuerGroup: ""

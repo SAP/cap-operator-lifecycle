@@ -47,10 +47,21 @@ type CAPOperatorSpec struct {
 	IngressGatewayLabels []NameValue `json:"ingressGatewayLabels,omitempty"`
 	// Controller specification
 	Controller Controller `json:"controller,omitempty"`
+	// Webhook specification
+	Webhook Webhook `json:"webhook,omitempty"`
+}
+
+type Webhook struct {
+	// Use cert-manager certificate
+	CertManager CertManager `json:"certManager,omitempty"`
 }
 
 type SubscriptionServer struct {
 	Subdomain string `json:"subDomain"`
+	// Use gardener certificate
+	Gardener Gardener `json:"gardener,omitempty"`
+	// Use cert-manager certificate
+	CertManager CertManager `json:"certManager,omitempty"`
 }
 
 type Controller struct {
@@ -68,6 +79,26 @@ type VersionMonitoring struct {
 	MetricsEvaluationInterval Duration `json:"metricsEvaluationInterval,omitempty"`
 	// The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt
 	PromClientAcquireRetryDelay Duration `json:"promClientAcquireRetryDelay,omitempty"`
+}
+
+type Gardener struct {
+	// Whether to use gardener to manage certificates
+	Enabled bool `json:"enabled,omitempty"`
+	// Issuer name (only relevant if enabled is true)
+	IssuerName string `json:"issuerName,omitempty"`
+	// Issuer namespace (only relevant if enabled is true)
+	IssuerNamespace string `json:"issuerNamespace,omitempty"`
+}
+
+type CertManager struct {
+	// Whether to use cert-manager to manage certificates
+	Enabled bool `json:"enabled,omitempty"`
+	// Issuer name (only relevant if enabled is true)
+	IssuerName string `json:"issuerName,omitempty"`
+	// Issuer kind (only relevant if enabled is true)
+	IssuerKind string `json:"issuerKind,omitempty"`
+	// Issuer group (only relevant if enabled is true)
+	IssuerGroup string `json:"issuerGroup,omitempty"`
 }
 
 // Duration is a valid time duration that can be parsed by Prometheus
