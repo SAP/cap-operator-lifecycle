@@ -47,6 +47,8 @@ type CAPOperatorSpec struct {
 	IngressGatewayLabels []NameValue `json:"ingressGatewayLabels,omitempty"`
 	// Controller specification
 	Controller Controller `json:"controller,omitempty"`
+	// Monitoring specification
+	Monitoring Monitoring `json:"monitoring,omitempty"`
 	// Webhook specification
 	Webhook Webhook `json:"webhook,omitempty"`
 }
@@ -54,6 +56,11 @@ type CAPOperatorSpec struct {
 type Webhook struct {
 	// Use cert-manager certificate
 	CertManager CertManager `json:"certManager,omitempty"`
+}
+
+type Monitoring struct {
+	// Optionally enable Prometheus monitoring for all components
+	Enabled bool `json:"enabled"`
 }
 
 type SubscriptionServer struct {
@@ -65,6 +72,9 @@ type SubscriptionServer struct {
 }
 
 type Controller struct {
+	// Optionally enable detailed opertational metrics for the controller by setting this to true
+	DetailedOperationalMetrics bool `json:"detailedOperationalMetrics,omitempty"`
+	// Version monitoring configuration
 	VersionMonitoring *VersionMonitoring `json:"versionMonitoring,omitempty"`
 	// Optionally specify list of additional volumes for the controller pod(s)
 	Volumes []corev1.Volume `json:"volumes,omitempty"`

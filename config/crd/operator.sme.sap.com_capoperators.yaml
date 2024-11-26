@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.16.5
   labels:
     app.kubernetes.io/name: capoperators.operator.sme.sap.com
     app.kubernetes.io/instance: capoperators.operator.sme.sap.com
@@ -55,7 +55,12 @@ spec:
               controller:
                 description: Controller specification
                 properties:
+                  detailedOperationalMetrics:
+                    description: Optionally enable detailed opertational metrics for
+                      the controller by setting this to true
+                    type: boolean
                   versionMonitoring:
+                    description: Version monitoring configuration
                     properties:
                       metricsEvaluationInterval:
                         description: The duration (example 2h) after which versions
@@ -1930,6 +1935,15 @@ spec:
                   type: object
                 minItems: 1
                 type: array
+              monitoring:
+                description: Monitoring specification
+                properties:
+                  enabled:
+                    description: Optionally enable Prometheus monitoring for all components
+                    type: boolean
+                required:
+                - enabled
+                type: object
               subscriptionServer:
                 description: SubscriptionServer specification
                 properties:

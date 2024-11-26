@@ -26,10 +26,6 @@ manifests: controller-gen ## Generate ClusterRole & CustomResourceDefinition obj
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
-.PHONY: generate-client
-generate-client: client-gen informer-gen lister-gen ## Generate typed client.
-	./hack/genclient.sh
-
 .PHONY: fmt
 fmt: ## Run go fmt against code.
 	go fmt ./...
@@ -82,35 +78,16 @@ $(LOCALBIN):
 
 ## Tool Binaries
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
-CLIENT_GEN ?= $(LOCALBIN)/client-gen
-INFORMER_GEN ?= $(LOCALBIN)/informer-gen
-LISTER_GEN ?= $(LOCALBIN)/lister-gen
 SETUP_ENVTEST ?= $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
-CONTROLLER_TOOLS_VERSION ?= v0.16.3
-CODE_GENERATOR_VERSION ?= v0.31.1
+CONTROLLER_TOOLS_VERSION ?= latest
 SETUP_ENVTEST_VERSION ?= latest
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
 $(CONTROLLER_GEN): $(LOCALBIN)
 	test -s $(LOCALBIN)/controller-gen || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
-
-.PHONY: client-gen
-client-gen: $(CLIENT_GEN) ## Download client-gen locally if necessary.
-$(CLIENT_GEN): $(LOCALBIN)
-	test -s $(LOCALBIN)/client-gen || GOBIN=$(LOCALBIN) go install k8s.io/code-generator/cmd/client-gen@$(CODE_GENERATOR_VERSION)
-
-.PHONY: informer-gen
-informer-gen: $(INFORMER_GEN) ## Download informer-gen locally if necessary.
-$(INFORMER_GEN): $(LOCALBIN)
-	test -s $(LOCALBIN)/informer-gen || GOBIN=$(LOCALBIN) go install k8s.io/code-generator/cmd/informer-gen@$(CODE_GENERATOR_VERSION)
-
-.PHONY: lister-gen
-lister-gen: $(LISTER_GEN) ## Download lister-gen locally if necessary.
-$(LISTER_GEN): $(LOCALBIN)
-	test -s $(LOCALBIN)/lister-gen || GOBIN=$(LOCALBIN) go install k8s.io/code-generator/cmd/lister-gen@$(CODE_GENERATOR_VERSION)
 
 .PHONY: setup-envtest
 setup-envtest: $(SETUP_ENVTEST) ## Download setup-envtest locally if necessary.
