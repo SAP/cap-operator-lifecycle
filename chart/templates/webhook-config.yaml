@@ -1,7 +1,7 @@
 {{- if gt (int .Values.webhook.replicas) 0 }}
 {{- $caCert := "" }}
 ---
-{{- if .Values.webhook.certManager.enabled }}
+{{- if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager") }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -18,13 +18,13 @@ spec:
   - {{.Release.Name}}-webhook.{{ .Release.Namespace }}.svc
   - {{.Release.Name}}-webhook.{{ .Release.Namespace }}.svc.cluster.local
   issuerRef:
-    {{- with .Values.webhook.certManager.issuerGroup }}
+    {{- with .Values.webhook.certificateConfig.certManager.issuerGroup }}
     group: {{ . }}
     {{- end }}
-    {{- with .Values.webhook.certManager.issuerKind }}
+    {{- with .Values.webhook.certificateConfig.certManager.issuerKind }}
     kind: {{ . }}
     {{- end }}
-    {{- with .Values.webhook.certManager.issuerName }}
+    {{- with .Values.webhook.certificateConfig.certManager.issuerName }}
     name: {{ . }}
     {{- end }}
   secretName: {{.Release.Name}}-webhook-tls-managed
@@ -63,7 +63,7 @@ metadata:
     operator.sme.sap.com/app: webhook
     operator.sme.sap.com/category: controller
     operator.sme.sap.com/release: {{.Release.Name}}
-  {{- if .Values.webhook.certManager.enabled }}
+  {{- if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager") }}
   annotations:
     cert-manager.io/inject-ca-from: {{.Release.Namespace}}/{{.Release.Name}}-webhook-cert
   {{- end }}
@@ -72,7 +72,7 @@ webhooks:
   admissionReviewVersions:
   - v1
   clientConfig:
-    {{- if not .Values.webhook.certManager.enabled }}
+    {{- if not (and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager")) }}
     caBundle: {{ $caCert }}
     {{- end }}
     service:

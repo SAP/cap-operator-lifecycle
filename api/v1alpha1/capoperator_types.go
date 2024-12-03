@@ -54,8 +54,11 @@ type CAPOperatorSpec struct {
 }
 
 type Webhook struct {
-	// Use cert-manager certificate
-	CertManager CertManager `json:"certManager,omitempty"`
+	// Certificate manager which can be either `Default` or `CertManager`
+	// +kubebuilder:validation:Enum=Default;CertManager
+	CertificateManager CertificateManager `json:"certificateManager,omitempty"`
+	// Certificate configuration
+	CertificateConfig CertificateConfig `json:"certificateConfig,omitempty"`
 }
 
 type Monitoring struct {
@@ -65,10 +68,11 @@ type Monitoring struct {
 
 type SubscriptionServer struct {
 	Subdomain string `json:"subDomain"`
-	// Use gardener certificate
-	Gardener Gardener `json:"gardener,omitempty"`
-	// Use cert-manager certificate
-	CertManager CertManager `json:"certManager,omitempty"`
+	// Certificate manager which can be either `Gardener` or `CertManager`
+	// +kubebuilder:validation:Enum=Gardener;CertManager
+	CertificateManager CertificateManager `json:"certificateManager,omitempty"`
+	// Certificate configuration
+	CertificateConfig CertificateConfig `json:"certificateConfig,omitempty"`
 }
 
 type Controller struct {
@@ -91,25 +95,30 @@ type VersionMonitoring struct {
 	PromClientAcquireRetryDelay Duration `json:"promClientAcquireRetryDelay,omitempty"`
 }
 
+type CertificateConfig struct {
+	// Gardener configuration
+	Gardener Gardener `json:"gardener,omitempty"`
+	// CertManager configuration
+	CertManager CertManager `json:"certManager,omitempty"`
+}
+
 type Gardener struct {
-	// Whether to use gardener to manage certificates
-	Enabled bool `json:"enabled,omitempty"`
-	// Issuer name (only relevant if enabled is true)
+	// Issuer name
 	IssuerName string `json:"issuerName,omitempty"`
-	// Issuer namespace (only relevant if enabled is true)
+	// Issuer namespace
 	IssuerNamespace string `json:"issuerNamespace,omitempty"`
 }
 
 type CertManager struct {
-	// Whether to use cert-manager to manage certificates
-	Enabled bool `json:"enabled,omitempty"`
-	// Issuer name (only relevant if enabled is true)
+	// Issuer name
 	IssuerName string `json:"issuerName,omitempty"`
-	// Issuer kind (only relevant if enabled is true)
+	// Issuer kind
 	IssuerKind string `json:"issuerKind,omitempty"`
-	// Issuer group (only relevant if enabled is true)
+	// Issuer group
 	IssuerGroup string `json:"issuerGroup,omitempty"`
 }
+
+type CertificateManager string
 
 // Duration is a valid time duration that can be parsed by Prometheus
 // Supported units: y, w, d, h, m, s, ms

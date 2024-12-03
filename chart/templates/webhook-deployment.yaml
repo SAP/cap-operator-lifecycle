@@ -108,7 +108,7 @@ spec:
       volumes:
       - name: ssl
         secret:
-          secretName: {{.Release.Name}}-webhook-{{ ternary "tls-managed" "tls" .Values.webhook.certManager.enabled }}
+          secretName: {{ if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager") }} {{.Release.Name}}-webhook-tls-managed {{ else }} {{.Release.Name}}-webhook-tls {{ end }}
           items:
           - key: tls.key
             path: tls.key

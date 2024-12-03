@@ -1947,36 +1947,40 @@ spec:
               subscriptionServer:
                 description: SubscriptionServer specification
                 properties:
-                  certManager:
-                    description: Use cert-manager certificate
+                  certificateConfig:
+                    description: Certificate configuration
                     properties:
-                      enabled:
-                        description: Whether to use cert-manager to manage certificates
-                        type: boolean
-                      issuerGroup:
-                        description: Issuer group (only relevant if enabled is true)
-                        type: string
-                      issuerKind:
-                        description: Issuer kind (only relevant if enabled is true)
-                        type: string
-                      issuerName:
-                        description: Issuer name (only relevant if enabled is true)
-                        type: string
+                      certManager:
+                        description: CertManager configuration
+                        properties:
+                          issuerGroup:
+                            description: Issuer group
+                            type: string
+                          issuerKind:
+                            description: Issuer kind
+                            type: string
+                          issuerName:
+                            description: Issuer name
+                            type: string
+                        type: object
+                      gardener:
+                        description: Gardener configuration
+                        properties:
+                          issuerName:
+                            description: Issuer name
+                            type: string
+                          issuerNamespace:
+                            description: Issuer namespace
+                            type: string
+                        type: object
                     type: object
-                  gardener:
-                    description: Use gardener certificate
-                    properties:
-                      enabled:
-                        description: Whether to use gardener to manage certificates
-                        type: boolean
-                      issuerName:
-                        description: Issuer name (only relevant if enabled is true)
-                        type: string
-                      issuerNamespace:
-                        description: Issuer namespace (only relevant if enabled is
-                          true)
-                        type: string
-                    type: object
+                  certificateManager:
+                    description: Certificate manager which can be either `Gardener`
+                      or `CertManager`
+                    enum:
+                    - Gardener
+                    - CertManager
+                    type: string
                   subDomain:
                     type: string
                 required:
@@ -1985,22 +1989,40 @@ spec:
               webhook:
                 description: Webhook specification
                 properties:
-                  certManager:
-                    description: Use cert-manager certificate
+                  certificateConfig:
+                    description: Certificate configuration
                     properties:
-                      enabled:
-                        description: Whether to use cert-manager to manage certificates
-                        type: boolean
-                      issuerGroup:
-                        description: Issuer group (only relevant if enabled is true)
-                        type: string
-                      issuerKind:
-                        description: Issuer kind (only relevant if enabled is true)
-                        type: string
-                      issuerName:
-                        description: Issuer name (only relevant if enabled is true)
-                        type: string
+                      certManager:
+                        description: CertManager configuration
+                        properties:
+                          issuerGroup:
+                            description: Issuer group
+                            type: string
+                          issuerKind:
+                            description: Issuer kind
+                            type: string
+                          issuerName:
+                            description: Issuer name
+                            type: string
+                        type: object
+                      gardener:
+                        description: Gardener configuration
+                        properties:
+                          issuerName:
+                            description: Issuer name
+                            type: string
+                          issuerNamespace:
+                            description: Issuer namespace
+                            type: string
+                        type: object
                     type: object
+                  certificateManager:
+                    description: Certificate manager which can be either `Default`
+                      or `CertManager`
+                    enum:
+                    - Default
+                    - CertManager
+                    type: string
                 type: object
             required:
             - subscriptionServer

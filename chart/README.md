@@ -71,15 +71,15 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | subscriptionServer.ingressGatewayLabels | object | `{"app":"istio-ingressgateway","istio":"ingressgateway"}` | Labels used to identify the istio ingress-gateway component |
 | subscriptionServer.dnsTarget | string | `"public-ingress.clusters.cs.services.sap"` | The dns target mentioned on the public ingress gateway service used in the cluster |
 | subscriptionServer.domain | string | `"cap-operator.clusters.cs.services.sap"` | The domain under which the cap operator subscription server would be available |
-| subscriptionServer.gardener | object | `{"enabled":true,"issuerName":"","issuerNamespace":""}` | Gardener |
-| subscriptionServer.gardener.enabled | bool | `true` | Whether to use gardener to manage server certificates |
-| subscriptionServer.gardener.issuerName | string | `""` | Issuer name (only relevant if enabled is true) |
-| subscriptionServer.gardener.issuerNamespace | string | `""` | Issuer namespace (only relevant if enabled is true) |
-| subscriptionServer.certManager | object | `{"enabled":false,"issuerGroup":"","issuerKind":"","issuerName":""}` | Cert Manager |
-| subscriptionServer.certManager.enabled | bool | `false` | Whether to use cert-manager to manage server certificates |
-| subscriptionServer.certManager.issuerGroup | string | `""` | Issuer group (only relevant if enabled is true) |
-| subscriptionServer.certManager.issuerKind | string | `""` | Issuer kind (only relevant if enabled is true) |
-| subscriptionServer.certManager.issuerName | string | `""` | Issuer name (only relevant if enabled is true; if unset, 'cluster-ca' of kind 'ClusterIssuer' is used) |
+| subscriptionServer.certificateManager | string | `"Gardener"` | Certificate manager which can be either `Gardener` or `CertManager` |
+| subscriptionServer.certificateConfig | object | `{"certManager":{"issuerGroup":"","issuerKind":"","issuerName":""},"gardener":{"issuerName":"","issuerNamespace":""}}` | Certificate configuration |
+| subscriptionServer.certificateConfig.certManager | object | `{"issuerGroup":"","issuerKind":"","issuerName":""}` | Cert Manager configuration |
+| subscriptionServer.certificateConfig.certManager.issuerGroup | string | `""` | Issuer group |
+| subscriptionServer.certificateConfig.certManager.issuerKind | string | `""` | Issuer kind |
+| subscriptionServer.certificateConfig.certManager.issuerName | string | `""` | Issuer name |
+| subscriptionServer.certificateConfig.gardener | object | `{"issuerName":"","issuerNamespace":""}` | Optionally specify the corresponding certificate configuration |
+| subscriptionServer.certificateConfig.gardener.issuerName | string | `""` | Issuer name |
+| subscriptionServer.certificateConfig.gardener.issuerNamespace | string | `""` | Issuer namespace |
 | webhook.sidecar | bool | `false` | Side car to mount admission review |
 | webhook.replicas | int | `1` | Replicas |
 | webhook.image.repository | string | `"ghcr.io/sap/cap-operator/web-hooks"` | Image repository |
@@ -103,9 +103,8 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | webhook.service.type | string | `"ClusterIP"` | Service type |
 | webhook.service.port | int | `443` | Service port |
 | webhook.service.targetPort | int | `1443` | Target port |
-| webhook.certManager | object | `{"enabled":false,"issuerGroup":"","issuerKind":"","issuerName":""}` | Cert Manager |
-| webhook.certManager.enabled | bool | `false` | Whether to use cert-manager to manage webhook tls |
-| webhook.certManager.issuerGroup | string | `""` | Issuer group (only relevant if enabled is true) |
-| webhook.certManager.issuerKind | string | `""` | Issuer kind (only relevant if enabled is true) |
-| webhook.certManager.issuerName | string | `""` | Issuer name (only relevant if enabled is true) |
-
+| webhook.certificateManager | string | `"Default"` | Certificate manager which can be either `Default` or `CertManager` |
+| webhook.certificateConfig | object | `{"certManager":{"issuerGroup":"","issuerKind":"","issuerName":""}}` | Optionally specify the corresponding certificate configuration |
+| webhook.certificateConfig.certManager.issuerGroup | string | `""` | Issuer group |
+| webhook.certificateConfig.certManager.issuerKind | string | `""` | Issuer kind |
+| webhook.certificateConfig.certManager.issuerName | string | `""` | Issuer name |
