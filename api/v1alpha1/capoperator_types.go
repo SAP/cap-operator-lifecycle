@@ -58,7 +58,7 @@ type Webhook struct {
 	// +kubebuilder:validation:Enum=Default;CertManager
 	CertificateManager CertificateManager `json:"certificateManager,omitempty"`
 	// Certificate configuration
-	CertificateConfig CertificateConfig `json:"certificateConfig,omitempty"`
+	CertificateConfig *CertificateConfig `json:"certificateConfig,omitempty"`
 }
 
 type Monitoring struct {
@@ -72,7 +72,7 @@ type SubscriptionServer struct {
 	// +kubebuilder:validation:Enum=Gardener;CertManager
 	CertificateManager CertificateManager `json:"certificateManager,omitempty"`
 	// Certificate configuration
-	CertificateConfig CertificateConfig `json:"certificateConfig,omitempty"`
+	CertificateConfig *CertificateConfig `json:"certificateConfig,omitempty"`
 }
 
 type Controller struct {
@@ -118,6 +118,8 @@ type CertManager struct {
 	IssuerGroup string `json:"issuerGroup,omitempty"`
 }
 
+// Supported values are Gardener, CertManager, or Default
+// For the subscription server, it can be either Gardener or CertManager, while for the webhook, it can be either Default or CertManager
 type CertificateManager string
 
 // Duration is a valid time duration that can be parsed by Prometheus

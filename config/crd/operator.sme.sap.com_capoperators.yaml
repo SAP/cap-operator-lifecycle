@@ -1949,6 +1949,16 @@ spec:
                 properties:
                   certificateConfig:
                     description: Certificate configuration
+                    anyOf:
+                    - oneOf:
+                      - required:
+                        - certManager
+                      - required:
+                        - gardener
+                    - not:
+                        required:
+                        - certManager
+                        - gardener
                     properties:
                       certManager:
                         description: CertManager configuration
@@ -1991,6 +2001,16 @@ spec:
                 properties:
                   certificateConfig:
                     description: Certificate configuration
+                    anyOf:
+                    - oneOf:
+                      - required:
+                        - certManager
+                      - required:
+                        - gardener
+                    - not:
+                        required:
+                        - certManager
+                        - gardener
                     properties:
                       certManager:
                         description: CertManager configuration
