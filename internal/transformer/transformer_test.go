@@ -153,26 +153,30 @@ func TestTransformer(t *testing.T) {
 			}
 
 			if tt.withCertManager {
-				certManagerConfig := v1alpha1.CertManager{
-					IssuerName:  "abc",
-					IssuerKind:  "abcKind",
-					IssuerGroup: "abcGroup",
+				certificateConfig := &v1alpha1.CertificateConfig{
+					CertManager: v1alpha1.CertManager{
+						IssuerName:  "abc",
+						IssuerKind:  "abcKind",
+						IssuerGroup: "abcGroup",
+					},
 				}
 
 				capOperatorSpec.SubscriptionServer.CertificateManager = "CertManager"
 				capOperatorSpec.Webhook.CertificateManager = "CertManager"
-				capOperatorSpec.SubscriptionServer.CertificateConfig.CertManager = certManagerConfig
-				capOperatorSpec.Webhook.CertificateConfig.CertManager = certManagerConfig
+				capOperatorSpec.SubscriptionServer.CertificateConfig = certificateConfig
+				capOperatorSpec.Webhook.CertificateConfig = certificateConfig
 			} else {
-				gardenerConfig := v1alpha1.Gardener{
-					IssuerName:      "abc",
-					IssuerNamespace: "abcNamespace",
+				certificateConfig := &v1alpha1.CertificateConfig{
+					Gardener: v1alpha1.Gardener{
+						IssuerName:      "abc",
+						IssuerNamespace: "abcNamespace",
+					},
 				}
 
 				capOperatorSpec.SubscriptionServer.CertificateManager = "Gardener"
 				capOperatorSpec.Webhook.CertificateManager = "Gardener"
-				capOperatorSpec.SubscriptionServer.CertificateConfig.Gardener = gardenerConfig
-				capOperatorSpec.Webhook.CertificateConfig.Gardener = gardenerConfig
+				capOperatorSpec.SubscriptionServer.CertificateConfig = certificateConfig
+				capOperatorSpec.Webhook.CertificateConfig = certificateConfig
 			}
 
 			if tt.ingressGatewayLabelsFilled {
