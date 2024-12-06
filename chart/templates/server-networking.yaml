@@ -1,14 +1,4 @@
-{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
----
-apiVersion: cert.gardener.cloud/v1alpha1
-kind: Certificate
-metadata:
-  name: {{.Release.Name}}-subscription-server
-  namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
-spec:
-  commonName: {{.Values.subscriptionServer.domain}}
-  secretName: {{.Release.Name}}-subscription-server
-{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+{{- if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.subscriptionServer.certificateManager "CertManager") }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -17,10 +7,34 @@ metadata:
   namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
 spec:
   commonName: {{.Values.subscriptionServer.domain}}
-  secretName: {{.Release.Name}}-subscription-server
+  secretName: {{.Release.Name}}-subscription-server-cert-manager
   issuerRef:
-    kind: ClusterIssuer
-    name: cluster-ca
+    {{- with .Values.subscriptionServer.certificateConfig.certManager.issuerGroup }}
+    group: {{ . }}
+    {{- end }}
+    {{- with .Values.subscriptionServer.certificateConfig.certManager.issuerKind }}
+    kind: {{ . }}
+    {{- end }}
+    {{- with .Values.subscriptionServer.certificateConfig.certManager.issuerName }}
+    name: {{ . }}
+    {{- end }}
+{{- else if and (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") (eq .Values.subscriptionServer.certificateManager "Gardener") }}
+---
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
+spec:
+  commonName: {{.Values.subscriptionServer.domain}}
+  secretName: {{.Release.Name}}-subscription-server-gardener
+  {{- if .Values.subscriptionServer.certificateConfig.gardener.issuerName }}
+  issuerRef:
+    name: {{.Values.subscriptionServer.certificateConfig.gardener.issuerName}}
+    {{- if .Values.subscriptionServer.certificateConfig.gardener.issuerNamespace }}
+    namespace: {{.Values.subscriptionServer.certificateConfig.gardener.issuerNamespace}}
+    {{- end }}
+  {{- end }}
 {{- end }}
 {{- if .Capabilities.APIVersions.Has "dns.gardener.cloud/v1alpha1" }}
 ---
@@ -55,7 +69,11 @@ spec:
       number: 443
       protocol: HTTPS
     tls:
-      credentialName: {{.Release.Name}}-subscription-server
+      {{- if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.subscriptionServer.certificateManager "CertManager") }}
+      credentialName: {{.Release.Name}}-subscription-server-cert-manager
+      {{- else if and (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") (eq .Values.subscriptionServer.certificateManager "Gardener") }}
+      credentialName: {{.Release.Name}}-subscription-server-gardener
+      {{- end }}
       mode: SIMPLE
 ---
 apiVersion: networking.istio.io/v1beta1

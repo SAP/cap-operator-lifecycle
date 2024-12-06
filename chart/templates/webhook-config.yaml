@@ -1,4 +1,34 @@
 {{- if gt (int .Values.webhook.replicas) 0 }}
+{{- $caCert := "" }}
+---
+{{- if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager") }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{.Release.Name}}-webhook-cert
+  labels:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  dnsNames:
+  - {{.Release.Name}}-webhook
+  - {{.Release.Name}}-webhook.{{ .Release.Namespace }}
+  - {{.Release.Name}}-webhook.{{ .Release.Namespace }}.svc
+  - {{.Release.Name}}-webhook.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    {{- with .Values.webhook.certificateConfig.certManager.issuerGroup }}
+    group: {{ . }}
+    {{- end }}
+    {{- with .Values.webhook.certificateConfig.certManager.issuerKind }}
+    kind: {{ . }}
+    {{- end }}
+    {{- with .Values.webhook.certificateConfig.certManager.issuerName }}
+    name: {{ . }}
+    {{- end }}
+  secretName: {{.Release.Name}}-webhook-tls-managed
+{{- else }}
 ---
 apiVersion: v1
 kind: Secret
@@ -10,20 +40,31 @@ metadata:
     operator.sme.sap.com/release: {{.Release.Name}}
 type: Opaque
 data:
-  {{- $data := (lookup "v1" "Secret" .Release.Namespace (printf "%s-webhook-tls" .Release.Name )).data }}
-  {{- $caCert := "" }}
-  {{- if $data }}
-  {{ $data | toYaml | nindent 2 }}
-  {{- $caCert = index $data "ca.crt" }}
-  {{- else }}
   {{- $cn := printf "%s-webhook.%s.svc" .Release.Name .Release.Namespace }}
-  {{- $ca := genCA (printf "%s-webhook-ca" .Release.Name  ) 36500 }}
-  {{- $cert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 36500 $ca }}
-  ca.crt: {{ $ca.Cert | b64enc }}
-  tls.crt: {{ $cert.Cert | b64enc }}
-  tls.key: {{ $cert.Key | b64enc }}
-  {{- $caCert = $ca.Cert | b64enc }}
+  {{- $data := (lookup "v1" "Secret" .Release.Namespace (printf "%s-webhook-tls" .Release.Name )).data }}
+  {{- if $data }}
+    {{- $caCert = index $data "ca.crt" }}
+    {{- if (hasKey $data "ca.key") }}
+      {{- $caKey := index $data "ca.key" }}
+      ca.crt: {{ $caCert }}
+      ca.key: {{ $caKey }}
+      {{- $customCa := buildCustomCert $caCert $caKey }}
+      {{- $customCaCert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 1000 $customCa }}
+      tls.crt: {{ $customCaCert.Cert | b64enc }}
+      tls.key: {{ $customCaCert.Key | b64enc }}
+    {{- else }}
+      {{ $data | toYaml | nindent 2 }}
+    {{- end }}
+  {{- else }}
+    {{- $ca := genCA (printf "%s-webhook-ca" .Release.Name  ) 3650 }}
+    {{- $cert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 1000 $ca }}
+    ca.crt: {{ $ca.Cert | b64enc }}
+    ca.key: {{ $ca.Key | b64enc }}
+    tls.crt: {{ $cert.Cert | b64enc }}
+    tls.key: {{ $cert.Key | b64enc }}
+    {{- $caCert = $ca.Cert | b64enc }}
   {{- end }}
+{{- end }}
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -33,12 +74,18 @@ metadata:
     operator.sme.sap.com/app: webhook
     operator.sme.sap.com/category: controller
     operator.sme.sap.com/release: {{.Release.Name}}
+  {{- if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager") }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{.Release.Namespace}}/{{.Release.Name}}-webhook-cert
+  {{- end }}
 webhooks:
 - name: cap-operator.sme.sap.com
   admissionReviewVersions:
   - v1
   clientConfig:
+    {{- if not (and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager")) }}
     caBundle: {{ $caCert }}
+    {{- end }}
     service:
       name: {{.Release.Name}}-webhook
       namespace: {{ .Release.Namespace }}

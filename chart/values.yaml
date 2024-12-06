@@ -76,13 +76,13 @@ controller:
   # -- Optionally enable detailed opertational metrics for the controller by setting this to true
   detailedOperationalMetrics: false
   versionMonitoring:
-    # -- The URL of the Prometheus server from which metrics related to managed application versions can be queried 
+    # -- The URL of the Prometheus server from which metrics related to managed application versions can be queried
     prometheusAddress: ""
     # -- The duration (example 2h) after which versions are evaluated for deletion; based on specified workload metrics
     metricsEvaluationInterval: "1h"
     # -- The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt
     promClientAcquireRetryDelay: "1h"
-    
+
 subscriptionServer:
   # -- Replicas
   replicas: 1
@@ -140,6 +140,24 @@ subscriptionServer:
   dnsTarget: public-ingress.clusters.cs.services.sap # replace with the actual cluster domain
   # -- The domain under which the cap operator subscription server would be available
   domain: cap-operator.clusters.cs.services.sap # replace with actual cluster domain
+  # -- Certificate manager which can be either `Gardener` or `CertManager`
+  certificateManager: Gardener
+  # -- Certificate configuration
+  certificateConfig:
+    # -- Optionally specify the corresponding certificate configuration
+    gardener:
+      # -- Issuer name
+      issuerName: ""
+      # -- Issuer namespace
+      issuerNamespace: ""
+    # -- Cert Manager configuration
+    certManager:
+      # -- Issuer group
+      issuerGroup: ""
+      # -- Issuer kind
+      issuerKind: ""
+      # -- Issuer name
+      issuerName: ""
 
 webhook:
   # -- Side car to mount admission review
@@ -192,3 +210,14 @@ webhook:
     port: 443
     # -- Target port
     targetPort: 1443
+  # -- Certificate manager which can be either `Default` or `CertManager`
+  certificateManager: "Default"
+  # -- Optionally specify the corresponding certificate configuration
+  certificateConfig:
+    certManager:
+      # -- Issuer group
+      issuerGroup: ""
+      # -- Issuer kind
+      issuerKind: ""
+      # -- Issuer name
+      issuerName: ""
