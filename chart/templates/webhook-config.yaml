@@ -40,18 +40,29 @@ metadata:
     operator.sme.sap.com/release: {{.Release.Name}}
 type: Opaque
 data:
+  {{- $cn := printf "%s-webhook.%s.svc" .Release.Name .Release.Namespace }}
   {{- $data := (lookup "v1" "Secret" .Release.Namespace (printf "%s-webhook-tls" .Release.Name )).data }}
   {{- if $data }}
-  {{ $data | toYaml | nindent 2 }}
-  {{- $caCert = index $data "ca.crt" }}
+    {{- $caCert = index $data "ca.crt" }}
+    {{- if (hasKey $data "ca.key") }}
+      {{- $caKey := index $data "ca.key" }}
+      ca.crt: {{ $caCert }}
+      ca.key: {{ $caKey }}
+      {{- $customCa := buildCustomCert $caCert $caKey }}
+      {{- $customCaCert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 1000 $customCa }}
+      tls.crt: {{ $customCaCert.Cert | b64enc }}
+      tls.key: {{ $customCaCert.Key | b64enc }}
+    {{- else }}
+      {{ $data | toYaml | nindent 2 }}
+    {{- end }}
   {{- else }}
-  {{- $cn := printf "%s-webhook.%s.svc" .Release.Name .Release.Namespace }}
-  {{- $ca := genCA (printf "%s-webhook-ca" .Release.Name  ) 3650 }}
-  {{- $cert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 3650 $ca }}
-  ca.crt: {{ $ca.Cert | b64enc }}
-  tls.crt: {{ $cert.Cert | b64enc }}
-  tls.key: {{ $cert.Key | b64enc }}
-  {{- $caCert = $ca.Cert | b64enc }}
+    {{- $ca := genCA (printf "%s-webhook-ca" .Release.Name  ) 3650 }}
+    {{- $cert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 1000 $ca }}
+    ca.crt: {{ $ca.Cert | b64enc }}
+    ca.key: {{ $ca.Key | b64enc }}
+    tls.crt: {{ $cert.Cert | b64enc }}
+    tls.key: {{ $cert.Key | b64enc }}
+    {{- $caCert = $ca.Cert | b64enc }}
   {{- end }}
 {{- end }}
 ---

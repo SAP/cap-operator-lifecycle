@@ -16,6 +16,8 @@ spec:
       operator.sme.sap.com/release: {{.Release.Name}}
   template:
     metadata:
+      annotations:
+        operator.sme.sap.com/checksum-cert: {{ include (print $.Template.BasePath "/webhook-config.yaml") . | sha256sum }}
       labels:
         operator.sme.sap.com/app: webhook
         operator.sme.sap.com/category: controller
