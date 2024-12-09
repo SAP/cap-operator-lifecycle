@@ -17,7 +17,7 @@ permissions:
 jobs:
   build:
     name: Build and Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
 
     - name: Check out code into the Go module directory
@@ -48,7 +48,7 @@ jobs:
     name: Analyze with Sonar Cloud
     if: github.repository_owner == 'sap'
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     
     - name: Check out code for Sonar Analysis

@@ -4,7 +4,6 @@ on:
   workflow_dispatch
 
 env:
-  HELM_VERSION: v3.11.3
   REGISTRY: ghcr.io
   CHART_DIRECTORY: chart
   RELEASE_TAG_PREFIX: helm
@@ -12,7 +11,7 @@ env:
 jobs:
   create_release_tag:
     name: Create release tag
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       tag: ${{ steps.get_tag.outputs.tag }}
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -21,8 +20,6 @@ jobs:
       uses: actions/checkout@v4
     
     - uses: azure/setup-helm@v4
-      with:
-        version: ${{ env.HELM_VERSION }}
 
     - name: Determine target commit
       id: get_target_commit
@@ -58,7 +55,7 @@ jobs:
   
   publish-to-pages:
     name: Publish chart to github pages
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: create_release_tag
     permissions:
       contents: write
@@ -80,9 +77,7 @@ jobs:
         path: website
         token: ${{ secrets.WORKFLOW_USER_TOKEN }}
 
-    - uses: azure/setup-helm@v3
-      with:
-        version: ${{ env.HELM_VERSION }}
+    - uses: azure/setup-helm@v4
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
@@ -121,7 +116,7 @@ jobs:
   publish-to-packages:
     name: Publish chart to github packages
     needs: create_release_tag
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -131,8 +126,6 @@ jobs:
       uses: actions/checkout@v4
 
     - uses: azure/setup-helm@v4
-      with:
-        version: ${{ env.HELM_VERSION }}
 
     - name: Create package
       run: |
