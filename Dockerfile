@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.23.3 as builder
+FROM golang:1.23.4 as builder
 ARG TARGETOS
 ARG TARGETARCH
 ENV CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH}
