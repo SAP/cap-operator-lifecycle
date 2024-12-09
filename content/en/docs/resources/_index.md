@@ -10,9 +10,9 @@ description: >
 CAP Operator Manager uses resource `CAPOperator` to install the CAP Operator. The `CAPOperator` resource has the following attributes -
 
 - `subscriptionServer.subDomain` _string_ - Subdomain of the CAP Operator subscription Server
-- `subscriptionServer.certificateManager` _string_ - Certificate manager which can be either `Gardener` or `CertManager`
-- `subscriptionServer.certificateConfig.gardener` -  Gardener certificate configuration. Relevant only if `subscriptionServer.certificateManager` is set to `Gardener`
-- `subscriptionServer.certificateConfig.certManager` -  CertManager certificate configuration. Relevant only if `subscriptionServer.certificateManager` is set to `CertManager`
+- `subscriptionServer.certificateManager` _string_ - Certificate manager which can be set to either `Gardener` or `CertManager`, with the default value being `Gardener`
+- `subscriptionServer.certificateConfig.gardener` - Configuration for Gardener certificates, applicable only if `subscriptionServer.certificateManager` is set to `Gardener`. This allows you to specify the `issuerName` and `issuerNamespace`.
+- `subscriptionServer.certificateConfig.certManager` - Configuration for CertManager certificates, applicable only if `subscriptionServer.certificateManager` is set to `CertManager`. This allows you to specify the `issuerGroup`, `issuerKind` and `issuerName`.
 - `dnsTarget` _string_ - Public ingress URL for the cluster Load Balancer
 - `ingressGatewayLabels` - Labels used to identify the istio ingress-gateway component and its corresponding namespace. Usually {“app”:“istio-ingressgateway”,“istio”:“ingressgateway”}
 - `controller.detailedOperationalMetrics` _bool_ - Optionally enable detailed opertational metrics for the controller by setting this to true
@@ -22,8 +22,8 @@ CAP Operator Manager uses resource `CAPOperator` to install the CAP Operator. Th
 - `controller.volumes` - Optionally specify list of additional volumes for the controller pod(s)
 - `controller.volumeMounts` - Optionally specify list of additional volumeMounts for the controller container(s)
 - `monitoring.enabled` _bool_ - Optionally enable Prometheus monitoring for all components
-- `webhook.certificateManager` _string_ - Certificate manager which can be either `Default` or `CertManager`
-- `webhook.certificateConfig.certManager` -  CertManager certificate configuration. Relevant only if `webhook.certificateManager` is set to `CertManager`
+- `webhook.certificateManager` _string_ - Certificate manager which can be set to either `Default` or `CertManager`, with the default value being `Default`
+- `webhook.certificateConfig.certManager` - Configuration for CertManager certificates, applicable only if `webhook.certificateManager` is set to `CertManager`. This allows you to specify the `issuerGroup`, `issuerKind` and `issuerName`.
 
 The below example shows a fully configured `CAPOperator` resource:
 
