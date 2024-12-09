@@ -49,6 +49,16 @@ type CAPOperatorSpec struct {
 	Controller Controller `json:"controller,omitempty"`
 	// Monitoring specification
 	Monitoring Monitoring `json:"monitoring,omitempty"`
+	// Webhook specification
+	Webhook Webhook `json:"webhook,omitempty"`
+}
+
+type Webhook struct {
+	// Certificate manager which can be either `Default` or `CertManager`
+	// +kubebuilder:validation:Enum=Default;CertManager
+	CertificateManager CertificateManager `json:"certificateManager,omitempty"`
+	// Certificate configuration
+	CertificateConfig *CertificateConfig `json:"certificateConfig,omitempty"`
 }
 
 type Monitoring struct {
@@ -58,6 +68,11 @@ type Monitoring struct {
 
 type SubscriptionServer struct {
 	Subdomain string `json:"subDomain"`
+	// Certificate manager which can be either `Gardener` or `CertManager`
+	// +kubebuilder:validation:Enum=Gardener;CertManager
+	CertificateManager CertificateManager `json:"certificateManager,omitempty"`
+	// Certificate configuration
+	CertificateConfig *CertificateConfig `json:"certificateConfig,omitempty"`
 }
 
 type Controller struct {
@@ -79,6 +94,33 @@ type VersionMonitoring struct {
 	// The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt
 	PromClientAcquireRetryDelay Duration `json:"promClientAcquireRetryDelay,omitempty"`
 }
+
+type CertificateConfig struct {
+	// Gardener configuration
+	Gardener Gardener `json:"gardener,omitempty"`
+	// CertManager configuration
+	CertManager CertManager `json:"certManager,omitempty"`
+}
+
+type Gardener struct {
+	// Issuer name
+	IssuerName string `json:"issuerName,omitempty"`
+	// Issuer namespace
+	IssuerNamespace string `json:"issuerNamespace,omitempty"`
+}
+
+type CertManager struct {
+	// Issuer name
+	IssuerName string `json:"issuerName,omitempty"`
+	// Issuer kind
+	IssuerKind string `json:"issuerKind,omitempty"`
+	// Issuer group
+	IssuerGroup string `json:"issuerGroup,omitempty"`
+}
+
+// Supported values are Gardener, CertManager, or Default
+// For the subscription server, it can be either Gardener or CertManager, while for the webhook, it can be either Default or CertManager
+type CertificateManager string
 
 // Duration is a valid time duration that can be parsed by Prometheus
 // Supported units: y, w, d, h, m, s, ms

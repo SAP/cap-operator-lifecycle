@@ -8,6 +8,7 @@ package transformer
 import (
 	"testing"
 
+	"github.com/sap/cap-operator-lifecycle/api/v1alpha1"
 	componentoperatorruntimetypes "github.com/sap/component-operator-runtime/pkg/types"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,6 +30,7 @@ func TestTransformer(t *testing.T) {
 		withVersionMonitoring              bool
 		omitVersionMonitoringDurations     bool
 		withControllerVolumes              bool
+		withCertManager                    bool
 	}{
 		{
 			name:                       "With dnsTarget and without ingress gateway labels",
@@ -74,6 +76,13 @@ func TestTransformer(t *testing.T) {
 			expectError:                    false,
 			withVersionMonitoring:          true,
 			omitVersionMonitoringDurations: true,
+		},
+		{
+			name:                       "With cert-manager",
+			dnsTargetFilled:            false,
+			ingressGatewayLabelsFilled: true,
+			expectError:                false,
+			withCertManager:            true,
 		},
 	}
 	for _, tt := range tests {
@@ -131,48 +140,70 @@ func TestTransformer(t *testing.T) {
 
 			transformer := NewParameterTransformer(kubeClient)
 
-			parameter := make(map[string]interface{})
-
-			parameter["subscriptionServer"] = map[string]interface{}{}
-			subscriptionServer := parameter["subscriptionServer"].(map[string]interface{})
+			capOperatorSpec := &v1alpha1.CAPOperatorSpec{}
 
 			if tt.longDomain {
-				subscriptionServer["subDomain"] = "long-subdomain-for-the-test-to-fail-to-check-the-error-case"
+				capOperatorSpec.SubscriptionServer.Subdomain = "long-subdomain-for-the-test-to-fail-to-check-the-error-case"
 			} else {
-				subscriptionServer["subDomain"] = "cop"
+				capOperatorSpec.SubscriptionServer.Subdomain = "cop"
 			}
+
 			if tt.dnsTargetFilled {
-				parameter["dnsTarget"] = "public-ingress.some.cluster.sap"
+				capOperatorSpec.DNSTarget = "public-ingress.some.cluster.sap"
+			}
+
+			if tt.withCertManager {
+				certificateConfig := &v1alpha1.CertificateConfig{
+					CertManager: v1alpha1.CertManager{
+						IssuerName:  "abc",
+						IssuerKind:  "abcKind",
+						IssuerGroup: "abcGroup",
+					},
+				}
+
+				capOperatorSpec.SubscriptionServer.CertificateManager = "CertManager"
+				capOperatorSpec.Webhook.CertificateManager = "CertManager"
+				capOperatorSpec.SubscriptionServer.CertificateConfig = certificateConfig
+				capOperatorSpec.Webhook.CertificateConfig = certificateConfig
+			} else {
+				certificateConfig := &v1alpha1.CertificateConfig{
+					Gardener: v1alpha1.Gardener{
+						IssuerName:      "abc",
+						IssuerNamespace: "abcNamespace",
+					},
+				}
+
+				capOperatorSpec.SubscriptionServer.CertificateManager = "Gardener"
+				capOperatorSpec.Webhook.CertificateManager = "Gardener"
+				capOperatorSpec.SubscriptionServer.CertificateConfig = certificateConfig
+				capOperatorSpec.Webhook.CertificateConfig = certificateConfig
 			}
 
 			if tt.ingressGatewayLabelsFilled {
-				parameter["ingressGatewayLabels"] = []interface{}{
-					map[string]interface{}{
-						"name":  "app",
-						"value": "istio-ingress",
+				capOperatorSpec.IngressGatewayLabels = []v1alpha1.NameValue{
+					{
+						Name:  "app",
+						Value: "istio-ingress",
 					},
-					map[string]interface{}{
-						"name":  "istio",
-						"value": "ingress",
+					{
+						Name:  "istio",
+						Value: "ingress",
 					},
 				}
 			}
 
 			if tt.withVersionMonitoring {
-				parameter["controller"] = map[string]any{
-					"versionMonitoring": map[string]any{
-						"prometheusAddress": mockPrometheusAddress,
-					},
+				capOperatorSpec.Controller.VersionMonitoring = &v1alpha1.VersionMonitoring{
+					PrometheusAddress: mockPrometheusAddress,
 				}
+
 				if !tt.omitVersionMonitoringDurations {
-					controller := parameter["controller"].(map[string]any)
-					vm := controller["versionMonitoring"].(map[string]any)
-					vm["metricsEvaluationInterval"] = "5m"
-					vm["promClientAcquireRetryDelay"] = "5h"
+					capOperatorSpec.Controller.VersionMonitoring.MetricsEvaluationInterval = "5m"
+					capOperatorSpec.Controller.VersionMonitoring.PromClientAcquireRetryDelay = "5h"
 				}
 			}
 
-			transformedParameters, err := transformer.TransformParameters("cap-operator-system", "cap-operator.sme.sap.com", componentoperatorruntimetypes.UnstructurableMap(parameter))
+			transformedParameters, err := transformer.TransformParameters("cap-operator-system", "cap-operator.sme.sap.com", componentoperatorruntimetypes.UnstructurableMap(capOperatorSpec.ToUnstructured()))
 			if !tt.expectError && err != nil {
 				t.Error(err)
 			}
@@ -194,12 +225,67 @@ func TestTransformer(t *testing.T) {
 			}
 
 			transformedParametersMap := transformedParameters.ToUnstructured()
-			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["dnsTarget"].(string) != expectedDnsTarget {
+			transformedSubscriptionServer := transformedParametersMap["subscriptionServer"].(map[string]interface{})
+			transformedWebhook := transformedParametersMap["webhook"].(map[string]interface{})
+
+			if transformedSubscriptionServer["dnsTarget"].(string) != expectedDnsTarget {
 				t.Error("unexpected value returned for subscriptionServer.dnsTarget")
 			}
-			if transformedParametersMap["subscriptionServer"].(map[string]interface{})["domain"].(string) != "cop.some.cluster.sap" {
+
+			if transformedSubscriptionServer["domain"].(string) != "cop.some.cluster.sap" {
 				t.Error("unexpected value returned for subscriptionServer.domain")
 			}
+
+			if tt.withCertManager {
+				// subscription server checks
+				if transformedSubscriptionServer["certificateManager"].(string) != "CertManager" {
+					t.Error("expected subscriptionServer.certificateManager to be `CertManager`")
+				}
+				certificateConfig := transformedSubscriptionServer["certificateConfig"].(map[string]any)
+				if len(certificateConfig["certManager"].(map[string]interface{})) == 0 {
+					t.Error("expected subscriptionServer.certificateConfig.certManager not to be empty")
+				}
+				if len(certificateConfig["gardener"].(map[string]interface{})) != 0 {
+					t.Error("expected subscriptionServer.certificateConfig.gardener to be empty")
+				}
+
+				// webhook checks
+				if transformedWebhook["certificateManager"].(string) != "CertManager" {
+					t.Error("expected webhook.certificateManager to be `CertManager`")
+				}
+				certificateConfig = transformedWebhook["certificateConfig"].(map[string]any)
+				if len(certificateConfig["certManager"].(map[string]interface{})) == 0 {
+					t.Error("expected webhook.certificateConfig.certManager not to be empty")
+				}
+				if len(certificateConfig["gardener"].(map[string]interface{})) != 0 {
+					t.Error("expected webhook.certificateConfig.gardener to be empty")
+				}
+			} else {
+				// subscription server checks
+				if transformedSubscriptionServer["certificateManager"].(string) != "Gardener" {
+					t.Error("expected subscriptionServer.certificateManager to be `Gardener`")
+				}
+				certificateConfig := transformedSubscriptionServer["certificateConfig"].(map[string]any)
+				if len(certificateConfig["gardener"].(map[string]interface{})) == 0 {
+					t.Error("expected subscriptionServer.certificateConfig.gardener not to be empty")
+				}
+				if len(certificateConfig["certManager"].(map[string]interface{})) != 0 {
+					t.Error("expected subscriptionServer.certificateConfig.certManager to be empty")
+				}
+
+				// webhook checks
+				if transformedWebhook["certificateManager"].(string) != "Gardener" {
+					t.Error("expected webhook.certificateManager to be `Gardener`")
+				}
+				certificateConfig = transformedWebhook["certificateConfig"].(map[string]any)
+				if len(certificateConfig["gardener"].(map[string]interface{})) == 0 {
+					t.Error("expected webhook.certificateConfig.gardener not to be empty")
+				}
+				if len(certificateConfig["certManager"].(map[string]interface{})) != 0 {
+					t.Error("expected webhook.certificateConfig.certManager to be empty")
+				}
+			}
+
 			transformedController := transformedParametersMap["controller"].(map[string]interface{})
 			if transformedController["dnsTarget"].(string) != expectedDnsTarget {
 				t.Error("unexpected value returned for controller.dnsTarget")

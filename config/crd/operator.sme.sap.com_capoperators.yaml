@@ -1947,10 +1947,102 @@ spec:
               subscriptionServer:
                 description: SubscriptionServer specification
                 properties:
+                  certificateConfig:
+                    description: Certificate configuration
+                    anyOf:
+                    - oneOf:
+                      - required:
+                        - certManager
+                      - required:
+                        - gardener
+                    - not:
+                        required:
+                        - certManager
+                        - gardener
+                    properties:
+                      certManager:
+                        description: CertManager configuration
+                        properties:
+                          issuerGroup:
+                            description: Issuer group
+                            type: string
+                          issuerKind:
+                            description: Issuer kind
+                            type: string
+                          issuerName:
+                            description: Issuer name
+                            type: string
+                        type: object
+                      gardener:
+                        description: Gardener configuration
+                        properties:
+                          issuerName:
+                            description: Issuer name
+                            type: string
+                          issuerNamespace:
+                            description: Issuer namespace
+                            type: string
+                        type: object
+                    type: object
+                  certificateManager:
+                    description: Certificate manager which can be either `Gardener`
+                      or `CertManager`
+                    enum:
+                    - Gardener
+                    - CertManager
+                    type: string
                   subDomain:
                     type: string
                 required:
                 - subDomain
+                type: object
+              webhook:
+                description: Webhook specification
+                properties:
+                  certificateConfig:
+                    description: Certificate configuration
+                    anyOf:
+                    - oneOf:
+                      - required:
+                        - certManager
+                      - required:
+                        - gardener
+                    - not:
+                        required:
+                        - certManager
+                        - gardener
+                    properties:
+                      certManager:
+                        description: CertManager configuration
+                        properties:
+                          issuerGroup:
+                            description: Issuer group
+                            type: string
+                          issuerKind:
+                            description: Issuer kind
+                            type: string
+                          issuerName:
+                            description: Issuer name
+                            type: string
+                        type: object
+                      gardener:
+                        description: Gardener configuration
+                        properties:
+                          issuerName:
+                            description: Issuer name
+                            type: string
+                          issuerNamespace:
+                            description: Issuer namespace
+                            type: string
+                        type: object
+                    type: object
+                  certificateManager:
+                    description: Certificate manager which can be either `Default`
+                      or `CertManager`
+                    enum:
+                    - Default
+                    - CertManager
+                    type: string
                 type: object
             required:
             - subscriptionServer

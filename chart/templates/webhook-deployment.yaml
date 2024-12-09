@@ -16,6 +16,8 @@ spec:
       operator.sme.sap.com/release: {{.Release.Name}}
   template:
     metadata:
+      annotations:
+        operator.sme.sap.com/checksum-cert: {{ include (print $.Template.BasePath "/webhook-config.yaml") . | sha256sum }}
       labels:
         operator.sme.sap.com/app: webhook
         operator.sme.sap.com/category: controller
@@ -58,7 +60,7 @@ spec:
       serviceAccountName: {{.Release.Name}}-webhook
       automountServiceAccountToken: true
       containers:
-      {{- if eq .Values.webhook.sidecar true }}  
+      {{- if eq .Values.webhook.sidecar true }}
       - name: request-sidecar
         image: alpine
         command:
@@ -108,7 +110,7 @@ spec:
       volumes:
       - name: ssl
         secret:
-          secretName: {{.Release.Name}}-webhook-tls
+          secretName: {{ if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager") }} {{.Release.Name}}-webhook-tls-managed {{ else }} {{.Release.Name}}-webhook-tls {{ end }}
           items:
           - key: tls.key
             path: tls.key
