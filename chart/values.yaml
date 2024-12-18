@@ -25,8 +25,8 @@ podAnnotations: {}
 monitoring:
   # -- Optionally enable Prometheus monitoring for all components (disabled by default)
   enabled: false
-  # -- Labels for selecting ConfigMaps with dashboards in the grafana sidecar
-  grafanaDashboardLabels:
+  # -- Labels for selecting ConfigMaps with dashboards in the Grafana sidecar
+  grafanaDashboardConfigMapLabels:
     grafana_dashboard: "1"
 
 controller:
