@@ -76,7 +76,7 @@ params:
     taxonomyCloud: ["tags", "categories"]
 
   copyright:
-    authors: SAP SE or an SAP affiliate company and cap-operator contributors
+    authors: SAP SE or an SAP affiliate company
     from_year: 2023
   # privacy_policy = "https://policies.google.com/privacy"
 
