@@ -2135,7 +2135,8 @@ spec:
                     managedTypes:
                       description: Managed types.
                       items:
-                        description: TypeInfo represents a Kubernetes type.
+                        description: TypeVersionInfo represents a Kubernetes type
+                          version.
                         properties:
                           group:
                             description: API group.
