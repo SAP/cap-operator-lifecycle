@@ -3,8 +3,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-grafana-dashboard
-  {{- if .Values.monitoring.grafanaDashboardConfigMapLabels }}
-  labels: {{- toYaml .Values.monitoring.grafanaDashboardConfigMapLabels | trim | nindent 6 }}
+  {{- if .Values.monitoring.grafana.dashboard.configMapLabels }}
+  labels: {{- toYaml .Values.monitoring.grafana.dashboard.configMapLabels | trim | nindent 6 }}
   {{- end }}
 data:
   grafana-dashboard.json: {{ .Files.Get "dashboards/grafana-dashboard.json" | toJson }}
