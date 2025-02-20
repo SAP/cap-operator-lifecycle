@@ -284,20 +284,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "/.*controller/"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 9,
@@ -329,7 +316,7 @@
           "editorMode": "code",
           "exemplar": false,
           "expr": "increase(cap_op_tenant_operation_failures{}[$duration])",
-          "format": "time_series",
+          "format": "table",
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
@@ -339,16 +326,17 @@
       "title": "Tenant Operation Failures",
       "transformations": [
         {
-          "id": "joinByLabels",
+          "id": "filterFieldsByName",
           "options": {
-            "join": [
-              "operation",
-              "exported_namespace",
-              "name",
-              "tenant_id",
-              "app"
-            ],
-            "value": "container"
+            "include": {
+              "names": [
+                "app",
+                "exported_namespace",
+                "name",
+                "operation",
+                "tenant_id"
+              ]
+            }
           }
         }
       ],
