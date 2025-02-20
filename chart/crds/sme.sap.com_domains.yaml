@@ -4,16 +4,16 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.17.2
-  name: captenants.sme.sap.com
+  name: domains.sme.sap.com
 spec:
   group: sme.sap.com
   names:
-    kind: CAPTenant
-    listKind: CAPTenantList
-    plural: captenants
+    kind: Domain
+    listKind: DomainList
+    plural: domains
     shortNames:
-    - cat
-    singular: captenant
+    - dom
+    singular: domain
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -22,9 +22,6 @@ spec:
       type: date
     - jsonPath: .status.state
       name: State
-      type: string
-    - jsonPath: .status.currentCAPApplicationVersionInstance
-      name: Current Version
       type: string
     name: v1alpha1
     schema:
@@ -38,23 +35,33 @@ spec:
             type: object
           spec:
             properties:
-              capApplicationInstance:
-                type: string
-              subDomain:
-                type: string
-              tenantId:
-                type: string
-              version:
-                type: string
-              versionUpgradeStrategy:
+              dnsMode:
                 enum:
-                - always
-                - never
+                - Node
+                - Wildcard
+                - Subdomain
+                type: string
+              dnsTarget:
+                pattern: ^[a-z0-9-.]+$
+                type: string
+              domain:
+                pattern: ^[a-z0-9-.]+$
+                type: string
+              ingressSelector:
+                additionalProperties:
+                  type: string
+                type: object
+              tlsMode:
+                enum:
+                - Simple
+                - Mutual
                 type: string
             required:
-            - capApplicationInstance
-            - subDomain
-            - tenantId
+            - dnsMode
+            - dnsTarget
+            - domain
+            - ingressSelector
+            - tlsMode
             type: object
           status:
             properties:
@@ -94,27 +101,16 @@ spec:
                   - type
                   type: object
                 type: array
-              currentCAPApplicationVersionInstance:
-                type: string
-              lastFullReconciliationTime:
-                format: date-time
-                type: string
               observedGeneration:
                 format: int64
                 type: integer
-              previousCAPApplicationVersions:
-                items:
-                  type: string
-                type: array
               state:
                 enum:
                 - ""
                 - Ready
-                - Provisioning
-                - Upgrading
+                - Error
+                - Processing
                 - Deleting
-                - ProvisioningError
-                - UpgradeError
                 type: string
             required:
             - state
