@@ -27,7 +27,8 @@ metadata:
   namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
 spec:
   commonName: {{.Values.subscriptionServer.domain}}
-  secretName: {{.Release.Name}}-subscription-server-gardener
+  secretRef:
+    name: {{.Release.Name}}-subscription-server-gardener
   {{- if .Values.subscriptionServer.certificateConfig.gardener.issuerName }}
   issuerRef:
     name: {{.Values.subscriptionServer.certificateConfig.gardener.issuerName}}
