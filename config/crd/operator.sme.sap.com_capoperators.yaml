@@ -1963,6 +1963,20 @@ spec:
                   enabled:
                     description: Optionally enable Prometheus monitoring for all components
                     type: boolean
+                  grafana:
+                    description: Grafana configuration
+                    properties:
+                      dashboard:
+                        description: Dashboard configuration
+                        properties:
+                          configMapLabels:
+                            additionalProperties:
+                              type: string
+                            description: Labels for selecting ConfigMaps with dashboards
+                              in Grafana
+                            type: object
+                        type: object
+                    type: object
                 required:
                 - enabled
                 type: object
