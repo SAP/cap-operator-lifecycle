@@ -148,6 +148,8 @@ rules:
   - captenantoperations
   - captenantoutputs
   - captenants
+  - clusterdomains
+  - domains
   verbs:
   - get
   - list
