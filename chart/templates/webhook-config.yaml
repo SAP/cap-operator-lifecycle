@@ -41,27 +41,44 @@ metadata:
 type: Opaque
 data:
   {{- $cn := printf "%s-webhook.%s.svc" .Release.Name .Release.Namespace }}
+  {{- $certValidityDays := 1000 }}
+  {{- $regenThresholdDays := 60 }}
+  {{- $currentTime := now | unixEpoch }}
   {{- $data := (lookup "v1" "Secret" .Release.Namespace (printf "%s-webhook-tls" .Release.Name )).data }}
   {{- if $data }}
     {{- $caCert = index $data "ca.crt" }}
     {{- if (hasKey $data "ca.key") }}
       {{- $caKey := index $data "ca.key" }}
-      ca.crt: {{ $caCert }}
-      ca.key: {{ $caKey }}
-      {{- $customCa := buildCustomCert $caCert $caKey }}
-      {{- $customCaCert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 1000 $customCa }}
-      tls.crt: {{ $customCaCert.Cert | b64enc }}
-      tls.key: {{ $customCaCert.Key | b64enc }}
+      {{- $expiryTime := index $data "tls.expiry" | default "0" | b64dec | int }}
+      {{- $daysLeft := div (sub $expiryTime $currentTime) 86400 }}
+      {{- if lt $daysLeft $regenThresholdDays }}
+        {{- $newCertExpiry := add $currentTime (mul $certValidityDays 86400) }}
+        {{- $customCa := buildCustomCert $caCert $caKey }}
+        {{- $customCaCert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") $certValidityDays $customCa }}
+        ca.crt: {{ $caCert }}
+        ca.key: {{ $caKey }}
+        tls.crt: {{ $customCaCert.Cert | b64enc }}
+        tls.key: {{ $customCaCert.Key | b64enc }}
+        tls.expiry: {{ $newCertExpiry | printf "%d" | b64enc }}
+      {{- else }}
+        ca.crt: {{ $caCert }}
+        ca.key: {{ $caKey }}
+        tls.crt: {{ index $data "tls.crt" }}
+        tls.key: {{ index $data "tls.key" }}
+        tls.expiry: {{ $expiryTime | printf "%d" | b64enc }}
+      {{- end }}
     {{- else }}
       {{ $data | toYaml | nindent 2 }}
     {{- end }}
   {{- else }}
+    {{- $newCertExpiry := add $currentTime (mul $certValidityDays 86400) }}
     {{- $ca := genCA (printf "%s-webhook-ca" .Release.Name  ) 3650 }}
-    {{- $cert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") 1000 $ca }}
+    {{- $cert := genSignedCert $cn (list "127.0.0.1") (list $cn "localhost") $certValidityDays $ca }}
     ca.crt: {{ $ca.Cert | b64enc }}
     ca.key: {{ $ca.Key | b64enc }}
     tls.crt: {{ $cert.Cert | b64enc }}
     tls.key: {{ $cert.Key | b64enc }}
+    tls.expiry: {{ $newCertExpiry | printf "%d" | b64enc }}
     {{- $caCert = $ca.Cert | b64enc }}
   {{- end }}
 {{- end }}

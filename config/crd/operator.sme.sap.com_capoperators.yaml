@@ -1977,6 +1977,11 @@ spec:
                             type: object
                         type: object
                     type: object
+                  serviceMonitorSelectorLabels:
+                    additionalProperties:
+                      type: string
+                    description: Prometheus service monitor selector labels
+                    type: object
                 required:
                 - enabled
                 type: object

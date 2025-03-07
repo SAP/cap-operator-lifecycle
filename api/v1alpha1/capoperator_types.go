@@ -64,6 +64,8 @@ type Webhook struct {
 type Monitoring struct {
 	// Optionally enable Prometheus monitoring for all components
 	Enabled bool `json:"enabled"`
+	// Prometheus service monitor selector labels
+	ServiceMonitorSelectorLabels map[string]string `json:"serviceMonitorSelectorLabels,omitempty"`
 	// Grafana configuration
 	Grafana *Grafana `json:"grafana,omitempty"`
 }

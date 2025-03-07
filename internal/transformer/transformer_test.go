@@ -215,6 +215,9 @@ func TestTransformer(t *testing.T) {
 			if tt.withMonitoringGrafanaDashboard {
 				capOperatorSpec.Monitoring = v1alpha1.Monitoring{
 					Enabled: true,
+					ServiceMonitorSelectorLabels: map[string]string{
+						"release": "prometheus-operator",
+					},
 					Grafana: &v1alpha1.Grafana{
 						Dashboard: &v1alpha1.GrafanaDashboard{
 							ConfigMapLabels: map[string]string{
@@ -332,6 +335,10 @@ func TestTransformer(t *testing.T) {
 				dashboard := transformedParametersMap["monitoring"].(map[string]any)["grafana"].(map[string]any)["dashboard"].(map[string]any)
 				if dashboard["configMapLabels"].(map[string]interface{})["grafana_dashboard"] != "1" {
 					t.Error("expected monitoring.grafana.dashboard.configMapLabels to be set")
+				}
+				serviceMonitorSelectorLabels := transformedParametersMap["monitoring"].(map[string]any)["serviceMonitorSelectorLabels"].(map[string]any)
+				if serviceMonitorSelectorLabels["release"] != "prometheus-operator" {
+					t.Error("expected monitoring.serviceMonitorSelectorLabels to be set")
 				}
 			}
 		})
