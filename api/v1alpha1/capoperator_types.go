@@ -64,6 +64,10 @@ type Webhook struct {
 type Monitoring struct {
 	// Optionally enable Prometheus monitoring for all components
 	Enabled bool `json:"enabled"`
+	// Prometheus service monitor selector labels
+	ServiceMonitorSelectorLabels map[string]string `json:"serviceMonitorSelectorLabels,omitempty"`
+	// Grafana configuration
+	Grafana *Grafana `json:"grafana,omitempty"`
 }
 
 type SubscriptionServer struct {
@@ -93,6 +97,16 @@ type VersionMonitoring struct {
 	MetricsEvaluationInterval Duration `json:"metricsEvaluationInterval,omitempty"`
 	// The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt
 	PromClientAcquireRetryDelay Duration `json:"promClientAcquireRetryDelay,omitempty"`
+}
+
+type Grafana struct {
+	// Dashboard configuration
+	Dashboard *GrafanaDashboard `json:"dashboard,omitempty"`
+}
+
+type GrafanaDashboard struct {
+	// Labels for selecting ConfigMaps with dashboards in Grafana
+	ConfigMapLabels map[string]string `json:"configMapLabels,omitempty"`
 }
 
 type CertificateConfig struct {

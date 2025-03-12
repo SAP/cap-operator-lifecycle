@@ -114,6 +114,9 @@ metadata:
     operator.sme.sap.com/app: subscription-server
     operator.sme.sap.com/category: controller
     operator.sme.sap.com/release: {{.Release.Name}}
+    {{- if .Values.monitoring.serviceMonitorSelectorLabels }}
+    {{- toYaml .Values.monitoring.serviceMonitorSelectorLabels | trim | nindent 4 }}
+    {{- end }}
 spec:
   selector:
     matchLabels:

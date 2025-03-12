@@ -88,6 +88,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - networking.istio.io
   resources:
   - gateways
@@ -136,6 +148,8 @@ rules:
   - captenantoperations
   - captenantoutputs
   - captenants
+  - clusterdomains
+  - domains
   verbs:
   - get
   - list

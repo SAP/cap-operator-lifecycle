@@ -31,6 +31,7 @@ func TestTransformer(t *testing.T) {
 		omitVersionMonitoringDurations     bool
 		withControllerVolumes              bool
 		withCertManager                    bool
+		withMonitoringGrafanaDashboard     bool
 	}{
 		{
 			name:                       "With dnsTarget and without ingress gateway labels",
@@ -83,6 +84,14 @@ func TestTransformer(t *testing.T) {
 			ingressGatewayLabelsFilled: true,
 			expectError:                false,
 			withCertManager:            true,
+		},
+		{
+			name:                           "With monitoring and grafana dashboard",
+			dnsTargetFilled:                false,
+			ingressGatewayLabelsFilled:     true,
+			expectError:                    false,
+			withCertManager:                true,
+			withMonitoringGrafanaDashboard: true,
 		},
 	}
 	for _, tt := range tests {
@@ -203,6 +212,22 @@ func TestTransformer(t *testing.T) {
 				}
 			}
 
+			if tt.withMonitoringGrafanaDashboard {
+				capOperatorSpec.Monitoring = v1alpha1.Monitoring{
+					Enabled: true,
+					ServiceMonitorSelectorLabels: map[string]string{
+						"release": "prometheus-operator",
+					},
+					Grafana: &v1alpha1.Grafana{
+						Dashboard: &v1alpha1.GrafanaDashboard{
+							ConfigMapLabels: map[string]string{
+								"grafana_dashboard": "1",
+							},
+						},
+					},
+				}
+			}
+
 			transformedParameters, err := transformer.TransformParameters("cap-operator-system", "cap-operator.sme.sap.com", componentoperatorruntimetypes.UnstructurableMap(capOperatorSpec.ToUnstructured()))
 			if !tt.expectError && err != nil {
 				t.Error(err)
@@ -303,6 +328,17 @@ func TestTransformer(t *testing.T) {
 							t.Error("expected version monitoring durations to be unset")
 						}
 					}
+				}
+			}
+
+			if tt.withMonitoringGrafanaDashboard {
+				dashboard := transformedParametersMap["monitoring"].(map[string]any)["grafana"].(map[string]any)["dashboard"].(map[string]any)
+				if dashboard["configMapLabels"].(map[string]interface{})["grafana_dashboard"] != "1" {
+					t.Error("expected monitoring.grafana.dashboard.configMapLabels to be set")
+				}
+				serviceMonitorSelectorLabels := transformedParametersMap["monitoring"].(map[string]any)["serviceMonitorSelectorLabels"].(map[string]any)
+				if serviceMonitorSelectorLabels["release"] != "prometheus-operator" {
+					t.Error("expected monitoring.serviceMonitorSelectorLabels to be set")
 				}
 			}
 		})

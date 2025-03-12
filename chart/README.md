@@ -1,6 +1,6 @@
 # cap-operator
 
-![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![AppVersion: 0.13.0](https://img.shields.io/badge/AppVersion-0.13.0-informational?style=flat-square)
+![Version: 0.14.0](https://img.shields.io/badge/Version-0.14.0-informational?style=flat-square) ![AppVersion: 0.14.0](https://img.shields.io/badge/AppVersion-0.14.0-informational?style=flat-square)
 
 Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 
@@ -21,6 +21,7 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | podAnnotations | object | `{}` | Additional pod annotations for all components |
 | monitoring | object | `{"enabled":false,"grafana":{"dashboard":{"configMapLabels":{"grafana_dashboard":"1"}}}}` | Monitoring configuration for all components |
 | monitoring.enabled | bool | `false` | Optionally enable Prometheus monitoring for all components (disabled by default) |
+| monitoring.serviceMonitorSelectorLabels | object | `{}` | Prometheus service monitor selector labels |
 | monitoring.grafana | object | `{"dashboard":{"configMapLabels":{"grafana_dashboard":"1"}}}` | Grafana configuration |
 | monitoring.grafana.dashboard.configMapLabels | object | `{"grafana_dashboard":"1"}` | Labels for selecting ConfigMaps with dashboards in Grafana |
 | controller.replicas | int | `1` | Replicas |

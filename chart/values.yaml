@@ -25,6 +25,8 @@ podAnnotations: {}
 monitoring:
   # -- Optionally enable Prometheus monitoring for all components (disabled by default)
   enabled: false
+  # -- Prometheus service monitor selector labels
+  serviceMonitorSelectorLabels: {}
   # -- Grafana configuration
   grafana:
     dashboard:
