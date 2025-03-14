@@ -22,6 +22,8 @@ CAP Operator Manager uses resource `CAPOperator` to install the CAP Operator. Th
 - `controller.volumes` - Optionally specify list of additional volumes for the controller pod(s)
 - `controller.volumeMounts` - Optionally specify list of additional volumeMounts for the controller container(s)
 - `monitoring.enabled` _bool_ - Optionally enable Prometheus monitoring for all components
+- `monitoring.serviceMonitorSelectorLabels` - Optionally specify the labels that Prometheus will use to select the ServiceMonitors
+- `monitoring.grafana.dashboard.configMapLabels` - Optionally specify the labels used to select ConfigMaps containing dashboards in Grafana
 - `webhook.certificateManager` _string_ - Certificate manager which can be set to either `Default` or `CertManager`, with the default value being `Default`
 - `webhook.certificateConfig.certManager` - Configuration for CertManager certificates, applicable only if `webhook.certificateManager` is set to `CertManager`. This allows you to specify the `issuerGroup`, `issuerKind` and `issuerName`.
 
@@ -47,6 +49,12 @@ spec:
       value: istio-ingressgateway
   monitoring:
     enabled: true
+    serviceMonitorSelectorLabels:
+      release: "prometheus-operator"
+    grafana:
+      dashboard:
+        configMapLabels:
+          grafana_dashboard: "1"
   controller:
     detailedOperationalMetrics: true
     versionMonitoring:
