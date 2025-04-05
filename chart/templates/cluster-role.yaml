@@ -1,0 +1,35 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{.Release.Name}}-view
+  labels:
+    operator.sme.sap.com/release: {{.Release.Name}}
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+rules:
+- apiGroups: ["sme.sap.com"]
+  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "captenants", "captenants/status", "captenantoperations", "captenantoperations/status", "captenantoutputs"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{.Release.Name}}-edit
+  labels:
+    operator.sme.sap.com/release: {{.Release.Name}}
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+rules:
+- apiGroups: ["sme.sap.com"]
+  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{.Release.Name}}-admin
+  labels:
+    operator.sme.sap.com/release: {{.Release.Name}}
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+rules:
+- apiGroups: ["sme.sap.com"]
+  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "captenants", "captenants/status", "captenantoperations", "captenantoperations/status", "captenantoutputs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
