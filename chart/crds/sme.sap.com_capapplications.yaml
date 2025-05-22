@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.2
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: capapplications.sme.sap.com
 spec:
   group: sme.sap.com
@@ -99,9 +99,6 @@ spec:
                       pattern: ^[a-z0-9-.]+$
                       type: string
                     type: array
-                required:
-                - istioIngressGatewayLabels
-                - primary
                 type: object
               globalAccountId:
                 type: string
@@ -118,7 +115,6 @@ spec:
             required:
             - btp
             - btpAppName
-            - domains
             - globalAccountId
             type: object
           status:
@@ -167,6 +163,10 @@ spec:
               observedGeneration:
                 format: int64
                 type: integer
+              observedSubdomains:
+                items:
+                  type: string
+                type: array
               servicesOnly:
                 type: boolean
               state:
