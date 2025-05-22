@@ -118,11 +118,51 @@ webhooks:
       - UPDATE
       - DELETE
       resources:
-      - pods
       - capapplications
       - captenants
       - capapplicationversions
       - captenantoutputs
+      - domains
+      - clusterdomains
+  sideEffects: NoneOnDryRun
+  timeoutSeconds: 15 # https://github.com/gardener/gardener/pull/6090
+  failurePolicy: Fail
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: cap-operator
+  labels:
+    operator.sme.sap.com/app: webhook
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+  {{- if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager") }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{.Release.Namespace}}/{{.Release.Name}}-webhook-cert
+  {{- end }}
+webhooks:
+- name: cap-operator.sme.sap.com
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    {{- if not (and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager")) }}
+    caBundle: {{ $caCert }}
+    {{- end }}
+    service:
+      name: {{.Release.Name}}-webhook
+      namespace: {{ .Release.Namespace }}
+      path: /mutate
+      port: {{ .Values.webhook.service.port }}
+  rules:
+    - apiGroups:
+      - sme.sap.com
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - capapplications
   sideEffects: NoneOnDryRun
   timeoutSeconds: 15 # https://github.com/gardener/gardener/pull/6090
   failurePolicy: Fail
