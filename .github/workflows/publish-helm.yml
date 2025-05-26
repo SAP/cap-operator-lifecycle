@@ -13,7 +13,7 @@ jobs:
     name: Create release tag
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
+      contents: write # allows creating releases / tags
     outputs:
       tag: ${{ steps.get_tag.outputs.tag }}
       upload_url: ${{ steps.create_release.outputs.upload_url }}
