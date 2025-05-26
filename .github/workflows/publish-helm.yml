@@ -12,6 +12,8 @@ jobs:
   create_release_tag:
     name: Create release tag
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     outputs:
       tag: ${{ steps.get_tag.outputs.tag }}
       upload_url: ${{ steps.create_release.outputs.upload_url }}
