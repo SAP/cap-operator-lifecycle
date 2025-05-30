@@ -7,7 +7,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-view: "true"
 rules:
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "captenants", "captenants/status", "captenantoperations", "captenantoperations/status", "captenantoutputs"]
+  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "captenants", "captenants/status", "captenantoperations", "captenantoperations/status", "captenantoutputs", "domains", "domains/status", "clusterdomains", "clusterdomains/status"]
   verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -19,7 +19,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
 rules:
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status"]
+  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "domains", "domains/status", "clusterdomains", "clusterdomains/status"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -31,5 +31,5 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
 rules:
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "captenants", "captenants/status", "captenantoperations", "captenantoperations/status", "captenantoutputs"]
+  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "captenants", "captenants/status", "captenantoperations", "captenantoperations/status", "captenantoutputs", "domains", "domains/status", "clusterdomains", "clusterdomains/status"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
