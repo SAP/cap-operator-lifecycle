@@ -13,11 +13,8 @@ kind: ClusterRole
 metadata:
   name: {{.Release.Name}}-webhook
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "watch", "list"]
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications","capapplicationversions", "captenants", "captenantoperations", "captenantoutputs"]
+  resources: ["capapplications","capapplicationversions", "captenants", "captenantoperations", "captenantoutputs", "domains", "clusterdomains"]
   verbs:  ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
