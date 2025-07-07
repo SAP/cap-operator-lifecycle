@@ -75,7 +75,22 @@ spec:
       {{- else if and (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") (eq .Values.subscriptionServer.certificateManager "Gardener") }}
       credentialName: {{.Release.Name}}-subscription-server-gardener
       {{- end }}
-      mode: SIMPLE
+      mode: OPTIONAL_MUTUAL
+{{- if (ne .Values.subscriptionServer.certificateConfig.additionalCaBundle "") }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  {{- if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.subscriptionServer.certificateManager "CertManager") }}
+  name: {{.Release.Name}}-subscription-server-cert-manager-cacert
+  {{- else if and (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") (eq .Values.subscriptionServer.certificateManager "Gardener") }}
+  name: {{.Release.Name}}-subscription-server-gardener-cacert
+  {{- end }}
+  namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
+type: Opaque
+data:
+  ca.crt: {{ .Values.subscriptionServer.certificateConfig.additionalCaBundle | b64enc | quote }}
+{{- end}}
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -92,10 +107,18 @@ spec:
     - method:
         regex: PUT|DELETE
       uri:
+        prefix: /sms/provision/
+    - method:
+        regex: PUT|DELETE
+      uri:
         prefix: /provision/
     route:
     - destination:
         host: {{.Release.Name}}-subscription-server.{{.Release.Namespace}}.svc.cluster.local
         port:
           number: {{.Values.subscriptionServer.port}}
+      headers:
+        request:
+          set:
+            x-forwarded-client-cert: '%DOWNSTREAM_PEER_CERT%'
       weight: 100
