@@ -167,7 +167,7 @@ subscriptionServer:
       # -- Issuer name
       issuerName: ""
     # -- Optionally specify additional caBundle
-    additionalCaBundle: |
+    additionalCACertificate: |
       -----BEGIN CERTIFICATE-----
       MIIFZjCCA06gAwIBAgIQGHcPvmUGa79M6pM42bGFYjANBgkqhkiG9w0BAQsFADBN
       MQswCQYDVQQGEwJERTERMA8GA1UEBwwIV2FsbGRvcmYxDzANBgNVBAoMBlNBUCBT

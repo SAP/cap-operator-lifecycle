@@ -76,7 +76,7 @@ spec:
       credentialName: {{.Release.Name}}-subscription-server-gardener
       {{- end }}
       mode: OPTIONAL_MUTUAL
-{{- if (ne .Values.subscriptionServer.certificateConfig.additionalCaBundle "") }}
+{{- if (ne .Values.subscriptionServer.certificateConfig.additionalCACertificate "") }}
 ---
 apiVersion: v1
 kind: Secret
@@ -89,7 +89,7 @@ metadata:
   namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
 type: Opaque
 data:
-  ca.crt: {{ .Values.subscriptionServer.certificateConfig.additionalCaBundle | b64enc | quote }}
+  ca.crt: {{ .Values.subscriptionServer.certificateConfig.additionalCACertificate | b64enc | quote }}
 {{- end}}
 ---
 apiVersion: networking.istio.io/v1beta1
