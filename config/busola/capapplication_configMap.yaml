@@ -43,10 +43,6 @@ data:
             source: spec.provider.subDomain
           - name: Provider Tenant Id
             source: spec.provider.tenantId
-          - name: Primary Domain
-            source: spec.domains.primary
-          - name: Secondary Domain
-            source: $join(spec.domains.secondary, ', ')
           - name: State
             source: status.state
             widget: Badge
@@ -58,6 +54,20 @@ data:
                 - Consistent
               critical:
                 - Error
+      - name: Domain References
+        source: spec.domainRefs
+        widget: Table
+        children:
+          - name: Kind
+            source: kind
+          - name: Name
+            source: name
+            widget: ResourceLink
+            resource:
+              name: $item.name
+              namespace: >-
+                $item.kind = "Domain" ? $root.metadata.namespace : ""
+              kind: $item.kind
       - name: Services / Secrets
         source: spec.btp.services
         widget: Table

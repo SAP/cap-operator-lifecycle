@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cap-operator-domains.sme.sap.com
+  labels:
+    app.kubernetes.io/name: cap-operator-domains.sme.sap.com
+    app.kubernetes.io/instance: cap-operator-domains.sme.sap.com
+    app.kubernetes.io/component: configmap
+    busola.io/extension: resource
+    busola.io/extension-version: '0.5'
+data:
+  dataSources: |
+    relatedCAs:
+      resource:
+        kind: CAPApplication
+        group: sme.sap.com
+        version: v1alpha1
+      filter: >-
+        $item.spec.domainRefs[name = $root.metadata.name and kind = 'Domain']
+  details: |
+    header: []
+    resourceGraph:
+      colorVariant: 3
+      dataSources:
+        - source: relatedCAs
+    body:
+      - name: Summary
+        widget: Panel
+        children:
+          - name: Domain
+            source: spec.domain
+          - name: DNS Mode
+            source: spec.dnsMode
+          - name: TLS Mode
+            source: spec.tlsMode
+          - name: Istio Ingress Selector
+            source: spec.ingressSelector
+          - name: State
+            source: status.state
+            widget: Badge
+            highlights:
+              information:
+                - Processing
+                - Deleting
+              positive:
+                - Ready
+              critical:
+                - Error
+      - name: Related CAP Applications
+        widget: ResourceList
+        source: $relatedCAs()
+      - name: Status
+        source: status.conditions
+        widget: Table
+        children:
+          - name: Type
+            source: type
+          - name: Status
+            source: status
+            widget: Badge
+            highlights:
+              positive:
+                - "True"
+              critical:
+                - "False"
+          - name: Reason
+            source: reason
+          - name: Last Transition Time
+            source: $readableTimestamp(lastTransitionTime)
+          - name: Message
+            source: message
+  form: |
+    []
+  general: |
+    resource:
+      kind: Domain
+      group: sme.sap.com
+      version: v1alpha1
+    name: Domains
+    category: CAP Operator
+    urlPath: domains
+    scope: namespace
+    features:
+      actions:
+        disableCreate: true
+        disableEdit: true
+  list: |
+    - name: Domain
+      source: spec.domain
+    - name: DNS Mode
+      source: spec.dnsMode
+    - name: State
+      source: status.state
+      widget: Badge
+      highlights:
+        information:
+          - Processing
+          - Deleting
+        positive:
+          - Ready
+        critical:
+          - Error
+  translations: |
+    en:
+      metadata.annotations: Annotations
+      metadata.labels: Labels
