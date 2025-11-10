@@ -167,6 +167,7 @@ subscriptionServer:
       # -- Issuer name
       issuerName: ""
     # -- Optionally specify additional CA Certificate
+    # @default -- this will contain the "SAP Cloud Root CA" certificate by default
     additionalCACertificate: |
       -----BEGIN CERTIFICATE-----
       MIIFZjCCA06gAwIBAgIQGHcPvmUGa79M6pM42bGFYjANBgkqhkiG9w0BAQsFADBN
