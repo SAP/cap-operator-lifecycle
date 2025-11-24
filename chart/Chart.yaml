@@ -1,5 +1,5 @@
 apiVersion: v2
 description: Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 name: cap-operator
-version: 0.21.0
-appVersion: 0.21.0
+version: 0.22.0
+appVersion: 0.22.0
