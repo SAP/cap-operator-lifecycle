@@ -27,17 +27,17 @@ const (
 	annotationDNSNames      = "dns.gardener.cloud/dnsnames"
 )
 
-type transformer struct {
+var setupLog = ctrl.Log.WithName("transformer")
+
+type parameterTransformer struct {
 	client client.Client
 }
 
-var setupLog = ctrl.Log.WithName("transformer")
-
-func NewParameterTransformer(client client.Client) *transformer {
-	return &transformer{client: client}
+func NewParameterTransformer(client client.Client) *parameterTransformer {
+	return &parameterTransformer{client: client}
 }
 
-func (t *transformer) TransformParameters(namespace string, name string, parameters componentoperatorruntimetypes.Unstructurable) (componentoperatorruntimetypes.Unstructurable, error) {
+func (t *parameterTransformer) TransformParameters(namespace string, name string, parameters componentoperatorruntimetypes.Unstructurable) (componentoperatorruntimetypes.Unstructurable, error) {
 	parameterMap := parameters.ToUnstructured()
 
 	if err := t.fillDomain(parameterMap); err != nil {
@@ -56,7 +56,7 @@ func replaceAsteriskDNSTarget(dnsTarget string) string {
 	return strings.ReplaceAll(dnsTarget, "*", "x")
 }
 
-func (t *transformer) fillDNSTarget(parameters map[string]any) error {
+func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
 
 	if parameters["controller"] == nil {
@@ -104,7 +104,7 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 	return nil
 }
 
-func (t *transformer) getDNSTargetUsingIngressGatewayLabels(ingressGatewayLabels []interface{}) (dnsTarget string, err error) {
+func (t *parameterTransformer) getDNSTargetUsingIngressGatewayLabels(ingressGatewayLabels []interface{}) (dnsTarget string, err error) {
 
 	ctx := context.TODO()
 
@@ -166,7 +166,7 @@ func convertIngressGatewayLabelsToMap(ingressGatewayLabels []interface{}) map[st
 	return ingressLabels
 }
 
-func (t *transformer) getLoadBalancerServices(ctx context.Context) ([]corev1.Service, error) {
+func (t *parameterTransformer) getLoadBalancerServices(ctx context.Context) ([]corev1.Service, error) {
 	// List all services in the same namespace as the istio-ingressgateway pod namespace
 	svcList := &corev1.ServiceList{TypeMeta: metav1.TypeMeta{Kind: "Service"}}
 	if err := t.client.List(ctx, svcList, &client.ListOptions{Namespace: istioIngressGWNamespace}); err != nil {
@@ -183,7 +183,7 @@ func (t *transformer) getLoadBalancerServices(ctx context.Context) ([]corev1.Ser
 	return loadBalancerSvcs, nil
 }
 
-func (t *transformer) getIngressGatewayService(ctx context.Context, relevantPodNames map[string]struct{}) (*corev1.Service, error) {
+func (t *parameterTransformer) getIngressGatewayService(ctx context.Context, relevantPodNames map[string]struct{}) (*corev1.Service, error) {
 	loadBalancerSvcs, err := t.getLoadBalancerServices(ctx)
 	if err != nil {
 		return nil, err
@@ -216,7 +216,7 @@ func (t *transformer) getIngressGatewayService(ctx context.Context, relevantPodN
 	return &ingressGwSvc, nil
 }
 
-func (t *transformer) fillDomain(parameters map[string]any) error {
+func (t *parameterTransformer) fillDomain(parameters map[string]any) error {
 	// get domain
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
 	domain, err := t.getDomain(subscriptionServer["subDomain"].(string))
@@ -234,7 +234,7 @@ func (t *transformer) fillDomain(parameters map[string]any) error {
 	return nil
 }
 
-func (t *transformer) getDomain(subDomain string) (string, error) {
+func (t *parameterTransformer) getDomain(subDomain string) (string, error) {
 	configMapObj := &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",

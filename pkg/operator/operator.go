@@ -107,12 +107,16 @@ func (o *Operator) Setup(mgr ctrl.Manager) error {
 		return errors.Wrap(err, "error checking manifest directory")
 	}
 
-	resourceGenerator, err := helm.NewHelmGeneratorWithParameterTransformer(
+	client := mgr.GetClient()
+	resourceGenerator, err := helm.NewTransformableHelmGenerator(
 		nil,
 		chartDir,
-		mgr.GetClient(),
-		transformer.NewParameterTransformer(mgr.GetClient()),
+		client,
 	)
+
+	resourceGenerator.WithParameterTransformer(transformer.NewParameterTransformer(client))
+	resourceGenerator.WithObjectTransformer(transformer.NewObjectTransformer(client))
+
 	if err != nil {
 		return errors.Wrap(err, "error initializing resource generator")
 	}
