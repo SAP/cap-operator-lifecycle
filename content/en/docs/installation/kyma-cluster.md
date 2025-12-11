@@ -8,10 +8,6 @@ description: >
   How to install CAP Operator in a Kyma cluster
 ---
 
-{{% alert title="Warning" color="warning" %}}
-The CAP Operator module is currently available only on SAP Internal Kyma clusters. To install it elsewhere, follow the guide [here](../local-cluster/)
-{{% /alert %}}
+The CAP Operator is available as a [Community module](https://kyma-project.io/external-content/community-modules/docs/user/README) in Kyma clusters.
 
-The CAP Operator is available in both `fast` and `regular` release channels.
-
-To enable the CAP Operator module in your Kyma cluster, refer to [Add and Delete a Kyma Module](https://help.sap.com/docs/btp/sap-business-technology-platform/enable-and-disable-kyma-module).
+To enable the CAP Operator in your Kyma environment, follow the steps outlined in the [Quick Install Guide](https://kyma-project.io/external-content/community-modules/docs/user/README.html#quick-install) provided in the Kyma Community Modules documentation.
