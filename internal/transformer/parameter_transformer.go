@@ -37,7 +37,7 @@ func NewParameterTransformer(client client.Client) *parameterTransformer {
 	return &parameterTransformer{client: client}
 }
 
-func (t *parameterTransformer) TransformParameters(namespace string, name string, parameters componentoperatorruntimetypes.Unstructurable) (componentoperatorruntimetypes.Unstructurable, error) {
+func (t *parameterTransformer) TransformParameters(_, _ string, parameters componentoperatorruntimetypes.Unstructurable) (componentoperatorruntimetypes.Unstructurable, error) {
 	parameterMap := parameters.ToUnstructured()
 
 	if err := t.fillDomain(parameterMap); err != nil {

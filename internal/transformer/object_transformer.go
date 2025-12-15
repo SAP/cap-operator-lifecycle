@@ -6,21 +6,16 @@ import (
 	"strings"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
+	"github.com/sap/component-operator-runtime/pkg/reconciler"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
-	// Annotation to check for retaining CRDs.
-	AnnotationRetainCRDs = "cap-operator.sme.sap.com/retain-crds"
+	// Annotation to check for retaining resources.
+	AnnotationRetainResources = "cap-operator.sme.sap.com/retain-resources"
 	// Annotation key for setting the delete policy.
 	AnnotationDeletePolicy = "cap-operator.sme.sap.com/delete-policy"
-
-	// GVK for CustomResourceDefinition
-	GVK_CRD_Group   = "apiextensions.k8s.io"
-	GVK_CRD_Version = "v1"
-	GVK_CRD_Kind    = "CustomResourceDefinition"
 )
 
 type objectTransformer struct {
@@ -38,16 +33,16 @@ func (ot *objectTransformer) TransformObjects(namespace string, name string, obj
 		return objects, err
 	}
 
-	// Step 2: Check for the retain-crds annotation value.
-	shouldRetain := ot.checkRetainCRDs(capOperator)
+	// Step 2: Check for the retain-resources annotation value.
+	shouldRetain := ot.checkRetainResources(capOperator)
 
 	// Step 3: Apply transformation logic based on the check.
 	if shouldRetain {
-		// If retain-crds="true", add delete-policy=orphan to all CRDs.
-		return ot.addDeletePolicyOrphan(objects), nil
+		// If retain-resources="true", add delete-policy=orphan to all resources.
+		return ot.addDeletePolicy(objects), nil
 	}
 
-	// If retain-crds is not "true", ensure the delete-policy annotation is removed from all CRDs.
+	// If retain-resources is not "true", ensure the delete-policy annotation is removed from all resources.
 	return ot.removeDeletePolicy(objects), nil
 }
 
@@ -72,44 +67,34 @@ func (ot *objectTransformer) getCAPOperator() (*operatorv1alpha1.CAPOperator, er
 	return &capOperatorList.Items[0], nil
 }
 
-// checkRetainCRDs checks if the CAPOperator is annotated to retain CRDs.
-func (ot *objectTransformer) checkRetainCRDs(capOperator *operatorv1alpha1.CAPOperator) bool {
-	retainCRDsValue, ok := capOperator.Annotations[AnnotationRetainCRDs]
-	return ok && strings.ToLower(retainCRDsValue) == "true"
+// checkRetainResources checks if the CAPOperator is annotated to retain resources.
+func (ot *objectTransformer) checkRetainResources(capOperator *operatorv1alpha1.CAPOperator) bool {
+	retainResourcesValue, ok := capOperator.Annotations[AnnotationRetainResources]
+	return ok && strings.ToLower(retainResourcesValue) == "true"
 }
 
-// addDeletePolicyOrphan iterates over objects and adds the orphan delete policy annotation to CRDs.
-func (ot *objectTransformer) addDeletePolicyOrphan(objects []client.Object) []client.Object {
-	crdGVK := schema.GroupVersionKind{Group: GVK_CRD_Group, Version: GVK_CRD_Version, Kind: GVK_CRD_Kind}
-
+// addDeletePolicy iterates over objects and adds orphan delete policy annotation to resources.
+func (ot *objectTransformer) addDeletePolicy(objects []client.Object) []client.Object {
 	for _, obj := range objects {
-		if obj.GetObjectKind().GroupVersionKind() == crdGVK {
-			annotations := obj.GetAnnotations()
-			if annotations == nil {
-				annotations = make(map[string]string)
-			}
-
-			// Add or overwrite the delete-policy annotation.
-			annotations[AnnotationDeletePolicy] = "orphan"
-			obj.SetAnnotations(annotations)
+		annotations := obj.GetAnnotations()
+		if annotations == nil {
+			annotations = make(map[string]string)
 		}
+
+		// Add the delete-policy annotation
+		annotations[AnnotationDeletePolicy] = string(reconciler.DeletePolicyOrphan)
+		obj.SetAnnotations(annotations)
 	}
 	return objects
 }
 
-// removeDeletePolicy iterates over objects and ensures the delete policy annotation is absent from CRDs.
 func (ot *objectTransformer) removeDeletePolicy(objects []client.Object) []client.Object {
-	crdGVK := schema.GroupVersionKind{Group: GVK_CRD_Group, Version: GVK_CRD_Version, Kind: GVK_CRD_Kind}
-
 	for _, obj := range objects {
-		if obj.GetObjectKind().GroupVersionKind() == crdGVK {
-			annotations := obj.GetAnnotations()
-			if annotations != nil {
-				if _, found := annotations[AnnotationDeletePolicy]; found {
-					delete(annotations, AnnotationDeletePolicy)
-					// Only call SetAnnotations if an annotation was actually deleted
-					obj.SetAnnotations(annotations)
-				}
+		annotations := obj.GetAnnotations()
+		if annotations != nil {
+			if _, found := annotations[AnnotationDeletePolicy]; found {
+				delete(annotations, AnnotationDeletePolicy)
+				obj.SetAnnotations(annotations)
 			}
 		}
 	}

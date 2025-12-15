@@ -17,6 +17,7 @@ import (
 	"github.com/sap/component-operator-runtime/pkg/component"
 	"github.com/sap/component-operator-runtime/pkg/manifests/helm"
 	"github.com/sap/component-operator-runtime/pkg/operator"
+	"github.com/sap/component-operator-runtime/pkg/reconciler"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
 	"github.com/sap/cap-operator-lifecycle/internal/transformer"
@@ -121,10 +122,13 @@ func (o *Operator) Setup(mgr ctrl.Manager) error {
 		return errors.Wrap(err, "error initializing resource generator")
 	}
 
+	adoptionPolicy := reconciler.AdoptionPolicyAlways
 	if err := component.NewReconciler[*operatorv1alpha1.CAPOperator](
 		o.options.Name,
 		resourceGenerator,
-		component.ReconcilerOptions{},
+		component.ReconcilerOptions{
+			AdoptionPolicy: &adoptionPolicy,
+		},
 	).SetupWithManager(mgr); err != nil {
 		return errors.Wrapf(err, "unable to create controller")
 	}

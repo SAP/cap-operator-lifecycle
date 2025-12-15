@@ -126,7 +126,7 @@ func TestGetCAPOperator(t *testing.T) {
 	}
 }
 
-func TestCheckRetainCRDs(t *testing.T) {
+func TestCheckRetainResources(t *testing.T) {
 	tests := []struct {
 		name        string
 		annotations map[string]string
@@ -144,27 +144,27 @@ func TestCheckRetainCRDs(t *testing.T) {
 		},
 		{
 			name:        "Annotation set to true",
-			annotations: map[string]string{AnnotationRetainCRDs: "true"},
+			annotations: map[string]string{AnnotationRetainResources: "true"},
 			expected:    true,
 		},
 		{
 			name:        "Annotation set to True (case insensitive)",
-			annotations: map[string]string{AnnotationRetainCRDs: "True"},
+			annotations: map[string]string{AnnotationRetainResources: "True"},
 			expected:    true,
 		},
 		{
 			name:        "Annotation set to TRUE (case insensitive)",
-			annotations: map[string]string{AnnotationRetainCRDs: "TRUE"},
+			annotations: map[string]string{AnnotationRetainResources: "TRUE"},
 			expected:    true,
 		},
 		{
 			name:        "Annotation set to false",
-			annotations: map[string]string{AnnotationRetainCRDs: "false"},
+			annotations: map[string]string{AnnotationRetainResources: "false"},
 			expected:    false,
 		},
 		{
 			name:        "Annotation set to invalid value",
-			annotations: map[string]string{AnnotationRetainCRDs: "invalid"},
+			annotations: map[string]string{AnnotationRetainResources: "invalid"},
 			expected:    false,
 		},
 	}
@@ -181,7 +181,7 @@ func TestCheckRetainCRDs(t *testing.T) {
 			fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
 			transformer := NewObjectTransformer(fakeClient)
 
-			result := transformer.checkRetainCRDs(capOperator)
+			result := transformer.checkRetainResources(capOperator)
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
@@ -189,30 +189,10 @@ func TestCheckRetainCRDs(t *testing.T) {
 	}
 }
 
-func TestAddDeletePolicyOrphan(t *testing.T) {
+func TestAddAdoptionPolicy(t *testing.T) {
 	scheme := runtime.NewScheme()
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
 	transformer := NewObjectTransformer(fakeClient)
-
-	crdObject := &mockObject{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "apiextensions.k8s.io/v1",
-			Kind:       "CustomResourceDefinition",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-crd",
-		},
-	}
-
-	nonCRDObject := &mockObject{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "ConfigMap",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-configmap",
-		},
-	}
 
 	tests := []struct {
 		name     string
@@ -220,22 +200,32 @@ func TestAddDeletePolicyOrphan(t *testing.T) {
 		expected map[string]string
 	}{
 		{
-			name:    "Add annotation to CRD without existing annotations",
-			objects: []client.Object{crdObject},
+			name: "Add annotation to resource without existing annotations",
+			objects: []client.Object{
+				&mockObject{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "apps/v1",
+						Kind:       "Deployment",
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "test-deployment",
+					},
+				},
+			},
 			expected: map[string]string{
 				AnnotationDeletePolicy: "orphan",
 			},
 		},
 		{
-			name: "Add annotation to CRD with existing annotations",
+			name: "Add annotation to resource with existing annotations",
 			objects: []client.Object{
 				&mockObject{
 					TypeMeta: metav1.TypeMeta{
-						APIVersion: "apiextensions.k8s.io/v1",
-						Kind:       "CustomResourceDefinition",
+						APIVersion: "v1",
+						Kind:       "Service",
 					},
 					ObjectMeta: metav1.ObjectMeta{
-						Name:        "test-crd-with-annotations",
+						Name:        "test-service",
 						Annotations: map[string]string{"existing": "value"},
 					},
 				},
@@ -246,27 +236,66 @@ func TestAddDeletePolicyOrphan(t *testing.T) {
 			},
 		},
 		{
-			name:     "Non-CRD object should not be modified",
-			objects:  []client.Object{nonCRDObject},
-			expected: nil,
+			name: "Add annotation to CRD",
+			objects: []client.Object{
+				&mockObject{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "apiextensions.k8s.io/v1",
+						Kind:       "CustomResourceDefinition",
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "test-crd",
+					},
+				},
+			},
+			expected: map[string]string{
+				AnnotationDeletePolicy: "orphan",
+			},
+		},
+		{
+			name: "Add annotation to multiple resources",
+			objects: []client.Object{
+				&mockObject{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "v1",
+						Kind:       "ConfigMap",
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "test-configmap",
+					},
+				},
+				&mockObject{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "v1",
+						Kind:       "Secret",
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "test-secret",
+					},
+				},
+			},
+			expected: map[string]string{
+				AnnotationDeletePolicy: "orphan",
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := transformer.addDeletePolicyOrphan(tt.objects)
+			result := transformer.addDeletePolicy(tt.objects)
 			if len(result) != len(tt.objects) {
 				t.Fatalf("expected %d objects, got %d", len(tt.objects), len(result))
 			}
 
-			if tt.expected != nil {
-				annotations := result[0].GetAnnotations()
+			// Verify all objects have the expected annotations
+			for i, obj := range result {
+				annotations := obj.GetAnnotations()
 				if len(annotations) != len(tt.expected) {
-					t.Fatalf("expected %d annotations, got %d", len(tt.expected), len(annotations))
+					t.Fatalf("object %d: expected %d annotations, got %d", i, len(tt.expected), len(annotations))
 				}
 				for k, v := range tt.expected {
 					if annotations[k] != v {
-						t.Errorf("expected annotation %s=%s, got %s", k, v, annotations[k])
+						t.Errorf("object %d: expected annotation %s=%s, got %s", i, k, v, annotations[k])
 					}
 				}
 			}
@@ -285,15 +314,15 @@ func TestRemoveDeletePolicy(t *testing.T) {
 		expected map[string]string
 	}{
 		{
-			name: "Remove delete-policy annotation from CRD",
+			name: "Remove delete-policy annotation from Deployment",
 			objects: []client.Object{
 				&mockObject{
 					TypeMeta: metav1.TypeMeta{
-						APIVersion: "apiextensions.k8s.io/v1",
-						Kind:       "CustomResourceDefinition",
+						APIVersion: "apps/v1",
+						Kind:       "Deployment",
 					},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-crd",
+						Name: "test-deployment",
 						Annotations: map[string]string{
 							AnnotationDeletePolicy: "orphan",
 						},
@@ -307,11 +336,11 @@ func TestRemoveDeletePolicy(t *testing.T) {
 			objects: []client.Object{
 				&mockObject{
 					TypeMeta: metav1.TypeMeta{
-						APIVersion: "apiextensions.k8s.io/v1",
-						Kind:       "CustomResourceDefinition",
+						APIVersion: "v1",
+						Kind:       "Service",
 					},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-crd",
+						Name: "test-service",
 						Annotations: map[string]string{
 							AnnotationDeletePolicy: "orphan",
 							"other-annotation":     "value",
@@ -324,7 +353,44 @@ func TestRemoveDeletePolicy(t *testing.T) {
 			},
 		},
 		{
-			name: "CRD without delete-policy annotation",
+			name: "Remove both adoption-policy and delete-policy annotations",
+			objects: []client.Object{
+				&mockObject{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "v1",
+						Kind:       "Secret",
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "test-secret",
+						Annotations: map[string]string{
+							AnnotationDeletePolicy: "orphan",
+							"keep-this":            "annotation",
+						},
+					},
+				},
+			},
+			expected: map[string]string{
+				"keep-this": "annotation",
+			},
+		},
+		{
+			name: "Resource without delete-policy annotation",
+			objects: []client.Object{
+				&mockObject{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "v1",
+						Kind:       "ConfigMap",
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name:        "test-configmap",
+						Annotations: map[string]string{"other": "value"},
+					},
+				},
+			},
+			expected: map[string]string{"other": "value"},
+		},
+		{
+			name: "Remove from multiple resources",
 			objects: []client.Object{
 				&mockObject{
 					TypeMeta: metav1.TypeMeta{
@@ -332,12 +398,27 @@ func TestRemoveDeletePolicy(t *testing.T) {
 						Kind:       "CustomResourceDefinition",
 					},
 					ObjectMeta: metav1.ObjectMeta{
-						Name:        "test-crd",
-						Annotations: map[string]string{"other": "value"},
+						Name: "test-crd",
+						Annotations: map[string]string{
+							AnnotationDeletePolicy: "orphan",
+						},
+					},
+				},
+				&mockObject{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "apps/v1",
+						Kind:       "StatefulSet",
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "test-statefulset",
+						Annotations: map[string]string{
+							AnnotationDeletePolicy: "orphan",
+							"keep-this":            "annotation",
+						},
 					},
 				},
 			},
-			expected: map[string]string{"other": "value"},
+			expected: map[string]string{},
 		},
 	}
 
@@ -348,13 +429,37 @@ func TestRemoveDeletePolicy(t *testing.T) {
 				t.Fatalf("expected %d objects, got %d", len(tt.objects), len(result))
 			}
 
-			annotations := result[0].GetAnnotations()
-			if len(annotations) != len(tt.expected) {
-				t.Fatalf("expected %d annotations, got %d", len(tt.expected), len(annotations))
-			}
-			for k, v := range tt.expected {
-				if annotations[k] != v {
-					t.Errorf("expected annotation %s=%s, got %s", k, v, annotations[k])
+			// For the "Remove from multiple resources" test case, verify each object separately
+			if tt.name == "Remove from multiple resources" {
+				// First object should have no annotations
+				annotations0 := result[0].GetAnnotations()
+				if len(annotations0) != 0 {
+					t.Fatalf("object 0: expected 0 annotations, got %d", len(annotations0))
+				}
+				// Second object should have only "keep-this" annotation
+				annotations1 := result[1].GetAnnotations()
+				if len(annotations1) != 1 {
+					t.Fatalf("object 1: expected 1 annotation, got %d", len(annotations1))
+				}
+				if annotations1["keep-this"] != "annotation" {
+					t.Errorf("object 1: expected annotation keep-this=annotation, got %s", annotations1["keep-this"])
+				}
+				if _, exists := annotations1[AnnotationDeletePolicy]; exists {
+					t.Error("object 1: delete-policy annotation should not exist")
+				}
+			} else {
+				annotations := result[0].GetAnnotations()
+				if len(annotations) != len(tt.expected) {
+					t.Fatalf("expected %d annotations, got %d", len(tt.expected), len(annotations))
+				}
+				for k, v := range tt.expected {
+					if annotations[k] != v {
+						t.Errorf("expected annotation %s=%s, got %s", k, v, annotations[k])
+					}
+				}
+				// Verify delete-policy is removed
+				if _, exists := annotations[AnnotationDeletePolicy]; exists {
+					t.Error("delete-policy annotation should not exist")
 				}
 			}
 		})
@@ -373,24 +478,24 @@ func TestTransformObjects(t *testing.T) {
 		expectedAnnotated bool
 	}{
 		{
-			name: "Retain CRDs annotation is true",
+			name: "Retain resources annotation is true - adds orphan policy to all resources",
 			capOperator: &operatorv1alpha1.CAPOperator{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-operator",
 					Namespace: "default",
 					Annotations: map[string]string{
-						AnnotationRetainCRDs: "true",
+						AnnotationRetainResources: "true",
 					},
 				},
 			},
 			objects: []client.Object{
 				&mockObject{
 					TypeMeta: metav1.TypeMeta{
-						APIVersion: "apiextensions.k8s.io/v1",
-						Kind:       "CustomResourceDefinition",
+						APIVersion: "apps/v1",
+						Kind:       "Deployment",
 					},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-crd",
+						Name: "test-deployment",
 					},
 				},
 			},
@@ -398,24 +503,24 @@ func TestTransformObjects(t *testing.T) {
 			expectedAnnotated: true,
 		},
 		{
-			name: "Retain CRDs annotation is false",
+			name: "Retain resources annotation is false - removes orphan policy from all resources",
 			capOperator: &operatorv1alpha1.CAPOperator{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-operator",
 					Namespace: "default",
 					Annotations: map[string]string{
-						AnnotationRetainCRDs: "false",
+						AnnotationRetainResources: "false",
 					},
 				},
 			},
 			objects: []client.Object{
 				&mockObject{
 					TypeMeta: metav1.TypeMeta{
-						APIVersion: "apiextensions.k8s.io/v1",
-						Kind:       "CustomResourceDefinition",
+						APIVersion: "v1",
+						Kind:       "Service",
 					},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-crd",
+						Name: "test-service",
 						Annotations: map[string]string{
 							AnnotationDeletePolicy: "orphan",
 						},
@@ -426,16 +531,16 @@ func TestTransformObjects(t *testing.T) {
 			expectedAnnotated: false,
 		},
 		{
-			name:        "No CAPOperator found",
+			name:        "No CAPOperator found - returns error",
 			capOperator: nil,
 			objects: []client.Object{
 				&mockObject{
 					TypeMeta: metav1.TypeMeta{
-						APIVersion: "apiextensions.k8s.io/v1",
-						Kind:       "CustomResourceDefinition",
+						APIVersion: "v1",
+						Kind:       "ConfigMap",
 					},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "test-crd",
+						Name: "test-configmap",
 					},
 				},
 			},
