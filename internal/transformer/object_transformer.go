@@ -26,7 +26,7 @@ func NewObjectTransformer(client client.Client) *objectTransformer {
 	return &objectTransformer{client: client}
 }
 
-func (ot *objectTransformer) TransformObjects(namespace string, name string, objects []client.Object) ([]client.Object, error) {
+func (ot *objectTransformer) TransformObjects(_, _ string, objects []client.Object) ([]client.Object, error) {
 	// Step 1: Find the single CAPOperator resource.
 	capOperator, err := ot.getCAPOperator()
 	if err != nil {
