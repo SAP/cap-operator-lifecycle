@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
+	"github.com/sap/component-operator-runtime/pkg/reconciler"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -213,7 +214,7 @@ func TestAddAdoptionPolicy(t *testing.T) {
 				},
 			},
 			expected: map[string]string{
-				AnnotationDeletePolicy: "orphan",
+				AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 			},
 		},
 		{
@@ -232,7 +233,7 @@ func TestAddAdoptionPolicy(t *testing.T) {
 			},
 			expected: map[string]string{
 				"existing":             "value",
-				AnnotationDeletePolicy: "orphan",
+				AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 			},
 		},
 		{
@@ -249,7 +250,7 @@ func TestAddAdoptionPolicy(t *testing.T) {
 				},
 			},
 			expected: map[string]string{
-				AnnotationDeletePolicy: "orphan",
+				AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 			},
 		},
 		{
@@ -275,7 +276,7 @@ func TestAddAdoptionPolicy(t *testing.T) {
 				},
 			},
 			expected: map[string]string{
-				AnnotationDeletePolicy: "orphan",
+				AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 			},
 		},
 	}
@@ -324,7 +325,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-deployment",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: "orphan",
+							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 						},
 					},
 				},
@@ -342,7 +343,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-service",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: "orphan",
+							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 							"other-annotation":     "value",
 						},
 					},
@@ -363,7 +364,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-secret",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: "orphan",
+							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 							"keep-this":            "annotation",
 						},
 					},
@@ -400,7 +401,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-crd",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: "orphan",
+							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 						},
 					},
 				},
@@ -412,7 +413,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-statefulset",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: "orphan",
+							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 							"keep-this":            "annotation",
 						},
 					},
@@ -522,7 +523,7 @@ func TestTransformObjects(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-service",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: "orphan",
+							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
 						},
 					},
 				},
@@ -574,7 +575,7 @@ func TestTransformObjects(t *testing.T) {
 
 				if tt.expectedAnnotated {
 					annotations := result[0].GetAnnotations()
-					if annotations[AnnotationDeletePolicy] != "orphan" {
+					if annotations[AnnotationDeletePolicy] != string(reconciler.DeletePolicyOrphan) {
 						t.Errorf("expected annotation %s=orphan, got %s", AnnotationDeletePolicy, annotations[AnnotationDeletePolicy])
 					}
 				} else {

@@ -10,19 +10,19 @@ import "testing"
 func TestCheckDirectoryExists(t *testing.T) {
 
 	// invalid directory
-	if err := CheckDirectoryExists("invalid"); err == nil {
+	if CheckDirectoryExists("invalid") == nil {
 		t.Error("error expected but not returned")
 		return
 	}
 
 	// valid directory
-	if err := CheckDirectoryExists("../../chart"); err != nil {
+	if CheckDirectoryExists("../../chart") != nil {
 		t.Error("error not expected but returned")
 		return
 	}
 
 	// File path passed instead of a directory
-	if err := CheckDirectoryExists("../../chart/values.yaml"); err == nil {
+	if CheckDirectoryExists("../../chart/values.yaml") == nil {
 		t.Error("error expected but not returned")
 		return
 	}
