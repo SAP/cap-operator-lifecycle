@@ -122,12 +122,12 @@ func (o *Operator) Setup(mgr ctrl.Manager) error {
 		return errors.Wrap(err, "error initializing resource generator")
 	}
 
-	adoptionPolicy := reconciler.AdoptionPolicyAlways
+	adoptionPolicyAlways := reconciler.AdoptionPolicyAlways
 	if err := component.NewReconciler[*operatorv1alpha1.CAPOperator](
 		o.options.Name,
 		resourceGenerator,
 		component.ReconcilerOptions{
-			AdoptionPolicy: &adoptionPolicy,
+			AdoptionPolicy: &adoptionPolicyAlways,
 		},
 	).SetupWithManager(mgr); err != nil {
 		return errors.Wrapf(err, "unable to create controller")
