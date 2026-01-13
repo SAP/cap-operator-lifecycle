@@ -250,8 +250,8 @@ func TestTransformer(t *testing.T) {
 			}
 
 			transformedParametersMap := transformedParameters.ToUnstructured()
-			transformedSubscriptionServer := transformedParametersMap["subscriptionServer"].(map[string]interface{})
-			transformedWebhook := transformedParametersMap["webhook"].(map[string]interface{})
+			transformedSubscriptionServer := transformedParametersMap["subscriptionServer"].(map[string]any)
+			transformedWebhook := transformedParametersMap["webhook"].(map[string]any)
 
 			if transformedSubscriptionServer["dnsTarget"].(string) != expectedDnsTarget {
 				t.Error("unexpected value returned for subscriptionServer.dnsTarget")
@@ -267,10 +267,10 @@ func TestTransformer(t *testing.T) {
 					t.Error("expected subscriptionServer.certificateManager to be `CertManager`")
 				}
 				certificateConfig := transformedSubscriptionServer["certificateConfig"].(map[string]any)
-				if len(certificateConfig["certManager"].(map[string]interface{})) == 0 {
+				if len(certificateConfig["certManager"].(map[string]any)) == 0 {
 					t.Error("expected subscriptionServer.certificateConfig.certManager not to be empty")
 				}
-				if len(certificateConfig["gardener"].(map[string]interface{})) != 0 {
+				if len(certificateConfig["gardener"].(map[string]any)) != 0 {
 					t.Error("expected subscriptionServer.certificateConfig.gardener to be empty")
 				}
 
@@ -279,10 +279,10 @@ func TestTransformer(t *testing.T) {
 					t.Error("expected webhook.certificateManager to be `CertManager`")
 				}
 				certificateConfig = transformedWebhook["certificateConfig"].(map[string]any)
-				if len(certificateConfig["certManager"].(map[string]interface{})) == 0 {
+				if len(certificateConfig["certManager"].(map[string]any)) == 0 {
 					t.Error("expected webhook.certificateConfig.certManager not to be empty")
 				}
-				if len(certificateConfig["gardener"].(map[string]interface{})) != 0 {
+				if len(certificateConfig["gardener"].(map[string]any)) != 0 {
 					t.Error("expected webhook.certificateConfig.gardener to be empty")
 				}
 			} else {
@@ -291,10 +291,10 @@ func TestTransformer(t *testing.T) {
 					t.Error("expected subscriptionServer.certificateManager to be `Gardener`")
 				}
 				certificateConfig := transformedSubscriptionServer["certificateConfig"].(map[string]any)
-				if len(certificateConfig["gardener"].(map[string]interface{})) == 0 {
+				if len(certificateConfig["gardener"].(map[string]any)) == 0 {
 					t.Error("expected subscriptionServer.certificateConfig.gardener not to be empty")
 				}
-				if len(certificateConfig["certManager"].(map[string]interface{})) != 0 {
+				if len(certificateConfig["certManager"].(map[string]any)) != 0 {
 					t.Error("expected subscriptionServer.certificateConfig.certManager to be empty")
 				}
 
@@ -303,15 +303,15 @@ func TestTransformer(t *testing.T) {
 					t.Error("expected webhook.certificateManager to be `Gardener`")
 				}
 				certificateConfig = transformedWebhook["certificateConfig"].(map[string]any)
-				if len(certificateConfig["gardener"].(map[string]interface{})) == 0 {
+				if len(certificateConfig["gardener"].(map[string]any)) == 0 {
 					t.Error("expected webhook.certificateConfig.gardener not to be empty")
 				}
-				if len(certificateConfig["certManager"].(map[string]interface{})) != 0 {
+				if len(certificateConfig["certManager"].(map[string]any)) != 0 {
 					t.Error("expected webhook.certificateConfig.certManager to be empty")
 				}
 			}
 
-			transformedController := transformedParametersMap["controller"].(map[string]interface{})
+			transformedController := transformedParametersMap["controller"].(map[string]any)
 			if transformedController["dnsTarget"].(string) != expectedDnsTarget {
 				t.Error("unexpected value returned for controller.dnsTarget")
 			}
@@ -333,7 +333,7 @@ func TestTransformer(t *testing.T) {
 
 			if tt.withMonitoringGrafanaDashboard {
 				dashboard := transformedParametersMap["monitoring"].(map[string]any)["grafana"].(map[string]any)["dashboard"].(map[string]any)
-				if dashboard["configMapLabels"].(map[string]interface{})["grafana_dashboard"] != "1" {
+				if dashboard["configMapLabels"].(map[string]any)["grafana_dashboard"] != "1" {
 					t.Error("expected monitoring.grafana.dashboard.configMapLabels to be set")
 				}
 				serviceMonitorSelectorLabels := transformedParametersMap["monitoring"].(map[string]any)["serviceMonitorSelectorLabels"].(map[string]any)
