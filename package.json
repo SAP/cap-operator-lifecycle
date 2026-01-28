@@ -1,7 +1,8 @@
 {
-  "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "hugo-extended": "^0.152.2",
-    "postcss-cli": "^11.0.0"
+  "name": "cap-operator-lifecycle",
+ "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "hugo-extended": "^0.154.5",
+    "postcss-cli": "^11.0.1"
   }
 }
