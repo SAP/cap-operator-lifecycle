@@ -12,7 +12,7 @@ The CAP Operator is available as a [Community module](https://kyma-project.io/ex
 
 To enable the CAP Operator module in your Kyma cluster, follow these steps:
 
-1. Open the Kyma Console, navigate to the **Modules** section, and click the **Add** button.
+1. Open the Kyma Console, navigate to the **Modules** section, and click the **Add** button within **Community Modules** list.
 
    ![community-module-1](/cap-operator-lifecycle/img/community-module-1.png)
 
