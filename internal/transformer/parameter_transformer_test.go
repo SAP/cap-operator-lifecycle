@@ -147,7 +147,7 @@ func TestTransformer(t *testing.T) {
 
 			kubeClient := clientBuilder.Build()
 
-			transformer := NewParameterTransformer(kubeClient)
+			parameterTransformer := NewParameterTransformer(kubeClient)
 
 			capOperatorSpec := &v1alpha1.CAPOperatorSpec{}
 
@@ -228,7 +228,7 @@ func TestTransformer(t *testing.T) {
 				}
 			}
 
-			transformedParameters, err := transformer.TransformParameters("cap-operator-system", "cap-operator.sme.sap.com", componentoperatorruntimetypes.UnstructurableMap(capOperatorSpec.ToUnstructured()))
+			transformedParameters, err := parameterTransformer.TransformParameters("cap-operator-system", "cap-operator.sme.sap.com", componentoperatorruntimetypes.UnstructurableMap(capOperatorSpec.ToUnstructured()))
 			if !tt.expectError && err != nil {
 				t.Error(err)
 			}

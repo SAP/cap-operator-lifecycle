@@ -17,6 +17,7 @@ import (
 	"github.com/sap/component-operator-runtime/pkg/component"
 	"github.com/sap/component-operator-runtime/pkg/manifests/helm"
 	"github.com/sap/component-operator-runtime/pkg/operator"
+	"github.com/sap/component-operator-runtime/pkg/reconciler"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
 	"github.com/sap/cap-operator-lifecycle/internal/transformer"
@@ -107,20 +108,27 @@ func (o *Operator) Setup(mgr ctrl.Manager) error {
 		return errors.Wrap(err, "error checking manifest directory")
 	}
 
-	resourceGenerator, err := helm.NewHelmGeneratorWithParameterTransformer(
+	client := mgr.GetClient()
+	resourceGenerator, err := helm.NewTransformableHelmGenerator(
 		nil,
 		chartDir,
-		mgr.GetClient(),
-		transformer.NewParameterTransformer(mgr.GetClient()),
+		client,
 	)
+
+	resourceGenerator.WithParameterTransformer(transformer.NewParameterTransformer(client))
+	resourceGenerator.WithObjectTransformer(transformer.NewObjectTransformer(client, o.options.Name))
+
 	if err != nil {
 		return errors.Wrap(err, "error initializing resource generator")
 	}
 
+	adoptionPolicyAlways := reconciler.AdoptionPolicyAlways
 	if err := component.NewReconciler[*operatorv1alpha1.CAPOperator](
 		o.options.Name,
 		resourceGenerator,
-		component.ReconcilerOptions{},
+		component.ReconcilerOptions{
+			AdoptionPolicy: &adoptionPolicyAlways,
+		},
 	).SetupWithManager(mgr); err != nil {
 		return errors.Wrapf(err, "unable to create controller")
 	}
