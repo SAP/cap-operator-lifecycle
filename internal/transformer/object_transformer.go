@@ -18,9 +18,9 @@ import (
 
 const (
 	// Annotation to check for retaining resources.
-	AnnotationRetainResources = "cap-operator.sme.sap.com/retain-resources"
+	AnnotationRetainResources = "operator.sme.sap.com/retain-resources"
 	// Annotation key for setting the delete policy.
-	AnnotationDeletePolicy = "cap-operator.sme.sap.com/delete-policy"
+	AnnotationDeletePolicy = "operator.sme.sap.com/delete-policy"
 )
 
 type objectTransformer struct {
