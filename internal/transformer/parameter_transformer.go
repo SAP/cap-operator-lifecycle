@@ -60,9 +60,9 @@ func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
 	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
 
 	if parameters["controller"] == nil {
-		parameters["controller"] = map[string]interface{}{}
+		parameters["controller"] = map[string]any{}
 	}
-	controller := parameters["controller"].(map[string]interface{})
+	controller := parameters["controller"].(map[string]any)
 
 	// DNSTarget given - use it
 	if parameters["dnsTarget"] != nil {
@@ -82,7 +82,7 @@ func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
 		return fmt.Errorf("unable to retrieve dnsTarget; please specify either dnsTarget or ingressGatewayLabels in the CAP Operator CRO")
 	}
 
-	dnsTarget, err := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]interface{}))
+	dnsTarget, err := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]any))
 	if err != nil {
 		setupLog.Info("dnsTarget not found using ingressGatewayLabels", "error", err)
 
@@ -155,11 +155,11 @@ func (t *parameterTransformer) getDNSTargetUsingIngressGatewayLabels(ingressGate
 	return dnsTarget, nil
 }
 
-func convertIngressGatewayLabelsToMap(ingressGatewayLabels []interface{}) map[string]string {
+func convertIngressGatewayLabelsToMap(ingressGatewayLabels []any) map[string]string {
 	ingressLabels := map[string]string{}
 
 	for _, label := range ingressGatewayLabels {
-		labelMap := label.(map[string]interface{})
+		labelMap := label.(map[string]any)
 		ingressLabels[labelMap["name"].(string)] = labelMap["value"].(string)
 	}
 
@@ -218,7 +218,7 @@ func (t *parameterTransformer) getIngressGatewayService(ctx context.Context, rel
 
 func (t *parameterTransformer) fillDomain(parameters map[string]any) error {
 	// get domain
-	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
+	subscriptionServer := parameters["subscriptionServer"].(map[string]any)
 	domain, err := t.getDomain(subscriptionServer["subDomain"].(string))
 	if err != nil {
 		return err
