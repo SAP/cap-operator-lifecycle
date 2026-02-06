@@ -23,6 +23,8 @@ type mockObject struct {
 	metav1.TypeMeta
 }
 
+const Name = "cap-operator.sme.sap.com"
+
 func (m *mockObject) DeepCopyObject() runtime.Object {
 	return &mockObject{
 		ObjectMeta: *m.ObjectMeta.DeepCopy(),
@@ -46,7 +48,7 @@ func TestNewObjectTransformer(t *testing.T) {
 	scheme := runtime.NewScheme()
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
 
-	transformer := NewObjectTransformer(fakeClient)
+	transformer := NewObjectTransformer(fakeClient, Name)
 
 	if transformer == nil {
 		t.Fatal("transformer is nil")
@@ -110,7 +112,7 @@ func TestGetCAPOperator(t *testing.T) {
 			}
 			fakeClient := clientBuilder.Build()
 
-			transformer := NewObjectTransformer(fakeClient)
+			transformer := NewObjectTransformer(fakeClient, Name)
 			capOperator, err := transformer.getCAPOperator()
 
 			if tt.expectedError != "" {
@@ -185,7 +187,7 @@ func TestCheckRetainResources(t *testing.T) {
 
 			scheme := runtime.NewScheme()
 			fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
-			transformer := NewObjectTransformer(fakeClient)
+			transformer := NewObjectTransformer(fakeClient, Name)
 
 			result := transformer.checkRetainResources(capOperator)
 			if result != tt.expected {
@@ -195,10 +197,10 @@ func TestCheckRetainResources(t *testing.T) {
 	}
 }
 
-func TestAddAdoptionPolicy(t *testing.T) {
+func TestAddDeletionPolicy(t *testing.T) {
 	scheme := runtime.NewScheme()
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
-	transformer := NewObjectTransformer(fakeClient)
+	transformer := NewObjectTransformer(fakeClient, Name)
 
 	tests := []struct {
 		name     string
@@ -219,7 +221,7 @@ func TestAddAdoptionPolicy(t *testing.T) {
 				},
 			},
 			expected: map[string]string{
-				AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
+				Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
 			},
 		},
 		{
@@ -237,8 +239,8 @@ func TestAddAdoptionPolicy(t *testing.T) {
 				},
 			},
 			expected: map[string]string{
-				"existing":             "value",
-				AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
+				"existing":                          "value",
+				Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
 			},
 		},
 		{
@@ -255,7 +257,7 @@ func TestAddAdoptionPolicy(t *testing.T) {
 				},
 			},
 			expected: map[string]string{
-				AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
+				Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
 			},
 		},
 		{
@@ -281,7 +283,7 @@ func TestAddAdoptionPolicy(t *testing.T) {
 				},
 			},
 			expected: map[string]string{
-				AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
+				Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
 			},
 		},
 	}
@@ -312,7 +314,7 @@ func TestAddAdoptionPolicy(t *testing.T) {
 func TestRemoveDeletePolicy(t *testing.T) {
 	scheme := runtime.NewScheme()
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
-	transformer := NewObjectTransformer(fakeClient)
+	transformer := NewObjectTransformer(fakeClient, Name)
 
 	tests := []struct {
 		name     string
@@ -330,7 +332,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-deployment",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
+							Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
 						},
 					},
 				},
@@ -348,8 +350,8 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-service",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
-							"other-annotation":     "value",
+							Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
+							"other-annotation":                  "value",
 						},
 					},
 				},
@@ -369,8 +371,8 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-secret",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
-							"keep-this":            "annotation",
+							Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
+							"keep-this":                         "annotation",
 						},
 					},
 				},
@@ -406,7 +408,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-crd",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
+							Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
 						},
 					},
 				},
@@ -418,8 +420,8 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-statefulset",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
-							"keep-this":            "annotation",
+							Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
+							"keep-this":                         "annotation",
 						},
 					},
 				},
@@ -450,7 +452,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 				if annotations1["keep-this"] != "annotation" {
 					t.Errorf("object 1: expected annotation keep-this=annotation, got %s", annotations1["keep-this"])
 				}
-				if _, exists := annotations1[AnnotationDeletePolicy]; exists {
+				if _, exists := annotations1[Name+AnnotationDeletePolicySuffix]; exists {
 					t.Error("object 1: delete-policy annotation should not exist")
 				}
 			} else {
@@ -464,7 +466,7 @@ func TestRemoveDeletePolicy(t *testing.T) {
 					}
 				}
 				// Verify delete-policy is removed
-				if _, exists := annotations[AnnotationDeletePolicy]; exists {
+				if _, exists := annotations[Name+AnnotationDeletePolicySuffix]; exists {
 					t.Error("delete-policy annotation should not exist")
 				}
 			}
@@ -528,7 +530,7 @@ func TestTransformObjects(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test-service",
 						Annotations: map[string]string{
-							AnnotationDeletePolicy: string(reconciler.DeletePolicyOrphan),
+							Name + AnnotationDeletePolicySuffix: string(reconciler.DeletePolicyOrphan),
 						},
 					},
 				},
@@ -563,7 +565,7 @@ func TestTransformObjects(t *testing.T) {
 			}
 			fakeClient := clientBuilder.Build()
 
-			transformer := NewObjectTransformer(fakeClient)
+			transformer := NewObjectTransformer(fakeClient, Name)
 			result, err := transformer.TransformObjects("default", "test", tt.objects)
 
 			if tt.expectError {
@@ -580,12 +582,12 @@ func TestTransformObjects(t *testing.T) {
 
 				if tt.expectedAnnotated {
 					annotations := result[0].GetAnnotations()
-					if annotations[AnnotationDeletePolicy] != string(reconciler.DeletePolicyOrphan) {
-						t.Errorf("expected annotation %s=orphan, got %s", AnnotationDeletePolicy, annotations[AnnotationDeletePolicy])
+					if annotations[Name+AnnotationDeletePolicySuffix] != string(reconciler.DeletePolicyOrphan) {
+						t.Errorf("expected annotation %s=orphan, got %s", Name+AnnotationDeletePolicySuffix, annotations[Name+AnnotationDeletePolicySuffix])
 					}
 				} else {
 					annotations := result[0].GetAnnotations()
-					if _, exists := annotations[AnnotationDeletePolicy]; exists {
+					if _, exists := annotations[Name+AnnotationDeletePolicySuffix]; exists {
 						t.Error("expected annotation to not exist")
 					}
 				}

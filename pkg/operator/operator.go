@@ -116,7 +116,7 @@ func (o *Operator) Setup(mgr ctrl.Manager) error {
 	)
 
 	resourceGenerator.WithParameterTransformer(transformer.NewParameterTransformer(client))
-	resourceGenerator.WithObjectTransformer(transformer.NewObjectTransformer(client))
+	resourceGenerator.WithObjectTransformer(transformer.NewObjectTransformer(client, o.options.Name))
 
 	if err != nil {
 		return errors.Wrap(err, "error initializing resource generator")

@@ -20,15 +20,16 @@ const (
 	// Annotation to check for retaining resources.
 	AnnotationRetainResources = "operator.sme.sap.com/retain-resources"
 	// Annotation key for setting the delete policy.
-	AnnotationDeletePolicy = "operator.sme.sap.com/delete-policy"
+	AnnotationDeletePolicySuffix = "/delete-policy"
 )
 
 type objectTransformer struct {
 	client client.Client
+	name   string
 }
 
-func NewObjectTransformer(client client.Client) *objectTransformer {
-	return &objectTransformer{client: client}
+func NewObjectTransformer(client client.Client, name string) *objectTransformer {
+	return &objectTransformer{client: client, name: name}
 }
 
 func (ot *objectTransformer) TransformObjects(_, _ string, objects []client.Object) ([]client.Object, error) {
@@ -86,8 +87,8 @@ func (ot *objectTransformer) addDeletePolicy(objects []client.Object) []client.O
 			annotations = make(map[string]string)
 		}
 
-		// Add the delete-policy annotation
-		annotations[AnnotationDeletePolicy] = string(reconciler.DeletePolicyOrphan)
+		// Set the delete-policy annotation to orphan
+		annotations[ot.name+AnnotationDeletePolicySuffix] = string(reconciler.DeletePolicyOrphan)
 		obj.SetAnnotations(annotations)
 	}
 	return objects
@@ -97,8 +98,8 @@ func (ot *objectTransformer) removeDeletePolicy(objects []client.Object) []clien
 	for _, obj := range objects {
 		annotations := obj.GetAnnotations()
 		if annotations != nil {
-			if _, found := annotations[AnnotationDeletePolicy]; found {
-				delete(annotations, AnnotationDeletePolicy)
+			if _, found := annotations[ot.name+AnnotationDeletePolicySuffix]; found {
+				delete(annotations, ot.name+AnnotationDeletePolicySuffix)
 				obj.SetAnnotations(annotations)
 			}
 		}
