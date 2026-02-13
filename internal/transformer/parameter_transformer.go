@@ -57,7 +57,7 @@ func replaceAsteriskDNSTarget(dnsTarget string) string {
 }
 
 func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
-	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
+	subscriptionServer := parameters["subscriptionServer"].(map[string]any)
 
 	if parameters["controller"] == nil {
 		parameters["controller"] = map[string]any{}
@@ -104,7 +104,7 @@ func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
 	return nil
 }
 
-func (t *parameterTransformer) getDNSTargetUsingIngressGatewayLabels(ingressGatewayLabels []interface{}) (dnsTarget string, err error) {
+func (t *parameterTransformer) getDNSTargetUsingIngressGatewayLabels(ingressGatewayLabels []any) (dnsTarget string, err error) {
 
 	ctx := context.TODO()
 
