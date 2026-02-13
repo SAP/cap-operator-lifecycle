@@ -1,8 +1,8 @@
 {
   "name": "cap-operator-lifecycle",
- "devDependencies": {
-    "autoprefixer": "^10.4.23",
-    "hugo-extended": "^0.154.5",
+  "devDependencies": {
+    "autoprefixer": "^10.4.24",
+    "hugo-extended": "^0.155.3",
     "postcss-cli": "^11.0.1"
   }
 }
