@@ -4,7 +4,7 @@ linkTitle: CAP Operator Lifecycle
 description: Includes the Helm chart and the CAP Operator Manager component for installing CAP Operator
 ---
 
-{{% blocks/cover title="Welcome to CAP Operator Lifecycle" image_anchor="top" height="full" color="primary" %}}
+{{% blocks/cover title="Welcome to CAP Operator Lifecycle" height="auto td-below-navbar" color="primary" %}}
 {{% blocks/lead %}}
 Includes the Helm chart and the CAP Operator Manager component for installing CAP Operator
 {{% /blocks/lead %}}

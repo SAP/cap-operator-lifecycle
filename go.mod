@@ -1,5 +1,5 @@
 module github.com/sap/cap-operator-lifecycle/website
 
-go 1.25.6
+go 1.26.0
 
-require github.com/google/docsy v0.13.0 // indirect
+require github.com/google/docsy v0.14.2 // indirect
