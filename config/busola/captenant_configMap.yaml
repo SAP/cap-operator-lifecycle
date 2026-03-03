@@ -107,6 +107,8 @@ data:
               kind: "'CAPTenantOperation'"
           - source: $uppercase($item.spec.operation)
             name: Operation
+          - source: $readableTimestamp($item.metadata.creationTimestamp)
+            name: Created
           - source: $item.status.state
             name: State
             widget: Badge

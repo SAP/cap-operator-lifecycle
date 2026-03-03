@@ -23,6 +23,10 @@ data:
         widget: ControlledBy
         name: Owned By
         placeholder: '-'
+    resourceGraph:
+      colorVariant: 3
+      dataSources:
+        - source: relatedJobs
     body:
       - name: Summary
         widget: Panel
@@ -59,9 +63,27 @@ data:
         - name: Type
           source: type
           search: true
+        - name: Job
+          source: $relatedJobs().items[metadata.labels.`sme.sap.com/workload-name` = $item.name and metadata.labels.`sme.sap.com/workload-type` = $item.type].metadata.name
+          widget: ResourceLink
+          resource:
+            name: $relatedJobs().items[metadata.labels.`sme.sap.com/workload-name` = $item.name and metadata.labels.`sme.sap.com/workload-type` = $item.type].metadata.name
+            namespace: metadata.namespace
+            kind: "'Job'"
+        - name: Created
+          source: $readableTimestamp($relatedJobs().items[metadata.labels.`sme.sap.com/workload-name` = $item.name and metadata.labels.`sme.sap.com/workload-type` = $item.type].metadata.creationTimestamp)
+        - name: Status
+          source: $relatedJobs().items[metadata.labels.`sme.sap.com/workload-name` = $item.name and metadata.labels.`sme.sap.com/workload-type` = $item.type].status.conditions[-1].type
+          widget: Badge
+          highlights:
+            positive:
+              - Complete
+            critical:
+              - Failed
       - name: Related Jobs
         widget: ResourceList
         source: $relatedJobs()
+        visibility: $item = false
       - widget: EventList
         filter: '$matchEvents($$, $root.kind, $root.metadata.name)'
         name: Recent Events
