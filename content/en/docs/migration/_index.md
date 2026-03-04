@@ -21,7 +21,7 @@ helm uninstall cap-operator -n cap-operator-system
 
 > Note: The release name and namespace may vary based on your installation. Please ensure to use the correct release name and namespace in the command.
 
-2. Install the CAP Operator using the Kyma Community Module by following the instructions in the [Kyma Cluster Installation Documentation](../installation/kyma-cluster.md).
+2. Install the CAP Operator using the Kyma Community Module by following the instructions in the [Kyma Cluster Installation Documentation](../installation/kyma-cluster).
 
 ## [Manifest Installation (Using CAP Operator Manager)](https://sap.github.io/cap-operator/docs/installation/cap-operator-manager/)
 
@@ -46,4 +46,4 @@ kubectl delete -f https://github.com/SAP/cap-operator-lifecycle/releases/latest/
 kubectl delete -f https://github.com/SAP/cap-operator-lifecycle/releases/latest/download/manager_manifest.yaml
 ```
 
-5. Install the CAP Operator using the Kyma Community Module by following the instructions in the [Kyma Cluster Installation Documentation](../installation/kyma-cluster.md).
+5. Install the CAP Operator using the Kyma Community Module by following the instructions in the [Kyma Cluster Installation Documentation](../installation/kyma-cluster).
