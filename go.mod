@@ -4,13 +4,13 @@ go 1.26.0
 
 require (
 	github.com/pkg/errors v0.9.1
-	github.com/sap/component-operator-runtime v0.3.133
-	k8s.io/api v0.35.1
-	k8s.io/apiextensions-apiserver v0.35.1
-	k8s.io/apimachinery v0.35.1
-	k8s.io/client-go v0.35.1
-	k8s.io/kube-aggregator v0.35.1
-	sigs.k8s.io/controller-runtime v0.23.1
+	github.com/sap/component-operator-runtime v0.3.134
+	k8s.io/api v0.35.2
+	k8s.io/apiextensions-apiserver v0.35.2
+	k8s.io/apimachinery v0.35.2
+	k8s.io/client-go v0.35.2
+	k8s.io/kube-aggregator v0.35.2
+	sigs.k8s.io/controller-runtime v0.23.3
 )
 
 require (
@@ -27,20 +27,20 @@ require (
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
-	github.com/go-openapi/jsonpointer v0.22.4 // indirect
-	github.com/go-openapi/jsonreference v0.21.4 // indirect
-	github.com/go-openapi/swag v0.25.4 // indirect
-	github.com/go-openapi/swag/cmdutils v0.25.4 // indirect
-	github.com/go-openapi/swag/conv v0.25.4 // indirect
-	github.com/go-openapi/swag/fileutils v0.25.4 // indirect
-	github.com/go-openapi/swag/jsonname v0.25.4 // indirect
-	github.com/go-openapi/swag/jsonutils v0.25.4 // indirect
-	github.com/go-openapi/swag/loading v0.25.4 // indirect
-	github.com/go-openapi/swag/mangling v0.25.4 // indirect
-	github.com/go-openapi/swag/netutils v0.25.4 // indirect
-	github.com/go-openapi/swag/stringutils v0.25.4 // indirect
-	github.com/go-openapi/swag/typeutils v0.25.4 // indirect
-	github.com/go-openapi/swag/yamlutils v0.25.4 // indirect
+	github.com/go-openapi/jsonpointer v0.22.5 // indirect
+	github.com/go-openapi/jsonreference v0.21.5 // indirect
+	github.com/go-openapi/swag v0.25.5 // indirect
+	github.com/go-openapi/swag/cmdutils v0.25.5 // indirect
+	github.com/go-openapi/swag/conv v0.25.5 // indirect
+	github.com/go-openapi/swag/fileutils v0.25.5 // indirect
+	github.com/go-openapi/swag/jsonname v0.25.5 // indirect
+	github.com/go-openapi/swag/jsonutils v0.25.5 // indirect
+	github.com/go-openapi/swag/loading v0.25.5 // indirect
+	github.com/go-openapi/swag/mangling v0.25.5 // indirect
+	github.com/go-openapi/swag/netutils v0.25.5 // indirect
+	github.com/go-openapi/swag/stringutils v0.25.5 // indirect
+	github.com/go-openapi/swag/typeutils v0.25.5 // indirect
+	github.com/go-openapi/swag/yamlutils v0.25.5 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
@@ -58,8 +58,8 @@ require (
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
-	github.com/prometheus/procfs v0.20.0 // indirect
-	github.com/sap/go-generics v0.2.54 // indirect
+	github.com/prometheus/procfs v0.20.1 // indirect
+	github.com/sap/go-generics v0.2.55 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
@@ -81,7 +81,7 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20260127142750-a19766b6e2d4 // indirect
+	k8s.io/kube-openapi v0.0.0-20260304202019-5b3e3fdb0acf // indirect
 	k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2 // indirect
 	sigs.k8s.io/cli-utils v0.37.2 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
