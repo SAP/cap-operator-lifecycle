@@ -79,6 +79,32 @@ spec:
             - name: DNS_TARGET
               value: {{ .Values.controller.dnsTarget }}
             {{- end }}
+            {{- with .Values.controller.maxConcurrentReconciles }}
+            {{- if .capApplication }}
+            - name: MAX_CONCURRENT_RECONCILES_CAP_APPLICATION
+              value: "{{ .capApplication }}"
+            {{- end }}
+            {{- if .capApplicationVersion }}
+            - name: MAX_CONCURRENT_RECONCILES_CAP_APPLICATION_VERSION
+              value: "{{ .capApplicationVersion }}"
+            {{- end }}
+            {{- if .capTenant }}
+            - name: MAX_CONCURRENT_RECONCILES_CAP_TENANT
+              value: "{{ .capTenant }}"
+            {{- end }}
+            {{- if .capTenantOperation }}
+            - name: MAX_CONCURRENT_RECONCILES_CAP_TENANT_OPERATION
+              value: "{{ .capTenantOperation }}"
+            {{- end }}
+            {{- if .domain }}
+            - name: MAX_CONCURRENT_RECONCILES_DOMAIN
+              value: "{{ .domain }}"
+            {{- end }}
+            {{- if .clusterDomain }}
+            - name: MAX_CONCURRENT_RECONCILES_CLUSTER_DOMAIN
+              value: "{{ .clusterDomain }}"
+            {{- end }}
+            {{- end }}
             {{- with .Values.controller.versionMonitoring }}
             {{- if .prometheusAddress }}
             - name: PROMETHEUS_ADDRESS
