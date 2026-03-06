@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 49,
+  "id": 48,
   "links": [],
   "liveNow": true,
   "panels": [
@@ -39,7 +39,6 @@
       "id": 5,
       "panels": [],
       "repeat": "duration",
-      "repeatDirection": "h",
       "title": "CAP Operator Lifecycle",
       "type": "row"
     },
@@ -61,11 +60,11 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
-          "unit": "short"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -90,11 +89,10 @@
           "values": false
         },
         "showPercentChange": true,
-        "textMode": "auto",
+        "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.0",
-      "repeatDirection": "h",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -104,9 +102,22 @@
           "editorMode": "code",
           "expr": "ceil(sum(increase((cap_op_tenant_operations{}[$duration]))))",
           "instant": false,
-          "legendFormat": "$duration",
+          "legendFormat": "Tenant Ops",
           "range": true,
-          "refId": "$duration"
+          "refId": "TenantOps"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "ceil(sum(increase((cap_op_service_operations{}[$duration]))))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Service Ops",
+          "range": true,
+          "refId": "ServiceOps"
         }
       ],
       "title": "Lifecycle Operations - $duration",
@@ -128,7 +139,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -160,8 +171,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.0",
-      "repeatDirection": "h",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -196,7 +206,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -232,7 +242,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -270,6 +280,9 @@
               "type": "color-text"
             },
             "filterable": true,
+            "footer": {
+              "reducers": []
+            },
             "inspect": false
           },
           "mappings": [],
@@ -279,7 +292,7 @@
             "steps": [
               {
                 "color": "red",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -295,18 +308,10 @@
       "id": 11,
       "options": {
         "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "count"
-          ],
-          "show": false
-        },
+        "enablePagination": true,
         "showHeader": true
       },
-      "pluginVersion": "11.2.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -491,17 +496,16 @@
       "type": "row"
     }
   ],
+  "preload": false,
   "refresh": "",
-  "schemaVersion": 39,
+  "schemaVersion": 42,
   "tags": [
     "cap-operator"
   ],
   "templating": {
     "list": [
       {
-        "allValue": "",
         "current": {
-          "selected": true,
           "text": [
             "24 hours"
           ],
@@ -510,7 +514,6 @@
           ]
         },
         "description": "Duration",
-        "hide": 0,
         "includeAll": true,
         "label": "Duration",
         "multi": true,
@@ -543,8 +546,6 @@
           }
         ],
         "query": "24 hours : 24h, 30 days : 30d, 90 days : 90d, 1 year : 1y",
-        "queryValue": "",
-        "skipUrlSync": false,
         "type": "custom"
       }
     ]
@@ -559,6 +560,5 @@
   "timezone": "browser",
   "title": "CAP Operator - Info",
   "uid": "cap-operator",
-  "version": 1,
-  "weekStart": ""
+  "version": 1
 }
