@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/klog/v2"
 	apiregistrationv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -78,7 +79,11 @@ func main() {
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	logger := zap.New(zap.UseFlagOptions(&opts))
+	ctrl.SetLogger(logger)
+	// Set klog to use the same logger as controller-runtime, so that logs from all libraries are consistent.
+	// There seems to be an issue with leader election logs being emitted which uses klog. See: https://github.com/kubernetes-sigs/controller-runtime/issues/2656
+	klog.SetLogger(logger)
 
 	if chartDir == "" {
 		setupLog.Error(nil, "command line flag missing or empty: --chart-directory")
