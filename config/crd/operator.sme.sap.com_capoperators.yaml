@@ -59,6 +59,35 @@ spec:
                     description: Optionally enable detailed opertational metrics for
                       the controller by setting this to true
                     type: boolean
+                  maxConcurrentReconciles:
+                    description: Configuration of maximum number of concurrent reconciles
+                      for the resources managed by the controller
+                    properties:
+                      capApplication:
+                        description: Maximum number of concurrent reconciles for the
+                          cap application
+                        type: string
+                      capApplicationVersion:
+                        description: Maximum number of concurrent reconciles for the
+                          cap application version
+                        type: string
+                      capTenant:
+                        description: Maximum number of concurrent reconciles for the
+                          cap tenant
+                        type: string
+                      capTenantOperation:
+                        description: Maximum number of concurrent reconciles for the
+                          cap tenant operation
+                        type: string
+                      clusterDomain:
+                        description: Maximum number of concurrent reconciles for the
+                          cluster domain
+                        type: string
+                      domain:
+                        description: Maximum number of concurrent reconciles for the
+                          domain
+                        type: string
+                    type: object
                   versionMonitoring:
                     description: Version monitoring configuration
                     properties:
