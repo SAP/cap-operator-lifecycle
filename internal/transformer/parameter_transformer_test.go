@@ -32,6 +32,7 @@ func TestTransformer(t *testing.T) {
 		withControllerVolumes              bool
 		withCertManager                    bool
 		withMonitoringGrafanaDashboard     bool
+		withMaxConcurrentReconciles        bool
 	}{
 		{
 			name:                       "With dnsTarget and without ingress gateway labels",
@@ -62,6 +63,12 @@ func TestTransformer(t *testing.T) {
 			ingressGatewayLabelsFilled:         true,
 			longDomain:                         false,
 			withoutIngressGatewaySvcAnnotation: true,
+		},
+		{
+			name:                        "With max concurrent reconciles",
+			dnsTargetFilled:             true,
+			withMaxConcurrentReconciles: true,
+			expectError:                 false,
 		},
 		{
 			name:                       "With version monitoring and dnsTarget filled",
@@ -201,6 +208,16 @@ func TestTransformer(t *testing.T) {
 				}
 			}
 
+			if tt.withMaxConcurrentReconciles {
+				capOperatorSpec.Controller.MaxConcurrentReconciles = &v1alpha1.MaxConcurrentReconciles{
+					CAPApplication:        "2",
+					CAPApplicationVersion: "5",
+					CAPTenant:             "15",
+					CAPTenantOperation:    "20",
+					Domain:                "1",
+				}
+			}
+
 			if tt.withVersionMonitoring {
 				capOperatorSpec.Controller.VersionMonitoring = &v1alpha1.VersionMonitoring{
 					PrometheusAddress: mockPrometheusAddress,
@@ -315,6 +332,18 @@ func TestTransformer(t *testing.T) {
 			if transformedController["dnsTarget"].(string) != expectedDnsTarget {
 				t.Error("unexpected value returned for controller.dnsTarget")
 			}
+
+			if tt.withMaxConcurrentReconciles {
+				if transformedController["maxConcurrentReconciles"] == nil {
+					t.Error("expected controller.maxConcurrentReconciles to be filled")
+				} else {
+					mcr := transformedController["maxConcurrentReconciles"].(map[string]any)
+					if mcr["capApplication"] != "2" || mcr["capApplicationVersion"] != "5" || mcr["capTenant"] != "15" || mcr["capTenantOperation"] != "20" || mcr["domain"] != "1" {
+						t.Error("unexpected values returned for controller.maxConcurrentReconciles")
+					}
+				}
+			}
+
 			if tt.withVersionMonitoring {
 				if transformedController["versionMonitoring"] == nil {
 					t.Error("expected controller.versionMonitoring to be filled")

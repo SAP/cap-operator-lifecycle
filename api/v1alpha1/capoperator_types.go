@@ -82,12 +82,29 @@ type SubscriptionServer struct {
 type Controller struct {
 	// Optionally enable detailed opertational metrics for the controller by setting this to true
 	DetailedOperationalMetrics bool `json:"detailedOperationalMetrics,omitempty"`
+	// Configuration of maximum number of concurrent reconciles for the resources managed by the controller
+	MaxConcurrentReconciles *MaxConcurrentReconciles `json:"maxConcurrentReconciles,omitempty"`
 	// Version monitoring configuration
 	VersionMonitoring *VersionMonitoring `json:"versionMonitoring,omitempty"`
 	// Optionally specify list of additional volumes for the controller pod(s)
 	Volumes []corev1.Volume `json:"volumes,omitempty"`
 	// Optionally specify list of additional volumeMounts for the controller container(s)
 	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
+}
+
+type MaxConcurrentReconciles struct {
+	// Maximum number of concurrent reconciles for the cap application
+	CAPApplication string `json:"capApplication,omitempty"`
+	// Maximum number of concurrent reconciles for the cap application version
+	CAPApplicationVersion string `json:"capApplicationVersion,omitempty"`
+	// Maximum number of concurrent reconciles for the cap tenant
+	CAPTenant string `json:"capTenant,omitempty"`
+	// Maximum number of concurrent reconciles for the cap tenant operation
+	CAPTenantOperation string `json:"capTenantOperation,omitempty"`
+	// Maximum number of concurrent reconciles for the domain
+	Domain string `json:"domain,omitempty"`
+	// Maximum number of concurrent reconciles for the cluster domain
+	ClusterDomain string `json:"clusterDomain,omitempty"`
 }
 
 type VersionMonitoring struct {
