@@ -20,6 +20,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="State",type=string,JSONPath=".status.state"
+// +kubebuilder:metadata:labels="app.kubernetes.io/component=customresourcedefinition";"app.kubernetes.io/instance=capoperators.operator.sme.sap.com";"app.kubernetes.io/name=capoperators.operator.sme.sap.com"
 
 // CAPOperator is the Schema for the CAPOperators API
 type CAPOperator struct {
@@ -35,6 +36,7 @@ type CAPOperatorStatus struct {
 	component.Status `json:",inline"`
 }
 
+// +kubebuilder:validation:ExactlyOneOf=dnsTarget;ingressGatewayLabels
 // CAPOperatorSpec defines the desired state of CAPOperator
 type CAPOperatorSpec struct {
 	// SubscriptionServer specification
@@ -126,6 +128,7 @@ type GrafanaDashboard struct {
 	ConfigMapLabels map[string]string `json:"configMapLabels,omitempty"`
 }
 
+// +kubebuilder:validation:AtMostOneOf=gardener;certManager
 type CertificateConfig struct {
 	// Gardener configuration
 	Gardener Gardener `json:"gardener,omitempty"`
