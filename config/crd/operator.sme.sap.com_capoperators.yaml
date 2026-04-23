@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.20.1
   labels:
-    app.kubernetes.io/name: capoperators.operator.sme.sap.com
-    app.kubernetes.io/instance: capoperators.operator.sme.sap.com
     app.kubernetes.io/component: customresourcedefinition
+    app.kubernetes.io/instance: capoperators.operator.sme.sap.com
+    app.kubernetes.io/name: capoperators.operator.sme.sap.com
   name: capoperators.operator.sme.sap.com
 spec:
   group: operator.sme.sap.com
@@ -46,11 +46,6 @@ spec:
             type: object
           spec:
             description: CAPOperatorSpec defines the desired state of CAPOperator
-            oneOf:
-            - required:
-              - ingressGatewayLabels
-            - required:
-              - dnsTarget
             properties:
               controller:
                 description: Controller specification
@@ -2137,16 +2132,6 @@ spec:
                 properties:
                   certificateConfig:
                     description: Certificate configuration
-                    anyOf:
-                    - oneOf:
-                      - required:
-                        - certManager
-                      - required:
-                        - gardener
-                    - not:
-                        required:
-                        - certManager
-                        - gardener
                     properties:
                       certManager:
                         description: CertManager configuration
@@ -2172,6 +2157,11 @@ spec:
                             type: string
                         type: object
                     type: object
+                    x-kubernetes-validations:
+                    - message: at most one of the fields in [gardener certManager]
+                        may be set
+                      rule: '[has(self.gardener),has(self.certManager)].filter(x,x==true).size()
+                        <= 1'
                   certificateManager:
                     description: Certificate manager which can be either `Gardener`
                       or `CertManager`
@@ -2189,16 +2179,6 @@ spec:
                 properties:
                   certificateConfig:
                     description: Certificate configuration
-                    anyOf:
-                    - oneOf:
-                      - required:
-                        - certManager
-                      - required:
-                        - gardener
-                    - not:
-                        required:
-                        - certManager
-                        - gardener
                     properties:
                       certManager:
                         description: CertManager configuration
@@ -2224,6 +2204,11 @@ spec:
                             type: string
                         type: object
                     type: object
+                    x-kubernetes-validations:
+                    - message: at most one of the fields in [gardener certManager]
+                        may be set
+                      rule: '[has(self.gardener),has(self.certManager)].filter(x,x==true).size()
+                        <= 1'
                   certificateManager:
                     description: Certificate manager which can be either `Default`
                       or `CertManager`
@@ -2235,6 +2220,11 @@ spec:
             required:
             - subscriptionServer
             type: object
+            x-kubernetes-validations:
+            - message: exactly one of the fields in [dnsTarget ingressGatewayLabels]
+                must be set
+              rule: '[has(self.dnsTarget),has(self.ingressGatewayLabels)].filter(x,x==true).size()
+                == 1'
           status:
             properties:
               appliedGeneration:
