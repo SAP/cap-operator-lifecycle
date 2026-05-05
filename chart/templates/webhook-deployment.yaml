@@ -16,10 +16,19 @@ spec:
       operator.sme.sap.com/release: {{.Release.Name}}
   template:
     metadata:
+      annotations:
+        operator.sme.sap.com/checksum-cert: {{ include (print $.Template.BasePath "/webhook-config.yaml") . | sha256sum }}
       labels:
         operator.sme.sap.com/app: webhook
         operator.sme.sap.com/category: controller
         operator.sme.sap.com/release: {{.Release.Name}}
+        {{- if or (gt (len .Values.podLabels) 0) (gt (len .Values.webhook.podLabels) 0) }}
+        {{- include "utils.maps.merge" (list .Values.podLabels .Values.webhook.podLabels) | trim | nindent 8 }}
+        {{- end }}
+      {{- if or (gt (len .Values.podAnnotations) 0) (gt (len .Values.webhook.podAnnotations) 0) }}
+      annotations:
+        {{- include "utils.maps.merge" (list .Values.podAnnotations .Values.webhook.podAnnotations) | trim | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.webhook.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -51,7 +60,7 @@ spec:
       serviceAccountName: {{.Release.Name}}-webhook
       automountServiceAccountToken: true
       containers:
-      {{- if eq .Values.webhook.sidecar true }}  
+      {{- if eq .Values.webhook.sidecar true }}
       - name: request-sidecar
         image: alpine
         command:
@@ -101,7 +110,7 @@ spec:
       volumes:
       - name: ssl
         secret:
-          secretName: {{.Release.Name}}-webhook-tls
+          secretName: {{ if and (.Capabilities.APIVersions.Has "cert-manager.io/v1") (eq .Values.webhook.certificateManager "CertManager") }} {{.Release.Name}}-webhook-tls-managed {{ else }} {{.Release.Name}}-webhook-tls {{ end }}
           items:
           - key: tls.key
             path: tls.key

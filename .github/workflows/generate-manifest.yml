@@ -22,10 +22,13 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: write # allows uploading release assets
+
 jobs:
   generate_manifest:
     name: Generate manifest
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout

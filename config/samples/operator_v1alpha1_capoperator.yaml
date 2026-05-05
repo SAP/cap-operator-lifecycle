@@ -17,4 +17,3 @@ spec:
       value: ingressgateway
     - name: app
       value: istio-ingressgateway
-  

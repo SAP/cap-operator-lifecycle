@@ -4,21 +4,21 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.20.1
-  name: captenantoperations.sme.sap.com
+  name: domains.sme.sap.com
 spec:
   group: sme.sap.com
   names:
-    kind: CAPTenantOperation
-    listKind: CAPTenantOperationList
-    plural: captenantoperations
+    kind: Domain
+    listKind: DomainList
+    plural: domains
     shortNames:
-    - ctop
-    singular: captenantoperation
+    - dom
+    singular: domain
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.operation
-      name: Operation
+    - jsonPath: .spec.domain
+      name: Domain
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
@@ -38,46 +38,57 @@ spec:
             type: object
           spec:
             properties:
-              capApplicationVersionInstance:
-                type: string
-              operation:
+              certConfig:
+                properties:
+                  additionalCACertificate:
+                    type: string
+                type: object
+              dnsMode:
+                default: None
                 enum:
-                - provisioning
-                - deprovisioning
-                - upgrade
+                - None
+                - Wildcard
+                - Subdomain
+                - Custom
                 type: string
-              steps:
+              dnsTarget:
+                pattern: ^[a-z0-9-.]+$
+                type: string
+              dnsTemplates:
                 items:
                   properties:
-                    continueOnFailure:
-                      type: boolean
                     name:
                       type: string
-                    type:
-                      enum:
-                      - CustomTenantOperation
-                      - TenantOperation
+                    target:
                       type: string
                   required:
                   - name
-                  - type
+                  - target
                   type: object
+                maxItems: 10
                 type: array
-              subDomain:
+              domain:
+                pattern: ^[a-z0-9-.]+$
                 type: string
-              tenantId:
+              ingressSelector:
+                additionalProperties:
+                  type: string
+                type: object
+              tlsMode:
+                default: Simple
+                enum:
+                - Simple
+                - Mutual
+                - OptionalMutual
                 type: string
             required:
-            - capApplicationVersionInstance
-            - operation
-            - steps
-            - subDomain
-            - tenantId
+            - dnsMode
+            - domain
+            - ingressSelector
+            - tlsMode
             type: object
           status:
             properties:
-              activeJob:
-                type: string
               conditions:
                 items:
                   properties:
@@ -114,18 +125,21 @@ spec:
                   - type
                   type: object
                 type: array
-              currentStep:
-                format: int32
-                type: integer
+              dnsTarget:
+                type: string
+              gatewayName:
+                type: string
+              observedDomain:
+                type: string
               observedGeneration:
                 format: int64
                 type: integer
               state:
                 enum:
                 - ""
+                - Ready
+                - Error
                 - Processing
-                - Completed
-                - Failed
                 - Deleting
                 type: string
             required:

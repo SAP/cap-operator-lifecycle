@@ -7,3 +7,5 @@ resources:
 - capapplicationversion_configMap.yaml
 - captenant_configMap.yaml
 - captenantoperation_configMap.yaml
+- domain_configMap.yaml
+- clusterdomain_configMap.yaml

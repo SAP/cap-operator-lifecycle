@@ -1,5 +1,5 @@
 /*
-SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and cap-operator contributors
+SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and cap-operator contributors
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -27,17 +27,17 @@ const (
 	annotationDNSNames      = "dns.gardener.cloud/dnsnames"
 )
 
-type transformer struct {
+var setupLog = ctrl.Log.WithName("transformer")
+
+type parameterTransformer struct {
 	client client.Client
 }
 
-var setupLog = ctrl.Log.WithName("transformer")
-
-func NewParameterTransformer(client client.Client) *transformer {
-	return &transformer{client: client}
+func NewParameterTransformer(client client.Client) *parameterTransformer {
+	return &parameterTransformer{client: client}
 }
 
-func (t *transformer) TransformParameters(namespace string, name string, parameters componentoperatorruntimetypes.Unstructurable) (componentoperatorruntimetypes.Unstructurable, error) {
+func (t *parameterTransformer) TransformParameters(_, _ string, parameters componentoperatorruntimetypes.Unstructurable) (componentoperatorruntimetypes.Unstructurable, error) {
 	parameterMap := parameters.ToUnstructured()
 
 	if err := t.fillDomain(parameterMap); err != nil {
@@ -56,8 +56,14 @@ func replaceAsteriskDNSTarget(dnsTarget string) string {
 	return strings.ReplaceAll(dnsTarget, "*", "x")
 }
 
-func (t *transformer) fillDNSTarget(parameters map[string]any) error {
-	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
+func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
+	subscriptionServer := parameters["subscriptionServer"].(map[string]any)
+
+	if parameters["controller"] == nil {
+		parameters["controller"] = map[string]any{}
+	}
+	controller := parameters["controller"].(map[string]any)
+
 	// DNSTarget given - use it
 	if parameters["dnsTarget"] != nil {
 		replacedDnsTarget := replaceAsteriskDNSTarget(parameters["dnsTarget"].(string))
@@ -65,9 +71,7 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 		// set the dnsTarget in the subscriptionServer
 		subscriptionServer["dnsTarget"] = replacedDnsTarget
 		// set the dnsTarget in the controller
-		parameters["controller"] = map[string]interface{}{
-			"dnsTarget": replacedDnsTarget,
-		}
+		controller["dnsTarget"] = replacedDnsTarget
 
 		delete(parameters, "dnsTarget")
 		return nil
@@ -78,7 +82,7 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 		return fmt.Errorf("unable to retrieve dnsTarget; please specify either dnsTarget or ingressGatewayLabels in the CAP Operator CRO")
 	}
 
-	dnsTarget, err := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]interface{}))
+	dnsTarget, err := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]any))
 	if err != nil {
 		setupLog.Info("dnsTarget not found using ingressGatewayLabels", "error", err)
 
@@ -95,14 +99,12 @@ func (t *transformer) fillDNSTarget(parameters map[string]any) error {
 	// set the dnsTarget in the subscriptionServer
 	subscriptionServer["dnsTarget"] = replacedDnsTarget
 	// set the dnsTarget in the controller
-	parameters["controller"] = map[string]interface{}{
-		"dnsTarget": replacedDnsTarget,
-	}
+	controller["dnsTarget"] = replacedDnsTarget
 	delete(parameters, "ingressGatewayLabels")
 	return nil
 }
 
-func (t *transformer) getDNSTargetUsingIngressGatewayLabels(ingressGatewayLabels []interface{}) (dnsTarget string, err error) {
+func (t *parameterTransformer) getDNSTargetUsingIngressGatewayLabels(ingressGatewayLabels []any) (dnsTarget string, err error) {
 
 	ctx := context.TODO()
 
@@ -153,18 +155,18 @@ func (t *transformer) getDNSTargetUsingIngressGatewayLabels(ingressGatewayLabels
 	return dnsTarget, nil
 }
 
-func convertIngressGatewayLabelsToMap(ingressGatewayLabels []interface{}) map[string]string {
+func convertIngressGatewayLabelsToMap(ingressGatewayLabels []any) map[string]string {
 	ingressLabels := map[string]string{}
 
 	for _, label := range ingressGatewayLabels {
-		labelMap := label.(map[string]interface{})
+		labelMap := label.(map[string]any)
 		ingressLabels[labelMap["name"].(string)] = labelMap["value"].(string)
 	}
 
 	return ingressLabels
 }
 
-func (t *transformer) getLoadBalancerSvcs(ctx context.Context) ([]corev1.Service, error) {
+func (t *parameterTransformer) getLoadBalancerServices(ctx context.Context) ([]corev1.Service, error) {
 	// List all services in the same namespace as the istio-ingressgateway pod namespace
 	svcList := &corev1.ServiceList{TypeMeta: metav1.TypeMeta{Kind: "Service"}}
 	if err := t.client.List(ctx, svcList, &client.ListOptions{Namespace: istioIngressGWNamespace}); err != nil {
@@ -181,8 +183,8 @@ func (t *transformer) getLoadBalancerSvcs(ctx context.Context) ([]corev1.Service
 	return loadBalancerSvcs, nil
 }
 
-func (t *transformer) getIngressGatewayService(ctx context.Context, relevantPodNames map[string]struct{}) (*corev1.Service, error) {
-	loadBalancerSvcs, err := t.getLoadBalancerSvcs(ctx)
+func (t *parameterTransformer) getIngressGatewayService(ctx context.Context, relevantPodNames map[string]struct{}) (*corev1.Service, error) {
+	loadBalancerSvcs, err := t.getLoadBalancerServices(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -214,9 +216,9 @@ func (t *transformer) getIngressGatewayService(ctx context.Context, relevantPodN
 	return &ingressGwSvc, nil
 }
 
-func (t *transformer) fillDomain(parameters map[string]any) error {
+func (t *parameterTransformer) fillDomain(parameters map[string]any) error {
 	// get domain
-	subscriptionServer := parameters["subscriptionServer"].(map[string]interface{})
+	subscriptionServer := parameters["subscriptionServer"].(map[string]any)
 	domain, err := t.getDomain(subscriptionServer["subDomain"].(string))
 	if err != nil {
 		return err
@@ -232,7 +234,7 @@ func (t *transformer) fillDomain(parameters map[string]any) error {
 	return nil
 }
 
-func (t *transformer) getDomain(subDomain string) (string, error) {
+func (t *parameterTransformer) getDomain(subDomain string) (string, error) {
 	configMapObj := &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",

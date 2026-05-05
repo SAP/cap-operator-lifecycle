@@ -19,6 +19,13 @@ spec:
         operator.sme.sap.com/app: controller
         operator.sme.sap.com/category: controller
         operator.sme.sap.com/release: {{.Release.Name}}
+        {{- if or (gt (len .Values.podLabels) 0) (gt (len .Values.controller.podLabels) 0) }}
+        {{- include "utils.maps.merge" (list .Values.podLabels .Values.controller.podLabels) | trim | nindent 8 }}
+        {{- end }}
+      {{- if or (gt (len .Values.podAnnotations) 0) (gt (len .Values.controller.podAnnotations) 0) }}
+      annotations:
+        {{- include "utils.maps.merge" (list .Values.podAnnotations .Values.controller.podAnnotations) | trim | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.controller.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -62,6 +69,8 @@ spec:
           resources:
             {{- toYaml .Values.controller.resources | nindent 12 }}
           env:
+            - name: DETAILED_OPERATIONAL_METRICS
+              value: "{{ .Values.controller.detailedOperationalMetrics }}"
             - name: CERT_MANAGER
               value: {{ .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" | ternary "gardener" "cert-manager.io" }}
             - name: DNS_MANAGER
@@ -69,6 +78,32 @@ spec:
             {{- if .Values.controller.dnsTarget }}
             - name: DNS_TARGET
               value: {{ .Values.controller.dnsTarget }}
+            {{- end }}
+            {{- with .Values.controller.maxConcurrentReconciles }}
+            {{- if .capApplication }}
+            - name: MAX_CONCURRENT_RECONCILES_CAP_APPLICATION
+              value: "{{ .capApplication }}"
+            {{- end }}
+            {{- if .capApplicationVersion }}
+            - name: MAX_CONCURRENT_RECONCILES_CAP_APPLICATION_VERSION
+              value: "{{ .capApplicationVersion }}"
+            {{- end }}
+            {{- if .capTenant }}
+            - name: MAX_CONCURRENT_RECONCILES_CAP_TENANT
+              value: "{{ .capTenant }}"
+            {{- end }}
+            {{- if .capTenantOperation }}
+            - name: MAX_CONCURRENT_RECONCILES_CAP_TENANT_OPERATION
+              value: "{{ .capTenantOperation }}"
+            {{- end }}
+            {{- if .domain }}
+            - name: MAX_CONCURRENT_RECONCILES_DOMAIN
+              value: "{{ .domain }}"
+            {{- end }}
+            {{- if .clusterDomain }}
+            - name: MAX_CONCURRENT_RECONCILES_CLUSTER_DOMAIN
+              value: "{{ .clusterDomain }}"
+            {{- end }}
             {{- end }}
             {{- with .Values.controller.versionMonitoring }}
             {{- if .prometheusAddress }}
@@ -88,4 +123,48 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          ports:
+            - name: metrics-port
+              containerPort: 9090
+              protocol: TCP
       serviceAccountName: {{.Release.Name}}-controller
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{.Release.Name}}-controller
+  labels:
+    operator.sme.sap.com/app: controller
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+spec:
+  ports:
+    - name: metrics-http
+      protocol: TCP
+      port: 9090
+      targetPort: metrics-port
+  selector:
+    operator.sme.sap.com/app: controller
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+---
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{.Release.Name}}-controller
+  labels:
+    operator.sme.sap.com/app: controller
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+    {{- if .Values.monitoring.serviceMonitorSelectorLabels }}
+    {{- toYaml .Values.monitoring.serviceMonitorSelectorLabels | trim | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      operator.sme.sap.com/app: controller
+      operator.sme.sap.com/category: controller
+  endpoints:
+  - port: metrics-http
+{{- end }}

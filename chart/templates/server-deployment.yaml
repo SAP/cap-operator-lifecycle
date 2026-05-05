@@ -8,7 +8,7 @@ metadata:
     operator.sme.sap.com/category: controller
     operator.sme.sap.com/release: {{.Release.Name}}
 spec:
-  replicas: {{.Values.subscriptionServer.replicas}} 
+  replicas: {{.Values.subscriptionServer.replicas}}
   selector:
     matchLabels:
       operator.sme.sap.com/app: subscription-server
@@ -20,6 +20,13 @@ spec:
         operator.sme.sap.com/app: subscription-server
         operator.sme.sap.com/category: controller
         operator.sme.sap.com/release: {{.Release.Name}}
+        {{- if or (gt (len .Values.podLabels) 0) (gt (len .Values.subscriptionServer.podLabels) 0) }}
+        {{- include "utils.maps.merge" (list .Values.podLabels .Values.subscriptionServer.podLabels) | trim | nindent 8 }}
+        {{- end }}
+      {{- if or (gt (len .Values.podAnnotations) 0) (gt (len .Values.subscriptionServer.podAnnotations) 0) }}
+      annotations:
+        {{- include "utils.maps.merge" (list .Values.podAnnotations .Values.subscriptionServer.podAnnotations) | trim | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.subscriptionServer.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -70,6 +77,9 @@ spec:
             - name: server-port
               containerPort: 4000
               protocol: TCP
+            - name: metrics-port
+              containerPort: 9090
+              protocol: TCP
       serviceAccountName: {{.Release.Name}}-subscription-server
 ---
 kind: Service
@@ -86,7 +96,32 @@ spec:
       protocol: TCP
       port: {{.Values.subscriptionServer.port}}
       targetPort: server-port
+    - name: metrics-http
+      protocol: TCP
+      port: 9090
+      targetPort: metrics-port
   selector:
     operator.sme.sap.com/app: subscription-server
     operator.sme.sap.com/category: controller
     operator.sme.sap.com/release: {{.Release.Name}}
+---
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{.Release.Name}}-subscription-server
+  labels:
+    operator.sme.sap.com/app: subscription-server
+    operator.sme.sap.com/category: controller
+    operator.sme.sap.com/release: {{.Release.Name}}
+    {{- if .Values.monitoring.serviceMonitorSelectorLabels }}
+    {{- toYaml .Values.monitoring.serviceMonitorSelectorLabels | trim | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      operator.sme.sap.com/app: subscription-server
+      operator.sme.sap.com/category: controller
+  endpoints:
+  - port: metrics-http
+{{- end }}
