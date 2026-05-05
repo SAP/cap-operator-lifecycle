@@ -115,6 +115,10 @@ spec:
     - method:
         regex: GET
       uri:
+        prefix: /sms/dependencies/
+    - method:
+        regex: GET
+      uri:
         prefix: /dependencies/
     route:
     - destination:
