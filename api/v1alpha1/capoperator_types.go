@@ -55,7 +55,14 @@ type CAPOperatorSpec struct {
 	Webhook Webhook `json:"webhook,omitempty"`
 }
 
+// Common aspects for `Controller`, `SubscriptionServer` and `Webhook`
+type CommonConfig struct {
+	// Resource Requirements configuration
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
 type Webhook struct {
+	CommonConfig `json:",inline"`
 	// Certificate manager which can be either `Default` or `CertManager`
 	// +kubebuilder:validation:Enum=Default;CertManager
 	CertificateManager CertificateManager `json:"certificateManager,omitempty"`
@@ -73,7 +80,8 @@ type Monitoring struct {
 }
 
 type SubscriptionServer struct {
-	Subdomain string `json:"subDomain"`
+	CommonConfig `json:",inline"`
+	Subdomain    string `json:"subDomain"`
 	// Certificate manager which can be either `Gardener` or `CertManager`
 	// +kubebuilder:validation:Enum=Gardener;CertManager
 	CertificateManager CertificateManager `json:"certificateManager,omitempty"`
@@ -82,6 +90,7 @@ type SubscriptionServer struct {
 }
 
 type Controller struct {
+	CommonConfig `json:",inline"`
 	// Optionally enable detailed opertational metrics for the controller by setting this to true
 	DetailedOperationalMetrics bool `json:"detailedOperationalMetrics,omitempty"`
 	// Configuration of maximum number of concurrent reconciles for the resources managed by the controller
