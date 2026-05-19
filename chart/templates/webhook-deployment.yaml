@@ -103,6 +103,9 @@ spec:
           mountPath: /app/etc/ssl
         - name: request
           mountPath: /tmp
+        {{- with .Values.webhook.volumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         ports:
           - name: webhook-port
             containerPort: {{ .Values.webhook.service.targetPort }}
@@ -118,6 +121,9 @@ spec:
             path: tls.crt
       - name: request
         emptyDir: {}
+      {{- with .Values.webhook.volumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service
