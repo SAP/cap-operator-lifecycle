@@ -6,13 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 package transformer
 
 import (
-	"context"
-	"fmt"
 	"strings"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
 	"github.com/sap/component-operator-runtime/pkg/reconciler"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/sap/cap-operator-lifecycle/internal/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -34,7 +32,7 @@ func NewObjectTransformer(client client.Client, name string) *objectTransformer 
 
 func (ot *objectTransformer) TransformObjects(_, _ string, objects []client.Object) ([]client.Object, error) {
 	// Step 1: Find the single CAPOperator resource.
-	capOperator, err := ot.getCAPOperator()
+	capOperator, err := util.GetCAPOperator(ot.client)
 	if err != nil {
 		return objects, err
 	}
@@ -50,27 +48,6 @@ func (ot *objectTransformer) TransformObjects(_, _ string, objects []client.Obje
 
 	// If retain-resources is not "true", ensure the delete-policy annotation is removed from all resources.
 	return ot.removeDeletePolicy(objects), nil
-}
-
-// getCAPOperator fetches the single CAPOperator instance in the cluster.
-func (ot *objectTransformer) getCAPOperator() (*operatorv1alpha1.CAPOperator, error) {
-	capOperatorList := &operatorv1alpha1.CAPOperatorList{}
-
-	// List all CAPOperator resources across all namespaces.
-	err := ot.client.List(context.TODO(), capOperatorList, &client.ListOptions{Namespace: corev1.NamespaceAll})
-	if err != nil {
-		return nil, fmt.Errorf("failed to list CAPOperator resources: %w", err)
-	}
-
-	if len(capOperatorList.Items) == 0 {
-		return nil, fmt.Errorf("no CAPOperator resource found")
-	}
-
-	if len(capOperatorList.Items) > 1 {
-		return nil, fmt.Errorf("more than one CAPOperator resource found")
-	}
-
-	return &capOperatorList.Items[0], nil
 }
 
 // checkRetainResources checks if the CAPOperator is annotated to retain resources.

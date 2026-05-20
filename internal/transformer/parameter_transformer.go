@@ -17,6 +17,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/sap/cap-operator-lifecycle/internal/util"
 	componentoperatorruntimetypes "github.com/sap/component-operator-runtime/pkg/types"
 )
 
@@ -64,35 +65,43 @@ func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
 	}
 	controller := parameters["controller"].(map[string]any)
 
-	// DNSTarget given - use it
-	if parameters["dnsTarget"] != nil {
-		replacedDnsTarget := replaceAsteriskDNSTarget(parameters["dnsTarget"].(string))
-
-		// set the dnsTarget in the subscriptionServer
-		subscriptionServer["dnsTarget"] = replacedDnsTarget
-		// set the dnsTarget in the controller
-		controller["dnsTarget"] = replacedDnsTarget
-
-		delete(parameters, "dnsTarget")
-		return nil
-	}
-
-	// DNSTarget not given - read it from the load balancer service in istio namespace
-	if parameters["ingressGatewayLabels"] == nil {
-		return fmt.Errorf("unable to retrieve dnsTarget; please specify either dnsTarget or ingressGatewayLabels in the CAP Operator CRO")
-	}
-
-	dnsTarget, err := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]any))
+	capOperator, err := util.GetCAPOperator(t.client)
 	if err != nil {
-		setupLog.Info("dnsTarget not found using ingressGatewayLabels", "error", err)
+		return err
+	}
 
-		// default the dnsTarget to the x.<cluster-domain>
-		dnsTarget, err = t.getDomain("x")
-		if err != nil {
-			return err
+	var dnsTarget string
+	if capOperator.Status.ResolvedDNSTarget != "" && capOperator.Generation == capOperator.Status.AppliedGeneration {
+		// Cache hit: spec unchanged since last successful apply, reuse persisted DNS target
+		dnsTarget = capOperator.Status.ResolvedDNSTarget
+	} else {
+		// Cache miss: resolve from spec
+		if parameters["dnsTarget"] != nil {
+			dnsTarget = parameters["dnsTarget"].(string)
+		} else if parameters["ingressGatewayLabels"] != nil {
+			resolved, resolveErr := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]any))
+			if resolveErr != nil {
+				setupLog.Info("dnsTarget not found using ingressGatewayLabels", "error", resolveErr)
+
+				// default the dnsTarget to the x.<cluster-domain>
+				dnsTarget, err = t.getDomain("x")
+				if err != nil {
+					return err
+				}
+
+				setupLog.Info("defaulting dnsTarget to " + dnsTarget)
+			} else {
+				dnsTarget = resolved
+			}
+		} else {
+			return fmt.Errorf("unable to retrieve dnsTarget; please specify either dnsTarget or ingressGatewayLabels in the CAP Operator CRO")
 		}
 
-		setupLog.Info("defaulting dnsTarget to " + dnsTarget)
+		patch := client.MergeFrom(capOperator.DeepCopy())
+		capOperator.Status.ResolvedDNSTarget = dnsTarget
+		if patchErr := t.client.Status().Patch(context.TODO(), capOperator, patch); patchErr != nil {
+			setupLog.Info("failed to cache resolved dnsTarget in status", "error", patchErr)
+		}
 	}
 
 	replacedDnsTarget := replaceAsteriskDNSTarget(dnsTarget)
@@ -100,7 +109,10 @@ func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
 	subscriptionServer["dnsTarget"] = replacedDnsTarget
 	// set the dnsTarget in the controller
 	controller["dnsTarget"] = replacedDnsTarget
+
+	delete(parameters, "dnsTarget")
 	delete(parameters, "ingressGatewayLabels")
+
 	return nil
 }
 

@@ -9,9 +9,11 @@ import (
 	"testing"
 
 	"github.com/sap/cap-operator-lifecycle/api/v1alpha1"
+	component "github.com/sap/component-operator-runtime/pkg/component"
 	componentoperatorruntimetypes "github.com/sap/component-operator-runtime/pkg/types"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	fake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -20,6 +22,10 @@ const (
 )
 
 func TestTransformer(t *testing.T) {
+	scheme := runtime.NewScheme()
+	_ = corev1.AddToScheme(scheme)
+	_ = v1alpha1.AddToScheme(scheme)
+
 	tests := []struct {
 		name                               string
 		dnsTargetFilled                    bool
@@ -33,6 +39,12 @@ func TestTransformer(t *testing.T) {
 		withCertManager                    bool
 		withMonitoringGrafanaDashboard     bool
 		withMaxConcurrentReconciles        bool
+		// cache-related fields
+		preResolvedDNSTarget      string // pre-populate status.ResolvedDNSTarget
+		specGeneration            int64  // metadata.generation for CAPOperator (0 = default)
+		appliedGeneration         int64  // status.appliedGeneration for CAPOperator (0 = default)
+		skipPod                   bool   // omit the ingress gateway pod (for cache hit tests)
+		expectedDNSTargetOverride string // if set, overrides the default expectedDnsTarget in assertions
 	}{
 		{
 			name:                       "With dnsTarget and without ingress gateway labels",
@@ -100,11 +112,34 @@ func TestTransformer(t *testing.T) {
 			withCertManager:                true,
 			withMonitoringGrafanaDashboard: true,
 		},
+		{
+			name:                       "Cache hit - spec generation matches applied generation",
+			ingressGatewayLabelsFilled: true,
+			preResolvedDNSTarget:       "public-ingress.some.cluster.sap",
+			specGeneration:             1,
+			appliedGeneration:          1,
+			skipPod:                    true, // pod not needed; cache hit must bypass getDNSTargetUsingIngressGatewayLabels
+		},
+		{
+			name:                       "Cache miss on spec change - re-resolves DNS target",
+			ingressGatewayLabelsFilled: true,
+			preResolvedDNSTarget:       "old-dns-target.should-not-be-used",
+			specGeneration:             2,
+			appliedGeneration:          1,
+		},
+		{
+			name:                      "Cache hit with explicit dnsTarget - uses persisted value over spec",
+			dnsTargetFilled:           true,
+			preResolvedDNSTarget:      "cached-ingress.some.cluster.sap",
+			specGeneration:            1,
+			appliedGeneration:         1,
+			expectedDNSTargetOverride: "cached-ingress.some.cluster.sap",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			clientBuilder := fake.NewClientBuilder()
+			clientBuilder := fake.NewClientBuilder().WithScheme(scheme)
 
 			istioSvc := &corev1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -140,7 +175,11 @@ func TestTransformer(t *testing.T) {
 						"domain": "some.cluster.sap",
 					},
 				},
-				&corev1.Pod{
+				istioSvc,
+			)
+
+			if !tt.skipPod {
+				clientBuilder.WithObjects(&corev1.Pod{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "ingressGw",
 						Namespace: "istio-system",
@@ -149,8 +188,23 @@ func TestTransformer(t *testing.T) {
 							"app":   "istio-ingress",
 						},
 					},
+				})
+			}
+
+			capOperator := &v1alpha1.CAPOperator{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:       "cap-operator",
+					Namespace:  "cap-operator-system",
+					Generation: tt.specGeneration,
 				},
-				istioSvc)
+				Status: v1alpha1.CAPOperatorStatus{
+					Status: component.Status{
+						AppliedGeneration: tt.appliedGeneration,
+					},
+					ResolvedDNSTarget: tt.preResolvedDNSTarget,
+				},
+			}
+			clientBuilder.WithStatusSubresource(capOperator).WithObjects(capOperator)
 
 			kubeClient := clientBuilder.Build()
 
@@ -260,7 +314,9 @@ func TestTransformer(t *testing.T) {
 			}
 
 			var expectedDnsTarget string
-			if tt.withoutIngressGatewaySvcAnnotation {
+			if tt.expectedDNSTargetOverride != "" {
+				expectedDnsTarget = tt.expectedDNSTargetOverride
+			} else if tt.withoutIngressGatewaySvcAnnotation {
 				expectedDnsTarget = "x.some.cluster.sap"
 			} else {
 				expectedDnsTarget = "public-ingress.some.cluster.sap"

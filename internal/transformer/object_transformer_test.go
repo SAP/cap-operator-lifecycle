@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
+	"github.com/sap/cap-operator-lifecycle/internal/util"
 	"github.com/sap/component-operator-runtime/pkg/reconciler"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -111,9 +112,7 @@ func TestGetCAPOperator(t *testing.T) {
 				clientBuilder = clientBuilder.WithObjects(&tt.capOperators[i])
 			}
 			fakeClient := clientBuilder.Build()
-
-			transformer := NewObjectTransformer(fakeClient, Name)
-			capOperator, err := transformer.getCAPOperator()
+			capOperator, err := util.GetCAPOperator(fakeClient)
 
 			if tt.expectedError != "" {
 				if err == nil {
