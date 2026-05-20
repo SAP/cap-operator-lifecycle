@@ -33,7 +33,7 @@ type CAPOperator struct {
 
 type CAPOperatorStatus struct {
 	component.Status `json:",inline"`
-	// Resolved DNS target cached from the last successful ingress gateway lookup.
+	// Resolved DNS target cached from the last successful reconcile.
 	ResolvedDNSTarget string `json:"resolvedDNSTarget,omitempty"`
 }
 

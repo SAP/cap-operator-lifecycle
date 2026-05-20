@@ -2538,8 +2538,7 @@ spec:
                 format: date-time
                 type: string
               resolvedDNSTarget:
-                description: Resolved DNS target cached from the last successful ingress
-                  gateway lookup.
+                description: Resolved DNS target cached from the last successful reconcile.
                 type: string
               revision:
                 format: int64

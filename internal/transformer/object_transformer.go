@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	operatorv1alpha1 "github.com/sap/cap-operator-lifecycle/api/v1alpha1"
-	"github.com/sap/component-operator-runtime/pkg/reconciler"
 	"github.com/sap/cap-operator-lifecycle/internal/util"
+	"github.com/sap/component-operator-runtime/pkg/reconciler"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
