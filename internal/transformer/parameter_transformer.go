@@ -79,7 +79,7 @@ func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
 		if parameters["dnsTarget"] != nil {
 			dnsTarget = parameters["dnsTarget"].(string)
 		} else if parameters["ingressGatewayLabels"] != nil {
-			resolved, resolveErr := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]any))
+			resolvedDnsTarget, resolveErr := t.getDNSTargetUsingIngressGatewayLabels(parameters["ingressGatewayLabels"].([]any))
 			if resolveErr != nil {
 				setupLog.Info("dnsTarget not found using ingressGatewayLabels", "error", resolveErr)
 
@@ -91,7 +91,7 @@ func (t *parameterTransformer) fillDNSTarget(parameters map[string]any) error {
 
 				setupLog.Info("defaulting dnsTarget to " + dnsTarget)
 			} else {
-				dnsTarget = resolved
+				dnsTarget = resolvedDnsTarget
 			}
 		} else {
 			return fmt.Errorf("unable to retrieve dnsTarget; please specify either dnsTarget or ingressGatewayLabels in the CAP Operator CRO")
