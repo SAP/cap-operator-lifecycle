@@ -19,9 +19,9 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
-    - uses: azure/setup-helm@v4
+    - uses: azure/setup-helm@v5
 
     - name: Determine target commit
       id: get_target_commit
@@ -68,21 +68,21 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         ref: website
         path: website
         token: ${{ secrets.WORKFLOW_USER_TOKEN }}
 
-    - uses: azure/setup-helm@v4
+    - uses: azure/setup-helm@v5
 
     - name: Setup Pages
-      uses: actions/configure-pages@v5
+      uses: actions/configure-pages@v6
 
     - name: Create package
       run: |
@@ -125,9 +125,9 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
-    - uses: azure/setup-helm@v4
+    - uses: azure/setup-helm@v5
 
     - name: Create package
       run: |
