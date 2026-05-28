@@ -216,8 +216,6 @@ subscriptionServer:
       -----END CERTIFICATE-----
 
 webhook:
-  # -- Side car to mount admission review
-  sidecar: false
   # -- Replicas
   replicas: 1
   image:
