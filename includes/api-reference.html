@@ -1,0 +1,963 @@
+<p>Packages:</p>
+<ul>
+<li>
+<a href="#operator.sme.sap.com%2fv1alpha1">operator.sme.sap.com/v1alpha1</a>
+</li>
+</ul>
+<h2 id="operator.sme.sap.com/v1alpha1">operator.sme.sap.com/v1alpha1</h2>
+<div>
+<p>Package v1alpha1 contains API Schema definitions for the operator v1alpha1 API group</p>
+</div>
+Resource Types:
+<ul></ul>
+<h3 id="operator.sme.sap.com/v1alpha1.CAPOperator">CAPOperator
+</h3>
+<div>
+<p>CAPOperator is the Schema for the CAPOperators API</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#ObjectMeta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CAPOperatorSpec">
+CAPOperatorSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>subscriptionServer</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.SubscriptionServer">
+SubscriptionServer
+</a>
+</em>
+</td>
+<td>
+<p>SubscriptionServer specification</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dnsTarget</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Public ingress URL for the cluster Load Balancer</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>ingressGatewayLabels</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.NameValue">
+[]NameValue
+</a>
+</em>
+</td>
+<td>
+<p>Labels used to identify the istio ingress-gateway component and its corresponding namespace. Usually {&ldquo;app&rdquo;:&ldquo;istio-ingressgateway&rdquo;,&ldquo;istio&rdquo;:&ldquo;ingressgateway&rdquo;}</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>controller</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Controller">
+Controller
+</a>
+</em>
+</td>
+<td>
+<p>Controller specification</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>monitoring</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Monitoring">
+Monitoring
+</a>
+</em>
+</td>
+<td>
+<p>Monitoring specification</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>webhook</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Webhook">
+Webhook
+</a>
+</em>
+</td>
+<td>
+<p>Webhook specification</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CAPOperatorStatus">
+CAPOperatorStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.CAPOperatorSpec">CAPOperatorSpec
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CAPOperator">CAPOperator</a>)
+</p>
+<div>
+<p>CAPOperatorSpec defines the desired state of CAPOperator</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>subscriptionServer</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.SubscriptionServer">
+SubscriptionServer
+</a>
+</em>
+</td>
+<td>
+<p>SubscriptionServer specification</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dnsTarget</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Public ingress URL for the cluster Load Balancer</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>ingressGatewayLabels</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.NameValue">
+[]NameValue
+</a>
+</em>
+</td>
+<td>
+<p>Labels used to identify the istio ingress-gateway component and its corresponding namespace. Usually {&ldquo;app&rdquo;:&ldquo;istio-ingressgateway&rdquo;,&ldquo;istio&rdquo;:&ldquo;ingressgateway&rdquo;}</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>controller</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Controller">
+Controller
+</a>
+</em>
+</td>
+<td>
+<p>Controller specification</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>monitoring</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Monitoring">
+Monitoring
+</a>
+</em>
+</td>
+<td>
+<p>Monitoring specification</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>webhook</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Webhook">
+Webhook
+</a>
+</em>
+</td>
+<td>
+<p>Webhook specification</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.CAPOperatorStatus">CAPOperatorStatus
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CAPOperator">CAPOperator</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>Status</code><br/>
+<em>
+github.com/sap/component-operator-runtime/pkg/component.Status
+</em>
+</td>
+<td>
+<p>
+(Members of <code>Status</code> are embedded into this type.)
+</p>
+<p>add other fields to status subresource here</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.CertManager">CertManager
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CertificateConfig">CertificateConfig</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>issuerName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Issuer name</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>issuerKind</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Issuer kind</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>issuerGroup</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Issuer group</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.CertificateConfig">CertificateConfig
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.SubscriptionServer">SubscriptionServer</a>, <a href="#operator.sme.sap.com/v1alpha1.Webhook">Webhook</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>gardener</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Gardener">
+Gardener
+</a>
+</em>
+</td>
+<td>
+<p>Gardener configuration</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>certManager</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CertManager">
+CertManager
+</a>
+</em>
+</td>
+<td>
+<p>CertManager configuration</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.CertificateManager">CertificateManager
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.SubscriptionServer">SubscriptionServer</a>, <a href="#operator.sme.sap.com/v1alpha1.Webhook">Webhook</a>)
+</p>
+<div>
+<p>Supported values are Gardener, CertManager, or Default
+For the subscription server, it can be either Gardener or CertManager, while for the webhook, it can be either Default or CertManager</p>
+</div>
+<h3 id="operator.sme.sap.com/v1alpha1.CommonConfig">CommonConfig
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.Controller">Controller</a>, <a href="#operator.sme.sap.com/v1alpha1.SubscriptionServer">SubscriptionServer</a>, <a href="#operator.sme.sap.com/v1alpha1.Webhook">Webhook</a>)
+</p>
+<div>
+<p>Common aspects for <code>Controller</code>, <code>SubscriptionServer</code> and <code>Webhook</code></p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>resources</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#ResourceRequirements">
+Kubernetes core/v1.ResourceRequirements
+</a>
+</em>
+</td>
+<td>
+<p>Resource Requirements configuration</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.Controller">Controller
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CAPOperatorSpec">CAPOperatorSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CommonConfig</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CommonConfig">
+CommonConfig
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CommonConfig</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>detailedOperationalMetrics</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>Optionally enable detailed opertational metrics for the controller by setting this to true</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxConcurrentReconciles</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.MaxConcurrentReconciles">
+MaxConcurrentReconciles
+</a>
+</em>
+</td>
+<td>
+<p>Configuration of maximum number of concurrent reconciles for the resources managed by the controller</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>versionMonitoring</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.VersionMonitoring">
+VersionMonitoring
+</a>
+</em>
+</td>
+<td>
+<p>Version monitoring configuration</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>volumes</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#Volume">
+[]Kubernetes core/v1.Volume
+</a>
+</em>
+</td>
+<td>
+<p>Optionally specify list of additional volumes for the controller pod(s)</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>volumeMounts</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#VolumeMount">
+[]Kubernetes core/v1.VolumeMount
+</a>
+</em>
+</td>
+<td>
+<p>Optionally specify list of additional volumeMounts for the controller container(s)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.Duration">Duration
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.VersionMonitoring">VersionMonitoring</a>)
+</p>
+<div>
+<p>Duration is a valid time duration that can be parsed by Prometheus
+Supported units: y, w, d, h, m, s, ms
+Examples: <code>30s</code>, <code>1m</code>, <code>1h20m15s</code>, <code>15d</code></p>
+</div>
+<h3 id="operator.sme.sap.com/v1alpha1.Gardener">Gardener
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CertificateConfig">CertificateConfig</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>issuerName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Issuer name</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>issuerNamespace</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Issuer namespace</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.Grafana">Grafana
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.Monitoring">Monitoring</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>dashboard</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.GrafanaDashboard">
+GrafanaDashboard
+</a>
+</em>
+</td>
+<td>
+<p>Dashboard configuration</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.GrafanaDashboard">GrafanaDashboard
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.Grafana">Grafana</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>configMapLabels</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<p>Labels for selecting ConfigMaps with dashboards in Grafana</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.MaxConcurrentReconciles">MaxConcurrentReconciles
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.Controller">Controller</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>capApplication</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Maximum number of concurrent reconciles for the cap application</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>capApplicationVersion</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Maximum number of concurrent reconciles for the cap application version</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>capTenant</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Maximum number of concurrent reconciles for the cap tenant</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>capTenantOperation</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Maximum number of concurrent reconciles for the cap tenant operation</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>domain</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Maximum number of concurrent reconciles for the domain</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>clusterDomain</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Maximum number of concurrent reconciles for the cluster domain</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.Monitoring">Monitoring
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CAPOperatorSpec">CAPOperatorSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>enabled</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>Optionally enable Prometheus monitoring for all components</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>serviceMonitorSelectorLabels</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<p>Prometheus service monitor selector labels</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>grafana</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Grafana">
+Grafana
+</a>
+</em>
+</td>
+<td>
+<p>Grafana configuration</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.NameValue">NameValue
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CAPOperatorSpec">CAPOperatorSpec</a>)
+</p>
+<div>
+<p>Generic Name/Value configuration</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>value</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.SubscriptionServer">SubscriptionServer
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CAPOperatorSpec">CAPOperatorSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CommonConfig</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CommonConfig">
+CommonConfig
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CommonConfig</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subDomain</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>certificateManager</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CertificateManager">
+CertificateManager
+</a>
+</em>
+</td>
+<td>
+<p>Certificate manager which can be either <code>Gardener</code> or <code>CertManager</code></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>certificateConfig</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CertificateConfig">
+CertificateConfig
+</a>
+</em>
+</td>
+<td>
+<p>Certificate configuration</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.VersionMonitoring">VersionMonitoring
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.Controller">Controller</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>prometheusAddress</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>URL of the Prometheus server from which metrics related to managed application versions can be queried</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metricsEvaluationInterval</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Duration">
+Duration
+</a>
+</em>
+</td>
+<td>
+<p>The duration (example 2h) after which versions are evaluated for deletion; based on specified workload metrics</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>promClientAcquireRetryDelay</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.Duration">
+Duration
+</a>
+</em>
+</td>
+<td>
+<p>The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator.sme.sap.com/v1alpha1.Webhook">Webhook
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.CAPOperatorSpec">CAPOperatorSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CommonConfig</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CommonConfig">
+CommonConfig
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CommonConfig</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>certificateManager</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CertificateManager">
+CertificateManager
+</a>
+</em>
+</td>
+<td>
+<p>Certificate manager which can be either <code>Default</code> or <code>CertManager</code></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>certificateConfig</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.CertificateConfig">
+CertificateConfig
+</a>
+</em>
+</td>
+<td>
+<p>Certificate configuration</p>
+</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<p><em>
+Generated with <code>gen-crd-api-reference-docs</code>
+on git commit <code>13e5f09</code>.
+</em></p>
