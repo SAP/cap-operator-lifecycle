@@ -69,6 +69,7 @@ jobs:
     if: github.repository_owner == 'sap'
     needs: build
     runs-on: ubuntu-24.04
+    environment: build
     steps:
     
     - name: Check out code for Sonar Analysis
