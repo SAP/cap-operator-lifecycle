@@ -57,8 +57,28 @@ type CAPOperatorSpec struct {
 
 // Common aspects for `Controller`, `SubscriptionServer` and `Webhook`
 type CommonConfig struct {
+	// Number of replicas
+	Replicas *int32 `json:"replicas,omitempty"`
 	// Resource Requirements configuration
-	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+	Resources *corev1.ResourceRequirements `json:"resources,omitempty"`
+	// Node selector
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// Affinity settings
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
+	// Tolerations
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+	// Priority class name
+	PriorityClassName string `json:"priorityClassName,omitempty"`
+	// Topology spread constraints
+	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
+	// Pod Security context
+	PodSecurityContext *corev1.PodSecurityContext `json:"podSecurityContext,omitempty"`
+	// Security context
+	SecurityContext *corev1.SecurityContext `json:"securityContext,omitempty"`
+	// Optionally specify list of additional volumes for the controller pod(s)
+	Volumes []corev1.Volume `json:"volumes,omitempty"`
+	// Optionally specify list of additional volumeMounts for the controller container(s)
+	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
 }
 
 type Webhook struct {
@@ -97,10 +117,6 @@ type Controller struct {
 	MaxConcurrentReconciles *MaxConcurrentReconciles `json:"maxConcurrentReconciles,omitempty"`
 	// Version monitoring configuration
 	VersionMonitoring *VersionMonitoring `json:"versionMonitoring,omitempty"`
-	// Optionally specify list of additional volumes for the controller pod(s)
-	Volumes []corev1.Volume `json:"volumes,omitempty"`
-	// Optionally specify list of additional volumeMounts for the controller container(s)
-	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
 }
 
 type MaxConcurrentReconciles struct {

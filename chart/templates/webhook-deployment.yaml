@@ -60,18 +60,6 @@ spec:
       serviceAccountName: {{.Release.Name}}-webhook
       automountServiceAccountToken: true
       containers:
-      {{- if eq .Values.webhook.sidecar true }}
-      - name: request-sidecar
-        image: alpine
-        command:
-        - /bin/sh
-        - "-c"
-        - "sleep 60m"
-        imagePullPolicy: {{ .Values.webhook.image.pullPolicy | default .Values.image.pullPolicy }}
-        volumeMounts:
-        - name: request
-          mountPath: /tmp
-      {{- end }}
       - name: webhook
         image: {{ .Values.webhook.image.repository }}:{{ .Values.webhook.image.tag | default .Values.image.tag | default .Chart.AppVersion }}
         imagePullPolicy: {{ .Values.webhook.image.pullPolicy | default .Values.image.pullPolicy }}
@@ -94,15 +82,14 @@ spec:
             value: "/app/etc/ssl/tls.key"
           - name: TLS_CERT
             value: "/app/etc/ssl/tls.crt"
-          - name: WEBHOOK_SIDE_CAR
-            value: {{ if eq .Values.webhook.sidecar true }} "true" {{ else }} "false" {{ end }}
         args:
         - "--v={{ .Values.webhook.logLevel | default .Values.logLevel | default 0 }}"
         volumeMounts:
         - name: ssl
           mountPath: /app/etc/ssl
-        - name: request
-          mountPath: /tmp
+        {{- with .Values.webhook.volumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         ports:
           - name: webhook-port
             containerPort: {{ .Values.webhook.service.targetPort }}
@@ -116,8 +103,9 @@ spec:
             path: tls.key
           - key: tls.crt
             path: tls.crt
-      - name: request
-        emptyDir: {}
+      {{- with .Values.webhook.volumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service
