@@ -90,7 +90,6 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | subscriptionServer.certificateConfig.certManager.issuerKind | string | `""` | Issuer kind |
 | subscriptionServer.certificateConfig.certManager.issuerName | string | `""` | Issuer name |
 | subscriptionServer.certificateConfig.additionalCACertificate | string | this will contain the "SAP Cloud Root CA" certificate by default | Optionally specify additional CA Certificate |
-| webhook.sidecar | bool | `false` | Side car to mount admission review |
 | webhook.replicas | int | `1` | Replicas |
 | webhook.image.repository | string | `"ghcr.io/sap/cap-operator/web-hooks"` | Image repository |
 | webhook.image.tag | string | `""` | Image tag |
@@ -113,6 +112,8 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | webhook.service.type | string | `"ClusterIP"` | Service type |
 | webhook.service.port | int | `443` | Service port |
 | webhook.service.targetPort | int | `1443` | Target port |
+| webhook.volumes | list | `[]` | Optionally specify list of additional volumes for the webhook pod(s) |
+| webhook.volumeMounts | list | `[]` | Optionally specify list of additional volumeMounts for the webhook container(s) |
 | webhook.certificateManager | string | `"Default"` | Certificate manager which can be either `Default` or `CertManager` |
 | webhook.certificateConfig | object | `{"certManager":{"issuerGroup":"","issuerKind":"","issuerName":""}}` | Optionally specify the corresponding certificate configuration |
 | webhook.certificateConfig.certManager.issuerGroup | string | `""` | Issuer group |
