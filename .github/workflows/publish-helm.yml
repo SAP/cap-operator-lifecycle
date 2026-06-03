@@ -64,7 +64,7 @@ jobs:
       pages: write
       id-token: write
     environment:
-      name: github-pages
+      name: Website-Helm
 
     steps:
     - name: Checkout repository
@@ -77,7 +77,7 @@ jobs:
       with:
         ref: website
         path: website
-        token: ${{ secrets.WORKFLOW_USER_TOKEN }}
+        token: ${{ secrets.WEBSITE_HELM }}
 
     - uses: azure/setup-helm@v5
 
