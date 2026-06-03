@@ -1,20 +1,25 @@
-LOCALBIN ?= $(shell pwd)/bin
-API_DOCS ?= $(LOCALBIN)/gen-crd-api-reference-docs
-API_DOCS_VERSION ?= latest
-BRANCH ?= main
+API_DOCS ?= $(CURDIR)/bin/gen-crd-api-reference-docs
+BRANCH ?= $(shell git tag --sort=-version:refname | grep -v '^manager/' | grep -v '^helm/' | head -1)
 
 .PHONY: gen-api-docs
-gen-api-docs: ## Generate API reference documentation from Go types. Override branch with BRANCH=<name>.
-	bash hack/api-reference/generate.sh $(BRANCH)
+gen-api-docs: $(API_DOCS)
+	@TEMPDIR=$$(mktemp -d) && \
+	trap 'rm -rf "$$TEMPDIR"' EXIT && \
+	echo "Extracting Go types from $(BRANCH)..." && \
+	git archive $(BRANCH) -- api/ go.mod go.sum | tar -x -C "$$TEMPDIR" && \
+	if [ ! -f "$$TEMPDIR/api/v1alpha1/doc.go" ]; then \
+	  git show main:api/v1alpha1/doc.go > "$$TEMPDIR/api/v1alpha1/doc.go"; \
+	fi && \
+	echo "Downloading dependencies..." && \
+	cd "$$TEMPDIR" && \
+	go mod download && \
+	echo "Generating API reference..." && \
+	$(API_DOCS) \
+	  -config $(CURDIR)/hack/api-reference/config.json \
+	  -template-dir $(CURDIR)/hack/api-reference/template \
+	  -api-dir ./api/v1alpha1 \
+	  -out-file $(CURDIR)/includes/api-reference.html && \
+	echo "Done: $(CURDIR)/includes/api-reference.html"
 
-.PHONY: gen-crd-api-reference-docs
-gen-crd-api-reference-docs: $(API_DOCS) ## Download gen-crd-api-reference-docs locally if necessary.
-$(API_DOCS): $(LOCALBIN)
-	test -s $(LOCALBIN)/gen-crd-api-reference-docs || GOBIN=$(LOCALBIN) go install github.com/ahmetb/gen-crd-api-reference-docs@$(API_DOCS_VERSION)
-
-$(LOCALBIN):
-	mkdir -p $(LOCALBIN)
-
-.PHONY: help
-help: ## Display this help.
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+$(API_DOCS):
+	GOBIN=$(CURDIR)/bin go install github.com/ahmetb/gen-crd-api-reference-docs@latest
