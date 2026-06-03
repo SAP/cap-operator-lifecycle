@@ -1,6 +1,6 @@
 module github.com/sap/cap-operator-lifecycle
 
-go 1.26.3
+go 1.26.4
 
 require (
 	github.com/pkg/errors v0.9.1
@@ -60,7 +60,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
-	github.com/prometheus/common v0.68.0 // indirect
+	github.com/prometheus/common v0.68.1 // indirect
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/sap/go-generics v0.2.62 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
