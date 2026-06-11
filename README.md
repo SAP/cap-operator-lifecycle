@@ -8,6 +8,7 @@
 Helm chart and operator based on [component-operator-runtime](https://sap.github.io/component-operator-runtime/) framework to install the [CAP Operator](https://sap.github.io/cap-operator/)
 
 # cap-operator-manager
+
 Operator based on [component-operator-runtime](https://sap.github.io/component-operator-runtime/) framework to install the [CAP Operator](https://sap.github.io/cap-operator/)
 
 ## Description
