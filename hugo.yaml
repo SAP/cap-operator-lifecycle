@@ -129,7 +129,7 @@ params:
 module:
   hugoVersion:
     extended: true
-    min: 0.155.3
-  imports:
-    - path: github.com/google/docsy
-      disable: false
+    min: 0.162.0
+# Use docsy as the hugo theme via node_modules dir
+theme: docsy
+themesDir: node_modules
