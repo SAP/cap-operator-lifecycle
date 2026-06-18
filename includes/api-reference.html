@@ -388,6 +388,17 @@ For the subscription server, it can be either Gardener or CertManager, while for
 <tbody>
 <tr>
 <td>
+<code>replicas</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<p>Number of replicas</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>resources</code><br/>
 <em>
 <a href="https://pkg.go.dev/k8s.io/api/core/v1#ResourceRequirements">
@@ -397,6 +408,119 @@ Kubernetes core/v1.ResourceRequirements
 </td>
 <td>
 <p>Resource Requirements configuration</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nodeSelector</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<p>Node selector</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>affinity</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#Affinity">
+Kubernetes core/v1.Affinity
+</a>
+</em>
+</td>
+<td>
+<p>Affinity settings</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tolerations</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#Toleration">
+[]Kubernetes core/v1.Toleration
+</a>
+</em>
+</td>
+<td>
+<p>Tolerations</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>priorityClassName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Priority class name</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topologySpreadConstraints</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#TopologySpreadConstraint">
+[]Kubernetes core/v1.TopologySpreadConstraint
+</a>
+</em>
+</td>
+<td>
+<p>Topology spread constraints</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>podSecurityContext</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#PodSecurityContext">
+Kubernetes core/v1.PodSecurityContext
+</a>
+</em>
+</td>
+<td>
+<p>Pod Security context</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>securityContext</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#SecurityContext">
+Kubernetes core/v1.SecurityContext
+</a>
+</em>
+</td>
+<td>
+<p>Security context</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>volumes</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#Volume">
+[]Kubernetes core/v1.Volume
+</a>
+</em>
+</td>
+<td>
+<p>Optionally specify list of additional volumes for the controller pod(s)</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>volumeMounts</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/api/core/v1#VolumeMount">
+[]Kubernetes core/v1.VolumeMount
+</a>
+</em>
+</td>
+<td>
+<p>Optionally specify list of additional volumeMounts for the controller container(s)</p>
 </td>
 </tr>
 </tbody>
@@ -466,32 +590,6 @@ VersionMonitoring
 </td>
 <td>
 <p>Version monitoring configuration</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>volumes</code><br/>
-<em>
-<a href="https://pkg.go.dev/k8s.io/api/core/v1#Volume">
-[]Kubernetes core/v1.Volume
-</a>
-</em>
-</td>
-<td>
-<p>Optionally specify list of additional volumes for the controller pod(s)</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>volumeMounts</code><br/>
-<em>
-<a href="https://pkg.go.dev/k8s.io/api/core/v1#VolumeMount">
-[]Kubernetes core/v1.VolumeMount
-</a>
-</em>
-</td>
-<td>
-<p>Optionally specify list of additional volumeMounts for the controller container(s)</p>
 </td>
 </tr>
 </tbody>

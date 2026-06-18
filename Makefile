@@ -1,5 +1,5 @@
 API_DOCS ?= $(CURDIR)/bin/gen-crd-api-reference-docs
-BRANCH ?= $(shell git tag --sort=-version:refname | grep -v '^manager/' | grep -v '^helm/' | head -1)
+BRANCH ?= $(shell git fetch --tags && git tag --sort=-version:refname | grep -v '^manager/' | grep -v '^helm/' | head -1)
 
 .PHONY: gen-api-docs
 gen-api-docs: $(API_DOCS)
