@@ -119,6 +119,20 @@ spec:
               value: {{ .promClientAcquireRetryDelay }}
             {{- end }}
             {{- end }}
+            {{- with .Values.controller.clientRateLimiting }}
+            {{- if .qps }}
+            - name: CLIENT_QPS
+              value: "{{ .qps }}"
+            {{- end }}
+            {{- if .burst }}
+            - name: CLIENT_BURST
+              value: "{{ .burst }}"
+            {{- end }}
+            {{- end }}
+            {{- if .Values.controller.rolloutDelay }}
+            - name: ROLLOUT_DELAY
+              value: "{{ .Values.controller.rolloutDelay }}"
+            {{- end }}
           {{- with .Values.controller.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
