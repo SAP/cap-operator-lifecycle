@@ -475,6 +475,13 @@ spec:
                             x-kubernetes-list-type: atomic
                         type: object
                     type: object
+                  clientRateLimiting:
+                    properties:
+                      burst:
+                        type: string
+                      qps:
+                        type: string
+                    type: object
                   detailedOperationalMetrics:
                     type: boolean
                   maxConcurrentReconciles:
@@ -613,6 +620,8 @@ spec:
                           x-kubernetes-int-or-string: true
                         type: object
                     type: object
+                  rolloutDelay:
+                    type: string
                   securityContext:
                     properties:
                       allowPrivilegeEscalation:
