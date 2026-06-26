@@ -55,6 +55,9 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | controller.versionMonitoring.prometheusAddress | string | `""` | The URL of the Prometheus server from which metrics related to managed application versions can be queried |
 | controller.versionMonitoring.metricsEvaluationInterval | string | `"1h"` | The duration (example 2h) after which versions are evaluated for deletion; based on specified workload metrics |
 | controller.versionMonitoring.promClientAcquireRetryDelay | string | `"1h"` | The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt |
+| controller.clientRateLimiting.qps | string | `""` | The maximum queries per second from the controller client to the kubernetes API server (e.g. "20") |
+| controller.clientRateLimiting.burst | string | `""` | The maximum burst for throttle (e.g. "30") |
+| controller.rolloutDelay | string | `""` | The delay (example 1h) to wait before rolling out version workloads on credential update |
 | subscriptionServer.replicas | int | `1` | Replicas |
 | subscriptionServer.image.repository | string | `"ghcr.io/sap/cap-operator/server"` | Image repository |
 | subscriptionServer.image.tag | string | `""` | Image tag |
