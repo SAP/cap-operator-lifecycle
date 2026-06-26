@@ -117,6 +117,17 @@ type Controller struct {
 	MaxConcurrentReconciles *MaxConcurrentReconciles `json:"maxConcurrentReconciles,omitempty"`
 	// Version monitoring configuration
 	VersionMonitoring *VersionMonitoring `json:"versionMonitoring,omitempty"`
+	// Client rate limiting configuration for the controller client to the kubernetes API server
+	ClientRateLimiting *ClientRateLimiting `json:"clientRateLimiting,omitempty"`
+	// The delay (example 1h) to wait before rolling out a new version of the controller
+	RolloutDelay metav1.Duration `json:"rolloutDelay,omitempty"`
+}
+
+type ClientRateLimiting struct {
+	// Maximum queries per second from the controller client to the kubernetes API server (e.g. "20")
+	QPS string `json:"qps,omitempty"`
+	// Maximum burst for throttle (e.g. "30")
+	Burst string `json:"burst,omitempty"`
 }
 
 type MaxConcurrentReconciles struct {

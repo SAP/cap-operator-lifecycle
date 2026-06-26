@@ -7,6 +7,7 @@ package transformer
 
 import (
 	"testing"
+	"time"
 
 	"github.com/sap/cap-operator-lifecycle/api/v1alpha1"
 	componentoperatorruntimetypes "github.com/sap/component-operator-runtime/pkg/types"
@@ -33,6 +34,8 @@ func TestTransformer(t *testing.T) {
 		withCertManager                    bool
 		withMonitoringGrafanaDashboard     bool
 		withMaxConcurrentReconciles        bool
+		withClientRateLimiting             bool
+		withRolloutDelay                   bool
 	}{
 		{
 			name:                       "With dnsTarget and without ingress gateway labels",
@@ -69,6 +72,18 @@ func TestTransformer(t *testing.T) {
 			dnsTargetFilled:             true,
 			withMaxConcurrentReconciles: true,
 			expectError:                 false,
+		},
+		{
+			name:                   "With client rate limiting",
+			dnsTargetFilled:        true,
+			withClientRateLimiting: true,
+			expectError:            false,
+		},
+		{
+			name:             "With rollout delay",
+			dnsTargetFilled:  true,
+			withRolloutDelay: true,
+			expectError:      false,
 		},
 		{
 			name:                       "With version monitoring and dnsTarget filled",
@@ -218,6 +233,17 @@ func TestTransformer(t *testing.T) {
 				}
 			}
 
+			if tt.withClientRateLimiting {
+				capOperatorSpec.Controller.ClientRateLimiting = &v1alpha1.ClientRateLimiting{
+					QPS:   "20",
+					Burst: "30",
+				}
+			}
+
+			if tt.withRolloutDelay {
+				capOperatorSpec.Controller.RolloutDelay = metav1.Duration{Duration: time.Hour}
+			}
+
 			if tt.withVersionMonitoring {
 				capOperatorSpec.Controller.VersionMonitoring = &v1alpha1.VersionMonitoring{
 					PrometheusAddress: mockPrometheusAddress,
@@ -341,6 +367,23 @@ func TestTransformer(t *testing.T) {
 					if mcr["capApplication"] != "2" || mcr["capApplicationVersion"] != "5" || mcr["capTenant"] != "15" || mcr["capTenantOperation"] != "20" || mcr["domain"] != "1" {
 						t.Error("unexpected values returned for controller.maxConcurrentReconciles")
 					}
+				}
+			}
+
+			if tt.withClientRateLimiting {
+				if transformedController["clientRateLimiting"] == nil {
+					t.Error("expected controller.clientRateLimiting to be filled")
+				} else {
+					crl := transformedController["clientRateLimiting"].(map[string]any)
+					if crl["qps"] != "20" || crl["burst"] != "30" {
+						t.Error("unexpected values returned for controller.clientRateLimiting")
+					}
+				}
+			}
+
+			if tt.withRolloutDelay {
+				if transformedController["rolloutDelay"] != time.Hour.String() {
+					t.Error("unexpected value returned for controller.rolloutDelay")
 				}
 			}
 
