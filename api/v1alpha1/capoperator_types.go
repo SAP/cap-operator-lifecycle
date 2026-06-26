@@ -119,7 +119,7 @@ type Controller struct {
 	VersionMonitoring *VersionMonitoring `json:"versionMonitoring,omitempty"`
 	// Client rate limiting configuration for the controller client to the kubernetes API server
 	ClientRateLimiting *ClientRateLimiting `json:"clientRateLimiting,omitempty"`
-	// The delay (example 1h) to wait before rolling out a new version of the controller
+	// The delay (example 1h) to wait before rolling out version workloads on credential update
 	RolloutDelay metav1.Duration `json:"rolloutDelay,omitempty"`
 }
 

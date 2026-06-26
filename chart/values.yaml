@@ -108,7 +108,7 @@ controller:
     qps: ""
     # -- The maximum burst for throttle (e.g. "30")
     burst: ""
-  # -- The delay (example 1h) to wait before rolling out a new version of the controller
+  # -- The delay (example 1h) to wait before rolling out version workloads on credential update
   rolloutDelay: ""
 
 subscriptionServer:
