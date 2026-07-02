@@ -241,7 +241,7 @@ func TestTransformer(t *testing.T) {
 			}
 
 			if tt.withRolloutDelay {
-				capOperatorSpec.Controller.RolloutDelay = metav1.Duration{Duration: time.Hour}
+				capOperatorSpec.Controller.RolloutDelay = &metav1.Duration{Duration: time.Hour}
 			}
 
 			if tt.withVersionMonitoring {
@@ -384,6 +384,10 @@ func TestTransformer(t *testing.T) {
 			if tt.withRolloutDelay {
 				if transformedController["rolloutDelay"] != time.Hour.String() {
 					t.Error("unexpected value returned for controller.rolloutDelay")
+				}
+			} else {
+				if transformedController["rolloutDelay"] != nil {
+					t.Error("expected controller.rolloutDelay to be nil")
 				}
 			}
 
