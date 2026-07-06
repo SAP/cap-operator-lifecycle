@@ -88,10 +88,11 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | subscriptionServer.certificateConfig.gardener | object | `{"issuerName":"","issuerNamespace":""}` | Optionally specify the corresponding certificate configuration |
 | subscriptionServer.certificateConfig.gardener.issuerName | string | `""` | Issuer name |
 | subscriptionServer.certificateConfig.gardener.issuerNamespace | string | `""` | Issuer namespace |
-| subscriptionServer.certificateConfig.certManager | object | `{"issuerGroup":"","issuerKind":"","issuerName":""}` | Cert Manager configuration |
+| subscriptionServer.certificateConfig.certManager | object | `{"issuerGroup":"","issuerKind":"","issuerName":"","commonName":""}` | Cert Manager configuration |
 | subscriptionServer.certificateConfig.certManager.issuerGroup | string | `""` | Issuer group |
 | subscriptionServer.certificateConfig.certManager.issuerKind | string | `""` | Issuer kind |
 | subscriptionServer.certificateConfig.certManager.issuerName | string | `""` | Issuer name |
+| subscriptionServer.certificateConfig.certManager.commonName | string | `""` | Optionally specify the common name (at most 64 characters). Not needed in most scenarios. |
 | subscriptionServer.certificateConfig.additionalCACertificate | string | this will contain the "SAP Cloud Root CA" certificate by default | Optionally specify additional CA Certificate |
 | webhook.replicas | int | `1` | Replicas |
 | webhook.image.repository | string | `"ghcr.io/sap/cap-operator/web-hooks"` | Image repository |
