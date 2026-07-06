@@ -6,6 +6,9 @@ metadata:
   name: {{.Release.Name}}-subscription-server
   namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
 spec:
+  {{- with .Values.subscriptionServer.certificateConfig.certManager.commonName }}
+  commonName: {{ . }}
+  {{- end }}
   dnsNames:
   - {{.Values.subscriptionServer.domain}}
   secretName: {{.Release.Name}}-subscription-server-cert-manager
