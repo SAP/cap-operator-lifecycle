@@ -92,7 +92,7 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | subscriptionServer.certificateConfig.certManager.issuerGroup | string | `""` | Issuer group |
 | subscriptionServer.certificateConfig.certManager.issuerKind | string | `""` | Issuer kind |
 | subscriptionServer.certificateConfig.certManager.issuerName | string | `""` | Issuer name |
-| subscriptionServer.certificateConfig.certManager.commonName | string | `""` | Optionally specify the common name for the certificate. Have a character limit of 64 characters. |
+| subscriptionServer.certificateConfig.certManager.commonName | string | `""` | Optionally specify the common name (at most 64 characters). Not needed in most scenarios. |
 | subscriptionServer.certificateConfig.additionalCACertificate | string | this will contain the "SAP Cloud Root CA" certificate by default | Optionally specify additional CA Certificate |
 | webhook.replicas | int | `1` | Replicas |
 | webhook.image.repository | string | `"ghcr.io/sap/cap-operator/web-hooks"` | Image repository |
