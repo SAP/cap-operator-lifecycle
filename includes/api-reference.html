@@ -370,6 +370,45 @@ CertManager
 <p>Supported values are Gardener, CertManager, or Default
 For the subscription server, it can be either Gardener or CertManager, while for the webhook, it can be either Default or CertManager</p>
 </div>
+<h3 id="operator.sme.sap.com/v1alpha1.ClientRateLimiting">ClientRateLimiting
+</h3>
+<p>
+(<em>Appears on: </em><a href="#operator.sme.sap.com/v1alpha1.Controller">Controller</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>qps</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Maximum queries per second from the controller client to the kubernetes API server (e.g. &ldquo;20&rdquo;)</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>burst</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Maximum burst for throttle (e.g. &ldquo;30&rdquo;)</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="operator.sme.sap.com/v1alpha1.CommonConfig">CommonConfig
 </h3>
 <p>
@@ -590,6 +629,32 @@ VersionMonitoring
 </td>
 <td>
 <p>Version monitoring configuration</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>clientRateLimiting</code><br/>
+<em>
+<a href="#operator.sme.sap.com/v1alpha1.ClientRateLimiting">
+ClientRateLimiting
+</a>
+</em>
+</td>
+<td>
+<p>Client rate limiting configuration for the controller client to the kubernetes API server</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>rolloutDelay</code><br/>
+<em>
+<a href="https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Duration">
+Kubernetes meta/v1.Duration
+</a>
+</em>
+</td>
+<td>
+<p>The delay (example 1h) to wait before rolling out version workloads on credential update</p>
 </td>
 </tr>
 </tbody>
