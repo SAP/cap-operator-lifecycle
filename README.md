@@ -1,6 +1,6 @@
 # cap-operator-lifecycle
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/SAP/cap-operator-lifecycle)
-[![Go Report Card](https://goreportcard.com/badge/github.com/sap/cap-operator-lifecycle)](https://goreportcard.com/report/github.com/sap/cap-operator-lifecycle)
+[![CAP Operator Manager (Build & Unit test)](https://github.com/SAP/cap-operator-lifecycle/actions/workflows/build.yml/badge.svg)](https://github.com/SAP/cap-operator-lifecycle/actions/workflows/build.yml)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=SAP_cap-operator-lifecycle&metric=coverage)](https://sonarcloud.io/summary/overall?id=SAP_cap-operator-lifecycle)
 [![CodeQL](https://github.com/SAP/cap-operator-lifecycle/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/SAP/cap-operator-lifecycle/actions/workflows/github-code-scanning/codeql)
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP/cap-operator-lifecycle)](https://api.reuse.software/info/github.com/SAP/cap-operator-lifecycle)
