@@ -1,6 +1,6 @@
 # cap-operator
 
-![Version: 0.32.0](https://img.shields.io/badge/Version-0.32.0-informational?style=flat-square) ![AppVersion: 0.32.0](https://img.shields.io/badge/AppVersion-0.32.0-informational?style=flat-square)
+![Version: 0.33.0](https://img.shields.io/badge/Version-0.33.0-informational?style=flat-square) ![AppVersion: 0.33.0](https://img.shields.io/badge/AppVersion-0.33.0-informational?style=flat-square)
 
 Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 
@@ -88,7 +88,7 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | subscriptionServer.certificateConfig.gardener | object | `{"issuerName":"","issuerNamespace":""}` | Optionally specify the corresponding certificate configuration |
 | subscriptionServer.certificateConfig.gardener.issuerName | string | `""` | Issuer name |
 | subscriptionServer.certificateConfig.gardener.issuerNamespace | string | `""` | Issuer namespace |
-| subscriptionServer.certificateConfig.certManager | object | `{"issuerGroup":"","issuerKind":"","issuerName":"","commonName":""}` | Cert Manager configuration |
+| subscriptionServer.certificateConfig.certManager | object | `{"commonName":"","issuerGroup":"","issuerKind":"","issuerName":""}` | Cert Manager configuration |
 | subscriptionServer.certificateConfig.certManager.issuerGroup | string | `""` | Issuer group |
 | subscriptionServer.certificateConfig.certManager.issuerKind | string | `""` | Issuer kind |
 | subscriptionServer.certificateConfig.certManager.issuerName | string | `""` | Issuer name |
