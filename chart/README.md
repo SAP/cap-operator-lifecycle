@@ -44,6 +44,8 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | controller.resources.requests.cpu | float | `0.02` | CPU request |
 | controller.volumes | list | `[]` | Optionally specify list of additional volumes for the controller pod(s) |
 | controller.volumeMounts | list | `[]` | Optionally specify list of additional volumeMounts for the controller container(s) |
+| controller.certManager | string | `""` | Override the cert manager type (e.g. "gardener" or "cert-manager.io"); if empty, auto-detected via API capabilities |
+| controller.dnsManager | string | `""` | Override the DNS manager type (e.g. "gardener" or "kubernetes"); if empty, auto-detected via API capabilities |
 | controller.dnsTarget | string | `""` | The dns target mentioned on the public ingress gateway service used in the cluster |
 | controller.detailedOperationalMetrics | bool | `false` | Optionally enable detailed opertational metrics for the controller by setting this to true |
 | controller.maxConcurrentReconciles.capApplication | string | `""` | The maximum number of concurrent reconciles (e.g. "1") for the cap application |
