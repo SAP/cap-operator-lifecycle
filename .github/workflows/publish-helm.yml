@@ -11,7 +11,7 @@ env:
 jobs:
   create_release_tag:
     name: Create release tag
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write # allows creating releases / tags
     outputs:
@@ -19,7 +19,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     
     - uses: azure/setup-helm@v5
 
@@ -57,7 +57,7 @@ jobs:
   
   publish-to-pages:
     name: Publish chart to github pages
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: create_release_tag
     permissions:
       contents: write
@@ -68,12 +68,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
 
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         ref: website
         path: website
@@ -118,14 +118,14 @@ jobs:
   publish-to-packages:
     name: Publish chart to github packages
     needs: create_release_tag
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       packages: write
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - uses: azure/setup-helm@v5
 
