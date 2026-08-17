@@ -34,6 +34,7 @@ spec:
   - {{.Values.subscriptionServer.domain}}
   secretRef:
     name: {{.Release.Name}}-subscription-server-gardener
+    namespace: {{.Values.subscriptionServer.istioSystemNamespace}}
   {{- if .Values.subscriptionServer.certificateConfig.gardener.issuerName }}
   issuerRef:
     name: {{.Values.subscriptionServer.certificateConfig.gardener.issuerName}}
