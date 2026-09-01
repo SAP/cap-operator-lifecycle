@@ -4,27 +4,33 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-  name: domains.sme.sap.com
+  name: subscriptions.sme.sap.com
 spec:
   group: sme.sap.com
   names:
-    kind: Domain
-    listKind: DomainList
-    plural: domains
+    kind: Subscription
+    listKind: SubscriptionList
+    plural: subscriptions
     shortNames:
-    - dom
-    singular: domain
+    - sub
+    singular: subscription
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.domain
-      name: Domain
+    - jsonPath: .spec.appName
+      name: App
+      type: string
+    - jsonPath: .spec.subscriptionGuid
+      name: Guid
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
     - jsonPath: .status.state
       name: State
+      type: string
+    - jsonPath: .status.url
+      name: Url
       type: string
     name: v1alpha1
     schema:
@@ -38,70 +44,28 @@ spec:
             type: object
           spec:
             properties:
-              certConfig:
-                properties:
-                  additionalCACertificate:
-                    type: string
-                  certManager:
-                    properties:
-                      issuerRef:
-                        properties:
-                          group:
-                            type: string
-                          kind:
-                            type: string
-                          name:
-                            type: string
-                        required:
-                        - name
-                        type: object
-                    required:
-                    - issuerRef
-                    type: object
-                type: object
-              dnsMode:
-                default: None
-                enum:
-                - None
-                - Wildcard
-                - Subdomain
-                - Custom
+              appName:
                 type: string
-              dnsTarget:
-                pattern: ^[a-z0-9-.]+$
+              providerSubaccountId:
                 type: string
-              dnsTemplates:
-                items:
-                  properties:
-                    name:
-                      type: string
-                    target:
-                      type: string
-                  required:
-                  - name
-                  - target
-                  type: object
-                maxItems: 10
-                type: array
-              domain:
-                pattern: ^[a-z0-9-.]+$
+              subdomain:
                 type: string
-              ingressSelector:
-                additionalProperties:
-                  type: string
-                type: object
-              tlsMode:
-                default: Simple
-                enum:
-                - Simple
-                - Mutual
-                - OptionalMutual
+              subscriptionDomain:
+                type: string
+              subscriptionGuid:
+                type: string
+              subscriptionRequestPayload:
+                type: string
+              tenantId:
                 type: string
             required:
-            - dnsMode
-            - domain
-            - ingressSelector
-            - tlsMode
+            - appName
+            - providerSubaccountId
+            - subdomain
+            - subscriptionDomain
+            - subscriptionGuid
+            - subscriptionRequestPayload
+            - tenantId
             type: object
           status:
             properties:
@@ -141,12 +105,6 @@ spec:
                   - type
                   type: object
                 type: array
-              dnsTarget:
-                type: string
-              gatewayName:
-                type: string
-              observedDomain:
-                type: string
               observedGeneration:
                 format: int64
                 type: integer
@@ -154,9 +112,12 @@ spec:
                 enum:
                 - ""
                 - Ready
+                - ProcessingError
                 - Error
                 - Processing
                 - Deleting
+                type: string
+              url:
                 type: string
             required:
             - state
