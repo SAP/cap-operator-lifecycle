@@ -18,7 +18,7 @@ metadata:
     operator.sme.sap.com/release: {{.Release.Name}}
 rules:
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "captenants", "captenants/status", "captenantoperations", "captenantoperations/status", "captenantoutputs", "domains", "domains/status", "clusterdomains", "clusterdomains/status"]
+  resources: ["capapplications", "capapplications/status", "capapplicationversions", "capapplicationversions/status", "captenants", "captenants/status", "captenantoperations", "captenantoperations/status", "captenantoutputs", "domains", "domains/status", "clusterdomains", "clusterdomains/status", "subscriptionproviders", "subscriptionproviders/status", "subscriptions", "subscriptions/status"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
 - apiGroups: [""]
   resources: ["secrets", "configmaps", "services"]

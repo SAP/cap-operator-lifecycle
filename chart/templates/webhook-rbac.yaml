@@ -14,7 +14,7 @@ metadata:
   name: {{.Release.Name}}-webhook
 rules:
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications","capapplicationversions", "captenants", "captenantoperations", "captenantoutputs", "domains", "clusterdomains"]
+  resources: ["capapplications","capapplicationversions", "captenants", "captenantoperations", "captenantoutputs", "domains", "clusterdomains", "subscriptionproviders", "subscriptions"]
   verbs:  ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

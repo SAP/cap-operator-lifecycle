@@ -18,14 +18,14 @@ metadata:
     operator.sme.sap.com/release: {{.Release.Name}}
 rules:
 - apiGroups: ["sme.sap.com"]
-  resources: ["capapplications", "capapplications/status", "captenantoutputs", "domains", "domains/status", "clusterdomains", "clusterdomains/status"]
+  resources: ["subscriptionproviders", "subscriptionproviders/status", "captenantoutputs"]
   verbs:  ["get", "list", "watch"]
 - apiGroups: ["sme.sap.com"]
-  resources: ["captenants", "captenants/status"]
+  resources: ["subscriptions", "subscriptions/status"]
   verbs:  ["create", "delete", "get", "list", "update", "watch"]
 - apiGroups: [""]
   resources: ["secrets"]
-  verbs: ["create", "get", "update", "list", "watch"]
+  verbs: ["get", "list", "watch"]
 - apiGroups: ["", "events.k8s.io"]
   resources: ["events"]
   verbs: ["*"]
