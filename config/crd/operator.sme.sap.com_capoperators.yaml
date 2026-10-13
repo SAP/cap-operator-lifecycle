@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.21.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   labels:
     app.kubernetes.io/component: customresourcedefinition
     app.kubernetes.io/instance: capoperators.operator.sme.sap.com
@@ -2149,8 +2149,8 @@ spec:
                     x-kubernetes-validations:
                     - message: at most one of the fields in [gardener certManager]
                         may be set
-                      rule: '[has(self.gardener),has(self.certManager)].filter(x,x==true).size()
-                        <= 1'
+                      rule: (has(self.gardener)?1:0)+(has(self.certManager)?1:0) <=
+                        1
                   certificateManager:
                     enum:
                     - Gardener
@@ -3760,8 +3760,8 @@ spec:
                     x-kubernetes-validations:
                     - message: at most one of the fields in [gardener certManager]
                         may be set
-                      rule: '[has(self.gardener),has(self.certManager)].filter(x,x==true).size()
-                        <= 1'
+                      rule: (has(self.gardener)?1:0)+(has(self.certManager)?1:0) <=
+                        1
                   certificateManager:
                     enum:
                     - Default
@@ -4910,8 +4910,8 @@ spec:
             x-kubernetes-validations:
             - message: exactly one of the fields in [dnsTarget ingressGatewayLabels]
                 must be set
-              rule: '[has(self.dnsTarget),has(self.ingressGatewayLabels)].filter(x,x==true).size()
-                == 1'
+              rule: (has(self.dnsTarget)?1:0)+(has(self.ingressGatewayLabels)?1:0)
+                == 1
           status:
             properties:
               appliedGeneration:
