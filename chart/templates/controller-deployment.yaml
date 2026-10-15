@@ -104,6 +104,10 @@ spec:
             - name: MAX_CONCURRENT_RECONCILES_CLUSTER_DOMAIN
               value: "{{ .clusterDomain }}"
             {{- end }}
+            {{- if .subscription }}
+            - name: MAX_CONCURRENT_RECONCILES_SUBSCRIPTION
+              value: "{{ .subscription }}"
+            {{- end }}
             {{- end }}
             {{- with .Values.controller.versionMonitoring }}
             {{- if .prometheusAddress }}

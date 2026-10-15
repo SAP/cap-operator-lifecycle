@@ -54,6 +54,7 @@ Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
 | controller.maxConcurrentReconciles.capTenantOperation | string | `""` | The maximum number of concurrent reconciles (e.g. "10") for the cap tenant operation |
 | controller.maxConcurrentReconciles.domain | string | `""` | The maximum number of concurrent reconciles (e.g. "1") for the domain |
 | controller.maxConcurrentReconciles.clusterDomain | string | `""` | The maximum number of concurrent reconciles (e.g. "1") for the cluster domain |
+| controller.maxConcurrentReconciles.subscription | string | `""` | The maximum number of concurrent reconciles (e.g. "10") for the subscription |
 | controller.versionMonitoring.prometheusAddress | string | `""` | The URL of the Prometheus server from which metrics related to managed application versions can be queried |
 | controller.versionMonitoring.metricsEvaluationInterval | string | `"1h"` | The duration (example 2h) after which versions are evaluated for deletion; based on specified workload metrics |
 | controller.versionMonitoring.promClientAcquireRetryDelay | string | `"1h"` | The duration (example 10m) to wait before retrying to acquire Prometheus client and verify connection, after a failed attempt |

@@ -143,6 +143,8 @@ type MaxConcurrentReconciles struct {
 	Domain string `json:"domain,omitempty"`
 	// Maximum number of concurrent reconciles for the cluster domain
 	ClusterDomain string `json:"clusterDomain,omitempty"`
+	// Maximum number of concurrent reconciles for the subscription
+	Subscription string `json:"subscription,omitempty"`
 }
 
 type VersionMonitoring struct {
