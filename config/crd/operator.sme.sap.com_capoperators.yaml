@@ -498,6 +498,8 @@ spec:
                         type: string
                       domain:
                         type: string
+                      subscription:
+                        type: string
                     type: object
                   nodeSelector:
                     additionalProperties:
