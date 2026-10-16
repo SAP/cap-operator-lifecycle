@@ -16,7 +16,8 @@ package main
 // +kubebuilder:rbac:groups="sme.sap.com",resources=capapplications;capapplicationversions;captenants;captenantoperations;captenantoutputs;clusterdomains;domains,verbs=get;list;watch
 // +kubebuilder:rbac:groups="apiextensions.k8s.io",resources=customresourcedefinitions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="monitoring.coreos.com",resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="",resources=secrets;configmaps;pods;services;serviceaccounts;namespaces;events,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="events.k8s.io",resources=events,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=secrets;configmaps;pods;services;serviceaccounts;namespaces,verbs=get;list;watch;create;update;patch;delete
 
 import (
 	"flag"
