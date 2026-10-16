@@ -2,6 +2,15 @@ apiVersion: v1
 entries:
   cap-operator:
   - apiVersion: v2
+    appVersion: 0.37.1
+    created: "2026-10-16T07:23:28.630973417Z"
+    description: Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
+    digest: e2e613d0fe6a5bc8aca0c6f47558449f90d889b3f084cbfb9cea62153411d581
+    name: cap-operator
+    urls:
+    - https://github.com/SAP/cap-operator-lifecycle/releases/download/helm/0.37.1/cap-operator-0.37.1.tgz
+    version: 0.37.1
+  - apiVersion: v2
     appVersion: 0.37.0
     created: "2026-10-13T13:09:24.409660006Z"
     description: Helm chart to deploy CAP Operator https://sap.github.io/cap-operator/
@@ -406,4 +415,4 @@ entries:
     urls:
     - https://github.com/SAP/cap-operator-lifecycle/releases/download/helm/0.0.1/cap-operator-0.0.1.tgz
     version: 0.0.1
-generated: "2026-10-13T13:09:24.407318913Z"
+generated: "2026-10-16T07:23:28.628093772Z"
