@@ -12,7 +12,6 @@ rules:
   - ""
   resources:
   - configmaps
-  - events
   - namespaces
   - pods
   - secrets
@@ -80,6 +79,18 @@ rules:
   - dns.gardener.cloud
   resources:
   - dnsentries
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
   verbs:
   - create
   - delete

@@ -133,8 +133,8 @@ github.com/prometheus/procfs v0.22.0 h1:6q9+/JL9IKAPbCmBrv9n5O5Ty3NKnciV5X7YGw0o
 github.com/prometheus/procfs v0.22.0/go.mod h1:CvmFr/GVhIjIvWJZW3tgkODBQMRIf0EyWMQLHCHab58=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
-github.com/sap/component-operator-runtime v0.3.175 h1:V1Z39hSLIpop2MNEGZnRPt/UDNtqELz6cXdNqdqw4+0=
-github.com/sap/component-operator-runtime v0.3.175/go.mod h1:G1EbkpvNNHY232XHocbXErNCRT/nLHLDYpEXAAyiF7c=
+github.com/sap/component-operator-runtime v0.3.176 h1:r6uTUFGnnmaiWlYzBPzDjPLfybWpxODDOS0L8olHwgM=
+github.com/sap/component-operator-runtime v0.3.176/go.mod h1:G1EbkpvNNHY232XHocbXErNCRT/nLHLDYpEXAAyiF7c=
 github.com/sap/go-generics v0.2.78 h1:RRfcf/dbzb4p5anHPAJ5GKqG62xIRQ7iC8Vq2g1l85M=
 github.com/sap/go-generics v0.2.78/go.mod h1:S4ybWTl2q13VAxXrYE2exkaGuAEwkGP0rErslt2pNqU=
 github.com/sergi/go-diff v1.4.0 h1:n/SP9D5ad1fORl+llWyN+D6qoUETXNZARKjyY2/KVCw=
