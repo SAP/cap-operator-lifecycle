@@ -162,6 +162,8 @@ rules:
   - captenants
   - clusterdomains
   - domains
+  - subscriptionproviders
+  - subscriptions
   verbs:
   - get
   - list
