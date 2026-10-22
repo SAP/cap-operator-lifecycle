@@ -86,8 +86,8 @@ github.com/google/pprof v0.0.0-20260402051712-545e8a4df936 h1:EwtI+Al+DeppwYX2oX
 github.com/google/pprof v0.0.0-20260402051712-545e8a4df936/go.mod h1:MxpfABSjhmINe3F1It9d+8exIHFvUqtLIRCdOGNXqiI=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/huandu/xstrings v1.6.2 h1:+X5X6N46b40cmDw7FFJFU6Eoq0yJS8lbYigT2EFau4c=
-github.com/huandu/xstrings v1.6.2/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq4ovT0aE=
+github.com/huandu/xstrings v1.6.3 h1:7997PcI0mYC9uPNBJ7udg/KrdJh1GhJid8f2tzKFHYQ=
+github.com/huandu/xstrings v1.6.3/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq4ovT0aE=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
@@ -139,8 +139,8 @@ github.com/sap/go-generics v0.2.78 h1:RRfcf/dbzb4p5anHPAJ5GKqG62xIRQ7iC8Vq2g1l85
 github.com/sap/go-generics v0.2.78/go.mod h1:S4ybWTl2q13VAxXrYE2exkaGuAEwkGP0rErslt2pNqU=
 github.com/sergi/go-diff v1.4.0 h1:n/SP9D5ad1fORl+llWyN+D6qoUETXNZARKjyY2/KVCw=
 github.com/sergi/go-diff v1.4.0/go.mod h1:A0bzQcvG0E7Rwjx0REVgAGH58e96+X0MeOfepqsbeW4=
-github.com/shopspring/decimal v1.5.0 h1:HxSWk31RmJv0EyY4oLiGQB9u7WPludUwPBdvQZnYFPc=
-github.com/shopspring/decimal v1.5.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+DMd9qYNcwME=
+github.com/shopspring/decimal v1.6.0 h1:DcTwjCj4tJPLuGZYsR9W0hyX9pQwMIkdo26Ig1T9xX4=
+github.com/shopspring/decimal v1.6.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+DMd9qYNcwME=
 github.com/spf13/cast v1.10.0 h1:h2x0u2shc1QuLHfxi+cTJvs30+ZAHOGRic8uyGTDWxY=
 github.com/spf13/cast v1.10.0/go.mod h1:jNfB8QC9IA6ZuY2ZjDp0KtFO2LZZlg4S/7bzP6qqeHo=
 github.com/spf13/pflag v1.0.10 h1:4EBh2KAYBwaONj6b2Ye1GiHfwjqyROoF4RwYO+vPwFk=
