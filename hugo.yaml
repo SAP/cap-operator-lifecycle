@@ -12,7 +12,11 @@ enableGitInfo: true
 # horizontal (top level) menu items
 menus:
   main:
-    # NOTE: the "Documentation" menu item is sourced from the front matter of the _index.md file
+    # NOTE: the "Documentation" menu item is now moved from the front matter to this file
+    - name: "Documentation"
+      weight: 10
+      url: "./docs/"
+      pre: "<i class='fas fa-book'></i>"
     - name: "GitHub"
       weight: 90
       url: "https://github.com/sap/cap-operator-lifecycle/"
@@ -21,7 +25,8 @@ menus:
 # Image processing configuration.
 imaging:
   resampleFilter: "CatmullRom"
-  quality: 90
+  jpeg:
+    quality: 90
   anchor: Smart
 
 markup:
@@ -125,11 +130,10 @@ params:
         icon: "fa-brands fa-github"
         desc: "Development takes place here!"
 
-# Add docsy as hugo module
 module:
   hugoVersion:
     extended: true
-    min: 0.162.0
+    min: 0.169.0
 # Use docsy as the hugo theme via node_modules dir
 theme: '@docsy/theme'
 themesDir: node_modules
