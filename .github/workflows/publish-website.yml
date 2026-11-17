@@ -32,6 +32,7 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
+          hugo-version: "0.169.0"
           extended: true
 
       - name: Setup Node
@@ -42,6 +43,7 @@ jobs:
       - name: Update dependencies
         run: |
           npm ci
+          npm i -g sass-embedded
 
       - name: Build with Hugo
         env:
